@@ -42,3 +42,16 @@ cd ../
 sl
 ls
 cd ../
+ls
+git status
+git push origin master
+git pull 
+ls
+les README.md 
+ls
+git push origin master
+git pull
+git push origin master
+ls
+git push --force origin master
+ls

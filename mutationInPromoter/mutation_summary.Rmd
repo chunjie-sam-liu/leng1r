@@ -3,8 +3,6 @@ title: "Mutation_Summary"
 author: "C.J. Liu"
 date: "12/5/2016"
 output:
-  word_document:
-    toc: yes
   html_document:
     depth: 3
     highlight: tango
@@ -16,10 +14,12 @@ output:
       smooth_scroll: no
     word_document:
       toc: yes
+  word_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r load library}
