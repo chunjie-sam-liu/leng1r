@@ -65,8 +65,12 @@ ggplot(somatic, aes(ref,alt)) + geom_bin2d() + theme_minimal() + scale_fill_grad
 
 ### Filter recurrent larger than or equal to 5
 ```{r}
-somatic5 <- filter(somatic, recurrent >= 4)
+somatic5 <- filter(somatic, recurrent >= 5)
 # ggplot(somatic5, aes(x = ensid)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3) + theme_minimal() + xlab("Recurrent") + ylab("Count") + ggtitle(paste("Total ",nrow(somatic5)," (Recurrent > 2)")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+#write to the file somatic
+
+write.table(somatic5, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/4.compare_tumor_normal/somatic5.recurrency",sep = "\t", quote = F, row.names = F)
 
 ggplot(somatic5, aes(x = chrom)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Chromosome") + ylab("Count") + ggtitle("Chromosome Distribution")
 
