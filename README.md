@@ -3,3 +3,4 @@ I tried to write script in two server and MAC to upload to one R repository, the
 
 The server R studio can not use R studio notebook module. I shall add new repository for win7 desktop R studio Later.
 
+Congratulations! All my R studio working with Git works well.
