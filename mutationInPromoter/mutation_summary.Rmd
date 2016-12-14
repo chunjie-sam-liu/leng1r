@@ -42,7 +42,7 @@ library(biomaRt)
 ```{r}
 resultHeaders <-c("chrom","pos","ref","alt","ensid","desc","feature","recurrent")
 chromOrder = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")
-somatic <- as_data_frame(read.table('/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/4.compare_tumor_normal/somatic.recurrency', header = F, sep = "\t"))
+somatic <- as_data_frame(read.table('/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/4.compare_tumor_normal/SNP/somatic.recurrency', header = F, sep = "\t"))
 colnames(somatic) <- resultHeaders
 somatic <- filter(somatic, ensid != "." & recurrent > 1) %>% arrange(-recurrent)
 somatic$chrom <- factor(somatic$chrom, levels = chromOrder)
@@ -70,7 +70,7 @@ somatic5 <- filter(somatic, recurrent >= 5)
 
 #write the somatic 5 to file for testing 
 
-write.table(somatic5, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/4.compare_tumor_normal/somatic5.recurrency",sep = "\t", quote = F, row.names = F)
+#write.table(somatic5, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/4.compare_tumor_normal/SNP/somatic5.recurrency",sep = "\t", quote = F, row.names = F)
 
 ggplot(somatic5, aes(x = chrom)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Chromosome") + ylab("Count") + ggtitle("Chromosome Distribution")
 

@@ -1,0 +1,72 @@
+---
+title: "Refined recurrency"
+author: "C.J. Liu"
+date: "12/14/2016"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load library}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+#library(biomaRt)
+```
+
+# Recalibrate the recurrency
+Owing to WXS covering most of exons, most of regulatory regions are not covered. The mutaton recurrency should not be calculated as $ mutation recurrency / total sample $. I need to find out how many samples have enough read covered to this mutation site.
+
+I use `samtools mpileup` to convert regional bams to mpileup files. they contain the depth of every regulatory position. Using `samtools` will encount the problem that it counts depth excluding duplicates, then the samtools may underestimate the depth of certain position.
+
+`bedtools genomecov -bg` doesn't consider the reads flag, it count depth as reads covering the position. `-bg` paramter leaves out the region unmapped and it's faster than `-d`.
+
+
+## Import result file
+```{r import file}
+f<-'/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/refined.recurrency'
+
+recur <- read.table(f, header = F, sep = "\t")
+
+recur <- as_data_frame(recur)
+
+colnames(recur) <- c("No.cov", "recurr", "chrom","pos")
+
+recur <- mutate(recur, rate = recurr / No.cov)
+
+# Recurrent rate distribution
+ggplot(data= recur, aes(x= "rate", y = rate)) + geom_boxplot()
+
+# Select recurrent rate
+
+recur0.1 <- filter(recur, rate > 0.1)
+#ggplot(data= recur0.1, aes(x= "rate", y = rate)) + geom_boxplot()
+
+write.table(recur0.1, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/recur0.1", col.names = T, row.names = F, quote = F, sep = "\t")
+
+```
+
+
+
+
+
+
+
+
+
+
