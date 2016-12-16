@@ -1,0 +1,131 @@
+---
+title: "Find_target_of_mutation"
+author: "C.J. Liu"
+date: "12/14/2016"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r library packages}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+library(biomaRt)
+```
+
+
+# Annotate novel mutation
+
+## Ensembl [Regulatory build][1]
+Even though, I map mutation to the Ensembl regulatory build release-86 (the same as release-87 except without CTCF bind), the basic statistics Regulatory feature of Ensembl regulatory build release-86.
+
+|feature_type|No.|
+|-----|-----|
+|Promoter|16384|
+|TF binding site|21922|
+|Enhancer|36452|
+|Promoter Flanking Region|45706|
+|Open chromatin|129294|
+
+
+## Load filtered data
+```{r load data}
+recur <- read.table("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/somatic5.recur0.1", header = T, sep = "\t")
+recur <- as_data_frame(recur)
+#arrange(recur, -rate)
+```
+
+## Annotation from biomaRt
+### Ensembl Genes
+Find genes up and down stream(1M bp) of mutation site.
+```{r genes}
+GENES = useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host = "useast.ensembl.org")
+GENES.ATTRIBUTES <- listAttributes(GENES)
+GENES.FILTERS <- listFilters(GENES)
+
+getAroundGenes <- function(x, len){
+  around.genes<-getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end"), values = list(chromosome_name=x["chrom"], start=as.numeric(x["pos"]) - as.numeric(len), end = as.numeric(x["pos"]) + as.numeric(len)), mart = GENES)
+  
+  name<- file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP",len,paste(paste("chr", x["chrom"], sep = ""),as.numeric(x["pos"]), x["ensid"], as.numeric(x["recurr"]),len, sep = "_"))
+  
+  write.table(around.genes, file = name, quote = F, sep = "\t", row.names = F)
+  return(around.genes)
+}
+
+#test <- head(recur, 1)
+#apply(test, 1, getAroundGenes, len = "5000")
+
+#apply(recur, 1, getAroundGenes, len = "5000")
+#apply(recur, 1, getAroundGenes, len = "1000000")
+#apply(recur, 1, getAroundGenes, len = "500000")
+
+around.genes <- getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end"), values = list(chromosome_name=recur$chrom, start=recur$pos - 1000000, end = recur$pos + 1000000), mart = GENES)
+write.table(around.genes, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/1M_all", quote = F, sep = "\t", row.names = F)
+
+```
+
+### Ensembl Regulation
+```{r regulation}
+FUNCGEN <- useMart("ENSEMBL_MART_FUNCGEN", host = "useast.ensembl.org")
+
+FUNCGEN.dataset <- as_data_frame(listDatasets(FUNCGEN))
+FUNCGEN.dataset.hsapiens <- filter(FUNCGEN.dataset, grepl('hsapiens', dataset))
+FUNCGEN.dataset.hsapiens
+
+hsapiens.regulatory <- useDataset("hsapiens_regulatory_feature", FUNCGEN)
+hsapiens.regulatory.attributes <- listAttributes(hsapiens.regulatory)
+hsapiens.regulatory.filters <- listFilters(hsapiens.regulatory)
+
+# ensrIDs.regulatory<- getBM(hsapiens.regulatory.attributes$name[-c(10,11)], filters = "regulatory_stable_id", values = ensrIDs, mart = hsapiens.regulatory)
+
+# hsapiens.annotation <- useDataset("hsapiens_annotated_feature", FUNCGEN)
+# hsapiens.annotation.attributes <- listAttributes(hsapiens.annotation)
+# hsapiens.annotation.filters <- listFilters(hsapiens.annotation)
+
+# ensrIDs.annotation<- getBM(hsapiens.regulatory.attributes$name[-c(10,11)], filters = "regulatory_stable_id", values = ensrIDs, mart = hsapiens.regulatory)
+
+# hsapiens.external <- useDataset("hsapiens_external_feature", FUNCGEN)
+# hsapiens.external.attributes <- listAttributes(hsapiens.external)
+# hsapiens.external.filters <- listFilters(hsapiens.external)
+```
+
+
+
+
+
+
+
+
+
+
+
+[1]: http://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0621-5
+
+
+
+
+
+
+
+
+
+
+
+
+
