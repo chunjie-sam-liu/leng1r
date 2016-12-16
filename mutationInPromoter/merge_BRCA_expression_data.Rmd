@@ -1,0 +1,63 @@
+---
+title: "merge_BRCA_expression_data"
+author: "C.J. Liu"
+date: "12/16/2016"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r library packages}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+```
+
+```{r read gdc manifest}
+mapid <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/gdc_manifest.2016-12-15T19-12-44.461105.tsv.map2submitterID", header = T, sep = "\t")
+
+rnaseqPath <- "/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq"
+FPKM <- filter(mapid, grepl("FPKM.txt", file_name)) %>% mutate(file_name = gsub(".gz","",file_name),file = file.path(rnaseqPath, file_id, file_name), barcode = cases_0_samples_0_portions_0_analytes_0_aliquots_0_submitter_id) %>%  select(file_id, file_name, file, barcode)
+
+readAllRnaseqFile <- function(x) {
+   assign(x['barcode'],read.table(x['file'], header = F, sep = "\t", col.names = c("ensid",x["barcode"])))
+}
+options(digits=4)
+
+tmp <- head(FPKM, 3)
+hi <-apply(tmp,1, readAllRnaseqFile)
+hi.data.frame <- Reduce(function(...) merge(..., by = "ensid", all = T), hi)
+write.table(hi.data.frame, file = file.path(rnaseqPath, "hi.fpkm.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
+
+# read all exprssion files.
+brca.rnaexp <- apply(FPKM, 1, readAllRnaseqFile)
+write.table(brca.rnaexp, file = file.path(rnaseqPath, "brca.fpkm.txt"),row.names = F, col.names = T, quote = F, sep = "\t" )
+
+# write htseq.count
+htseq.count <- filter(mapid, grepl("htseq.count", file_name)) %>% mutate(file = file.path(rnaseqPath, file_id, file_name), barcode = cases_0_samples_0_portions_0_analytes_0_aliquots_0_submitter_id) %>%  select(file_id, file_name, file, barcode)
+
+brca.rnaexp.count <- apply(htseq.count, 1, readAllRnaseqFile)
+write.table(brca.rnaexp.count, file = file.path(rnaseqPath, "brca.htseq.count.txt"),row.names = F, col.names = T, quote = F, sep = "\t" )
+
+# Write FPKM-UQ
+FPKM.UQ <- filter(mapid, grepl("FPKM-UQ", file_name)) %>% mutate(file = file.path(rnaseqPath, file_id, file_name), barcode = cases_0_samples_0_portions_0_analytes_0_aliquots_0_submitter_id) %>%  select(file_id, file_name, file, barcode)
+brca.rnaexp.fpkm.uq <- apply(FPKM.UQ, 1, readAllRnaseqFile)
+write.table(brca.rnaexp.count, file = file.path(rnaseqPath, "brca.FPKM-UQ.txt"),row.names = F, col.names = T, quote = F, sep = "\t" )
+
+```
+
