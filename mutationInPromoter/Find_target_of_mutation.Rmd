@@ -60,23 +60,42 @@ GENES.ATTRIBUTES <- listAttributes(GENES)
 GENES.FILTERS <- listFilters(GENES)
 
 getAroundGenes <- function(x, len){
-  around.genes<-getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end"), values = list(chromosome_name=x["chrom"], start=as.numeric(x["pos"]) - as.numeric(len), end = as.numeric(x["pos"]) + as.numeric(len)), mart = GENES)
   
-  name<- file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP",len,paste(paste("chr", x["chrom"], sep = ""),as.numeric(x["pos"]), x["ensid"], as.numeric(x["recurr"]),len, sep = "_"))
+  around.genes<-getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end", "biotype"), values = list(chromosome_name=x["chrom"], start=as.numeric(x["pos"]) - as.numeric(len), end = as.numeric(x["pos"]) + as.numeric(len), biotype = "protein_coding"), mart = GENES)
   
-  write.table(around.genes, file = name, quote = F, sep = "\t", row.names = F)
-  return(around.genes)
+  # plus strand gene filter nearest start position protein coding gene
+  # minus strand gene filter nearest end position protein coding gene
+  
+  strand.plus <- filter(around.genes, strand == 1 & start_position - as.numeric(x["pos"]) > 0) %>% slice(which.min(start_position - as.numeric(x["pos"]))) %>% mutate(distance = start_position - as.numeric(x["pos"]))
+  
+  strand.minus <- filter(around.genes, strand == -1 & end_position - as.numeric(x["pos"]) < 0) %>% slice(which.max(end_position - as.numeric(x["pos"]))) %>% mutate(distance = end_position - as.numeric(x["pos"]))
+  
+   cbind(t(x), rbind(strand.plus, strand.minus))
+  # return(result)
+  
+  # name<- file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP",len,paste(paste("chr", x["chrom"], sep = ""),as.numeric(x["pos"]), x["ensid"], as.numeric(x["recurr"]),len, sep = "_"))
+  
+  #write.table(around.genes, file = name, quote = F, sep = "\t", row.names = F)
+  # return(x)
 }
 
-#test <- head(recur, 1)
-#apply(test, 1, getAroundGenes, len = "5000")
+# Find nearest gene to the mutation
+nearestGene <- apply(recur, 1, getAroundGenes, len = "100000000")
 
 #apply(recur, 1, getAroundGenes, len = "5000")
-#apply(recur, 1, getAroundGenes, len = "1000000")
 #apply(recur, 1, getAroundGenes, len = "500000")
+nearestGene.data.frame <-Reduce(function(...) rbind(...), nearestGene)
+# test one line to get nearest plus and minus gene.
+# test <- head(recur, 1)
+# apply(test, 1, getAroundGenes, len = "1000000")
 
-around.genes <- getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end"), values = list(chromosome_name=recur$chrom, start=recur$pos - 1000000, end = recur$pos + 1000000), mart = GENES)
-write.table(around.genes, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/1M_all", quote = F, sep = "\t", row.names = F)
+# test.around.genes <- getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end", "biotype"), values = list(chromosome_name=test$chrom, start=test$pos - 1000000, end = test$pos + 1000000, biotype= "protein_coding"), mart = GENES)
+
+# test.around.genes.plus <- filter(test.around.genes, strand == 1 & start_position - test$pos > 0) %>% slice(which.min(start_position - test$pos)) %>% mutate(distance = start_position - test$pos)
+
+# test.around.genes.minus <- filter(test.around.genes, strand == -1 & end_position - test$pos < 0) %>% slice(which.max(end_position - test$pos)) %>% mutate(distance = end_position - test$pos)
+
+write.table(nearestGene.data.frame, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/nearestProteinCodingGene.txt", quote = F, sep = "\t", row.names = F)
 
 ```
 
