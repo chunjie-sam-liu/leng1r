@@ -57,7 +57,7 @@ ggplot(data= recur, aes(x= "rate", y = rate)) + geom_boxplot()
 recur0.1 <- filter(recur, rate > 0.1)
 #ggplot(data= recur0.1, aes(x= "rate", y = rate)) + geom_boxplot()
 
-write.table(recur0.1, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/recur0.1", col.names = T, row.names = F, quote = F, sep = "\t")
+#write.table(recur0.1, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/recur0.1", col.names = T, row.names = F, quote = F, sep = "\t")
 
 ```
 

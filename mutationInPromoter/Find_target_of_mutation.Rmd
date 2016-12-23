@@ -49,6 +49,7 @@ Even though, I map mutation to the Ensembl regulatory build release-86 (the same
 recur <- read.table("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/somatic5.recur0.1", header = T, sep = "\t")
 recur <- as_data_frame(recur)
 #arrange(recur, -rate)
+ggplot(recur, aes(x = factor(recurrent))) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3) + theme_minimal() + xlab("Recurrent") + ylab("Count") + ggtitle(paste("Total ",nrow(recur)," (Recurrent >= 5 & Recurrent Ratio > 10 %)"))
 ```
 
 ## Annotation from biomaRt
@@ -79,6 +80,13 @@ getAroundGenes <- function(x, len){
   # return(x)
 }
 
+
+getAroundGenesBeta <- function(x, len){
+  
+  around.genes<-getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end", "biotype"), values = list(chromosome_name=x["chrom"], start=as.numeric(x["pos"]) - as.numeric(len), end = as.numeric(x["pos"]) + as.numeric(len), biotype = "protein_coding"), mart = GENES)
+  mutate(around.genes, distance = as.numeric(end_position) - as.numeric(x["pos"]))
+}
+
 # Find nearest gene to the mutation
 nearestGene <- apply(recur, 1, getAroundGenes, len = "100000000")
 
@@ -87,7 +95,8 @@ nearestGene <- apply(recur, 1, getAroundGenes, len = "100000000")
 nearestGene.data.frame <-Reduce(function(...) rbind(...), nearestGene)
 # test one line to get nearest plus and minus gene.
 # test <- head(recur, 1)
-# apply(test, 1, getAroundGenes, len = "1000000")
+#mega <- apply(recur, 1, getAroundGenesBeta, len = "500000")
+#mega.gene <- Reduce(function(...) rbind(...), mega)
 
 # test.around.genes <- getBM(attributes = c("ensembl_gene_id","chromosome_name", "start_position", "end_position", "strand","hgnc_symbol","entrezgene", "gene_biotype"), filters = c("chromosome_name", "start", "end", "biotype"), values = list(chromosome_name=test$chrom, start=test$pos - 1000000, end = test$pos + 1000000, biotype= "protein_coding"), mart = GENES)
 
@@ -95,8 +104,13 @@ nearestGene.data.frame <-Reduce(function(...) rbind(...), nearestGene)
 
 # test.around.genes.minus <- filter(test.around.genes, strand == -1 & end_position - test$pos < 0) %>% slice(which.max(end_position - test$pos)) %>% mutate(distance = end_position - test$pos)
 
-write.table(nearestGene.data.frame, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/nearestProteinCodingGene.txt", quote = F, sep = "\t", row.names = F)
+#write.table(nearestGene.data.frame, file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/nearestProteinCodingGene.txt", quote = F, sep = "\t", row.names = F)
 
+gene.list.expr <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/gene.list.cases.expr.txt", header = T, sep = "\t")
+
+ENSG00000000460 <- read.table("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc/13_chr1_169539274.10.mtwt.barcode.test")
+colnames(ENSG00000000460)<-c("type","case")
+ENSG00000000460$expr <- gene.list.expr[gene.list.expr$ensid == "ENSG00000000460",][, ENSG00000000460$case]
 ```
 
 ### Ensembl Regulation
