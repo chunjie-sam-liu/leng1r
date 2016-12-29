@@ -1,0 +1,98 @@
+---
+title: "nearestGeneExpression"
+author: "C.J. Liu"
+date: "12/23/2016"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load library}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+```
+
+## Load nearestProteinCodingGene
+```{r load data}
+# load nearest gene
+nearestProteinCodingGene <- read.table(file="/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/6.mapMutationToGenes/SNP/nearestProteinCodingGene.txt", header = T, sep = "\t")
+
+coln <- c("uuid", "chrom", "pos", "depth", "type", "barcode")
+
+#tmp.txt <- read.table(file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc", paste(paste(recurr, paste("chr", chrom, sep = ""), pos, sep = "_"), ".10.mtwt.barcode", sep = "")), sep = "\t", header = F)
+
+loadBarcode <- function(x, directory){
+  path <- file.path(directory,paste(paste(as.numeric(x["recurr"]), paste("chr", x["chrom"], sep = ""), as.numeric(x["pos"]), sep = "_"), ".10.mtwt.barcode", sep = ""))
+  if(file.exists(path)){
+    #print(path)
+    tmp <- read.table(file = path, header = F, sep = "\t")
+    colnames(tmp) <- coln
+    tmp$barcode <- gsub("-", ".", tmp$barcode)
+    tmp$ensembl_gene_id <- x["ensembl_gene_id"]
+    tmp$hgnc_symbol <- x["hgnc_symbol"]
+    return(tmp)
+  }
+}
+nearestProteinCodingGene.distinct <- distinct(nearestProteinCodingGene, ensembl_gene_id, .keep_all = T)
+expr.candidate <- apply(nearestProteinCodingGene.distinct, 1, loadBarcode, directory = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc")
+names(expr.candidate) <- nearestProteinCodingGene.distinct$ensembl_gene_id
+
+# load expression data
+expr <- read.table(file = "/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/brca.fpkm.expr.cases.genes.txt", header = T, sep = "\t")
+
+getGeneExpression <- function(x){
+  tmp <- dplyr::select(expr, one_of(c("ensid",x$barcode))) %>% filter(ensid %in% x$ensembl_gene_id)
+  tmp <-as.data.frame(t(tmp))
+  colnames(tmp) <- "expression"
+  tmp$expression <- as.numeric(tmp$expression)
+  tmp$barcode <- rownames(tmp)
+  left_join(x,tmp, by = "barcode")
+}
+# test <- head(expr.candidate,1)
+# lapply(test, getGeneExpression)
+total.expr <- lapply(expr.candidate,getGeneExpression)
+
+#pdf(file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression","all.gene_expression.pdf"), width = 20, height = 20) 
+
+for(gene in total.expr){
+  p.value <- wilcox.test(data=gene, expression ~ type)$p.value
+  if(is.na(p.value)) next
+  if(p.value < 0.05){
+    p <- ggplot(data = gene, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(gene$hgnc_symbol[1], "MT vs. WT p-value", round(p.value,3),"(wilcox test)"), subtitle = "")
+    print(p)
+    #ggsave(paste(gene$hgnc_symbol[1], "pdf", sep = "."), plot = p, device = "pdf", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+    
+   }
+}
+
+PDE4DIP <- total.expr$ENSG00000178104[, c(5,7,8,9)]
+PDE4DIP.normal <- data.frame(type = c("NM", "NM"), ensembl_gene_id = rep("ENSG00000178104", 2), hgnc_symbol = rep("PDE4DIP",2), expression = c(5.67827554477, 2.51608176292))
+PDE4DIP.expression <- rbind(PDE4DIP,PDE4DIP.normal)
+
+ggplot(data = PDE4DIP.expression, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(PDE4DIP.expression$hgnc_symbol[1], "expression in Tumor MT,WT and Normal samples"), subtitle = "")
+
+
+
+```
+
+
+
+
+
+

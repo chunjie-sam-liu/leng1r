@@ -55,3 +55,55 @@ git push origin master
 ls
 git push --force origin master
 ls
+ls
+ps xf
+l
+top
+ls
+l
+ls
+cd mutationInPromoter/
+l
+ps xf
+ls
+exit
+ls
+cd mutationInPromoter/
+l
+git status
+ps xf
+top
+ps xf
+ls
+ll -al
+rm .Rhistory
+ps xf
+ll
+ls -al 
+vim RstudioWithGit.Rproj 
+cd .Rproj.user/
+ls
+cd mutationInPromoter/
+ls
+ll
+ls -al
+ls
+rm NA 
+ls
+cd mutationInPromoter/
+ls
+ls -al
+cd
+ls
+ls -al
+cd .Rproj.user/
+l
+tree .Rproj.user/
+ls
+ls
+cd mutationInPromoter/
+l
+git status
+git add
+git add .
+git add -a
