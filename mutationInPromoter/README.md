@@ -6,3 +6,5 @@ The result and process is in this directory, call mutation_summary.
 ## INDEL analysis
 The INDEL result was analyzed, maybe I can find something in INDEL analysis even though the INDEL calling is not that reliable.
 
+## Add 2016-12-28 summary
+Write the summary using RMarkdown. And reorganize the mutationInPromoter file.

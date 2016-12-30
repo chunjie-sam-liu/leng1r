@@ -135,3 +135,11 @@ l
 cd ../
 ls
 git status
+git add -A
+git status
+git commit -m "summary"
+git push origin master
+l
+cd mutationInPromoter/
+l
+git status

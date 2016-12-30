@@ -32,3 +32,7 @@ cd ../
 sl
 ls
 cd ../
+ls
+cd summaries/
+l
+cd ../

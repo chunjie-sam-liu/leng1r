@@ -91,3 +91,22 @@ ps xf
 ll
 l
 cd ../
+ls
+ll
+rm PDE4DIP.normal.png 
+l
+ll
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/*png
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/*png .
+l
+ll
+mv PDE4DIP.normal.all.png 17.PDE4DIP.normal.all.png
+mv NBPF14.png 18.NBPF14.png
+mv USF1.png 19.USF1.png
+l
+ll
+rm PDE4DIP.normal.png PDE4DIP.png PRSS58.png
+ls
+ll
+git staus
+cd ./../
