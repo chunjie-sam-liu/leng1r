@@ -107,3 +107,31 @@ git status
 git add
 git add .
 git add -a
+git add -A
+ls
+git status
+git commit -m "reorganized files"
+git push origin master
+~ls
+ls
+cmv somatic_total_stat.png mutationInPromoter/analysis/
+l
+mv somatic_total_stat.png mutationInPromoter/analysis/
+l
+cd mutationInPromoter/
+ls
+cd mutationInPromoter/
+l
+tcga
+l
+rgit
+echo /home/cliu18/liucj/github/RstudioWithGit >>~/.profile
+vim ~/.profile
+source ~/.profile
+rgit
+ls
+cd mutationInPromoter/
+l
+cd ../
+ls
+git status

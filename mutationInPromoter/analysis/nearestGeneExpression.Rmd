@@ -76,17 +76,48 @@ for(gene in total.expr){
   if(p.value < 0.05){
     p <- ggplot(data = gene, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(gene$hgnc_symbol[1], "MT vs. WT p-value", round(p.value,3),"(wilcox test)"), subtitle = "")
     print(p)
-    #ggsave(paste(gene$hgnc_symbol[1], "pdf", sep = "."), plot = p, device = "pdf", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+    ggsave(paste(gene$hgnc_symbol[1], "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
     
    }
 }
 
-PDE4DIP <- total.expr$ENSG00000178104[, c(5,7,8,9)]
+PDE4DIP <- total.expr$ENSG00000178104[, c(5,6,7,8,9)]
 PDE4DIP.normal <- data.frame(type = c("NM", "NM"), ensembl_gene_id = rep("ENSG00000178104", 2), hgnc_symbol = rep("PDE4DIP",2), expression = c(5.67827554477, 2.51608176292))
 PDE4DIP.expression <- rbind(PDE4DIP,PDE4DIP.normal)
 
-ggplot(data = PDE4DIP.expression, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(PDE4DIP.expression$hgnc_symbol[1], "expression in Tumor MT,WT and Normal samples"), subtitle = "")
+p <- ggplot(data = PDE4DIP.expression, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(PDE4DIP.expression$hgnc_symbol[1], "expression in Tumor MT,WT and Normal samples"), subtitle = "")
 
+ggsave(paste("PDE4DIP","normal", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+
+# USF1 expression
+USF1.expr <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/USF1.all.expr.txt", header = T, sep = "\t")
+USF1 <- mutate(PDE4DIP, expression = as.numeric(USF1.expr[,PDE4DIP$barcode]), ensembl_gene_id= "ENSG00000158773", hgnc_symbol = "USF1")
+
+p.value = wilcox.test(data=USF1, expression ~ type)$p.value
+
+p <- ggplot(data = USF1, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(USF1$hgnc_symbol, "MT vs. WT p-value", round(p.value,3),"(wilcox test)"), subtitle = "")
+print(p)
+ggsave(paste("USF1", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+
+# all normal sample expression
+PDE4DIP.normal <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/PDE4DIP.normalName.expr.txt", header = T)
+PDE4DIP.normal <- data.frame(type = "NM", barcode = colnames(PDE4DIP.normal), ensembl_gene_id = "ENSG00000178104",hgnc_symbol = "PDE4DIP", expression = as.numeric(PDE4DIP.normal[1,]))
+PDE4DIP.expression <- rbind(PDE4DIP,PDE4DIP.normal)
+
+PDE4DIP.MT.WT <- filter(PDE4DIP.expression, type %in% c("MT","WT"))
+mtwt.wilcox.pvalue <- wilcox.test(data = PDE4DIP.MT.WT, expression ~ type)$p.value
+PDE4DIP.WT.NM <- filter(PDE4DIP.expression, type %in% c("WT","NM"))
+wtnm.wilcox.pvalue <- wilcox.test(data = PDE4DIP.WT.NM, expression ~ type)$p.value
+p <- ggplot(data = PDE4DIP.expression, aes(x = type, y = expression)) + geom_boxplot(aes(color = type))  + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(PDE4DIP.expression$hgnc_symbol[1], "expression in Tumor MT,WT and Normal samples"), subtitle = paste("MT vs. WT p-value",round(mtwt.wilcox.pvalue,3),"and WT vs. NM p-value", round(wtnm.wilcox.pvalue,3)))
+
+print(p)
+ggsave(paste("PDE4DIP","normal.all", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+
+p.value = wilcox.test(data=NBPF14, expression ~ type)$p.value
+p <- ggplot(data = NBPF14, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(NBPF14$hgnc_symbol, "MT vs. WT p-value", round(p.value,3),"(wilcox test)"), subtitle = "")
+
+
+ggsave(paste("NBPF14", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
 
 
 ```

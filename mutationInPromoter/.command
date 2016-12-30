@@ -23,3 +23,12 @@ ls
 cd summaries/
 l
 cd ../
+ls
+cd summaries/
+ls
+cd analysis/
+l
+cd ../
+sl
+ls
+cd ../
