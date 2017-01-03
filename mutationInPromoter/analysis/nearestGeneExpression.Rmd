@@ -99,6 +99,17 @@ p <- ggplot(data = USF1, aes(x = type, y = expression)) + geom_boxplot(aes(color
 print(p)
 ggsave(paste("USF1", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
 
+# CTCF expresison
+CTCF.expr <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/CTCF.all.expr.txt", header = T, sep = "\t")
+CTCF <- mutate(PDE4DIP, expression = as.numeric(CTCF.expr[,PDE4DIP$barcode]), ensembl_gene_id= "ENSG00000158773", hgnc_symbol = "CTCF")
+
+p.value = wilcox.test(data=CTCF, expression ~ type)$p.value
+
+p <- ggplot(data = CTCF, aes(x = type, y = expression)) + geom_boxplot(aes(color = type)) + geom_jitter(aes(color= type), position = position_jitter(0.1)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RPKM)", title = paste(CTCF$hgnc_symbol, "MT vs. WT p-value", round(p.value,3),"(wilcox test)"), subtitle = "")
+print(p)
+ggsave(paste("CTCF", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+
+
 # all normal sample expression
 PDE4DIP.normal <- read.table("/extraspace/TCGA/WXS_RAW/BRCA/RNA-seq/PDE4DIP.normalName.expr.txt", header = T)
 PDE4DIP.normal <- data.frame(type = "NM", barcode = colnames(PDE4DIP.normal), ensembl_gene_id = "ENSG00000178104",hgnc_symbol = "PDE4DIP", expression = as.numeric(PDE4DIP.normal[1,]))
@@ -119,7 +130,7 @@ p <- ggplot(data = NBPF14, aes(x = type, y = expression)) + geom_boxplot(aes(col
 
 ggsave(paste("NBPF14", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
 
-
+save.image(file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/expressionCached.RData")
 ```
 
 
