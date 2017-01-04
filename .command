@@ -161,3 +161,13 @@ l
 cd goodRCode/
 l
 git status
+git add -A
+git commit -m "ncomms r codes"
+git push origin master
+ls
+cd goodRCode/
+l
+git status
+gti add -m "geneMutationAndExpression"
+git add -m "geneMutationAndExpression"
+git commit -m "geneMutationAndExpression"
