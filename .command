@@ -143,3 +143,21 @@ l
 cd mutationInPromoter/
 l
 git status
+git add -A
+git commit -m "add pics"
+git push origin master
+'
+ls
+l
+cd
+ls
+mkdir goodRCode
+ls
+cd goodRCode/
+l
+ls
+cd mutationInPromoter/
+l
+cd goodRCode/
+l
+git status

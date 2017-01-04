@@ -36,3 +36,5 @@ ls
 cd summaries/
 l
 cd ../
+ls
+cd ../
