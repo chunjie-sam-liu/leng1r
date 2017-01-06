@@ -171,3 +171,22 @@ git status
 gti add -m "geneMutationAndExpression"
 git add -m "geneMutationAndExpression"
 git commit -m "geneMutationAndExpression"
+git add -A
+git commit -m "geneMutationAndExpression"
+git push origin master
+pip install pymongo
+ipython
+ls
+cd
+ls
+cd mutationInPromoter
+l
+mkdir test
+ls
+mv test testCode
+ls
+cd
+ls
+cd testCode/
+l
+cd testCode/

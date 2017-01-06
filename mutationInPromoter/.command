@@ -38,3 +38,6 @@ l
 cd ../
 ls
 cd ../
+sl
+ls
+cd ../
