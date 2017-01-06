@@ -1,0 +1,74 @@
+---
+title: "TCGA KIRC data summary"
+author: "C.J. Liu"
+date: "1/6/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+```
+```{r load library}
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
+suppressMessages(library(humanFormat))
+```
+#TCGA KIRC data summary
+```{r load data}
+root='/extraspace/TCGA/WXS_RAW/KIRC/downloadDataList'
+manifest <- as_data_frame(read.table(file.path(root,'gdc_manifest.2017-01-06T23-03-12.732045.tsv'), header = T, sep = "\t"))
+submitter <- as_data_frame(read.table(file.path(root,'gdc_manifest.2017-01-06T23-03-12.732045.tsv.map2submitterID'), header = T, sep = "\t"))
+manifest <- rename(manifest,  file_id = id)
+
+# Merge data frame
+kirc <- inner_join(manifest, submitter, by = "file_id")
+```
+
+## Case pairs distribution
+```{r}
+kirc.pairs <- kirc %>% group_by(cases_0_case_id) %>% summarise(count = n()) %>% arrange(-count)
+
+ggplot(kirc.pairs, aes(x = as.factor(count))) + geom_bar(fill = "steelblue") + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + xlab("NO. cases")
+```
+
+
+```{r}
+# Remove no cases pairs
+kirc.pairs.nopairs <- filter(kirc.pairs, count == 1)
+
+kirc.rmNoPairs <- kirc %>% filter(! cases_0_case_id  %in%  kirc.pairs.nopairs$cases_0_case_id)
+```
+
+## Sample type distribution after removing no pairs
+```{r}
+ggplot(kirc.rmNoPairs, aes(x = cases_0_samples_0_sample_type)) + geom_bar(fill = 'steelblue') + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Sample Type") + scale_x_discrete(limits = c('Primary Tumor','Additional - New Primary','Blood Derived Normal','Solid Tissue Normal'))
+```
+
+## Data size
+```{r}
+totalDataSize <- kirc.rmNoPairs %>% group_by(cases_0_samples_0_sample_type) %>% summarise(number=sum(size)) %>% mutate(storage = formatBytes(number)) %>% arrange(- number)
+
+ggplot(totalDataSize, aes(x="", y = number, fill = paste(cases_0_samples_0_sample_type, paste("(",storage, ")", sep = "")))) + geom_bar(width = 1, stat = 'identity') + theme_minimal() + coord_polar("y", start = 0) + theme(axis.text.x=element_blank()) + guides(fill = guide_legend(title = "Sample Type"))
+
+```
+
+## Write Normal and Tumor result to TSV files.
+```{r}
+kirc.normal <- filter(kirc.rmNoPairs, grepl("Normal",cases_0_samples_0_sample_type))
+write.table(kirc.normal, file = file.path(root,"kirc.normal.manifest.tsv"), quote = FALSE, sep = "\t", row.names = FALSE)
+kirc.tumor <- filter(kirc.rmNoPairs, ! grepl("Normal",cases_0_samples_0_sample_type))
+write.table(kirc.tumor, file = file.path(root,"kirc.tumor.manifest.tsv"), quote = FALSE, sep = "\t", row.names = FALSE)
+```

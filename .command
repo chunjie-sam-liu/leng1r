@@ -190,3 +190,9 @@ ls
 cd testCode/
 l
 cd testCode/
+ls
+vim ~/.profile
+source ~/.profile
+gitr
+ls
+git status

@@ -22,15 +22,14 @@ output:
 knitr::opts_chunk$set(echo = T)
 ```
 
-# Mutation In Promoter 2
-Plans and working processes are documented in [My Trello][1].
+> Plans and working processes are documented in [My Trello][1].
 
 ```{r load librares}
 library(dplyr)
 library(ggplot2)
 ```
 
-## Check NG paper.
+# Check NG paper.
 Check those three NG papers, there is one paper deposited all mutations in a website, you can check if our mutation is in their [ftp][2] list.
 
 I download the data to the /liucj/reference/SANGER/cancer/AlexandrovEtAl on the server 1. The file `samples_summary.txt` is malformated. 
@@ -54,12 +53,15 @@ ggplot(data = samples, aes(x = factor(Cancer.Type), fill = Sequencing.Type)) +
 # Load data
 cancers <- read.table(file = "/home/cliu18/liucj/reference/SANGER/cancer/AlexandrovEtAl/cancer_type_summary.txt", header = T, sep = "\t")
 
-
-
-
-
 ```
 
+
+# Analyze KIRC,LUAD
+Create analysis file for KIRC and LUAD, and download data to server 2.
+
+In fact, the whole processes of analyzing KIRC and LUAD are the similar to BRCA. 
+
+1. [LUAD data summary](LUAD/analysis/1.TCGA-LUADDataSummary.Rmd), [KIRC data summary](KIRC/analysis/1.TCGA-KIRCDataSummary.Rmd).
 
 
 
