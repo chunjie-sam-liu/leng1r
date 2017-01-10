@@ -13,3 +13,10 @@ l
 vim README.md 
 ls
 cd ../
+ls
+wget https://rpubs.com/kieroneil/240831
+ls
+ll
+vim 240831 
+mv 240831 mechineLearning.html
+cd ../

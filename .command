@@ -196,3 +196,21 @@ source ~/.profile
 gitr
 ls
 git status
+git add -A
+git push origin master
+git commit -m 'KIRC,LUAD data stat'
+git push origin master
+l
+cd mutationInPromoter
+l
+cd mutationInPromoter2/
+l
+vim README.md 
+ls
+exit
+ls
+cd goodRCode/
+l
+cd ../
+ls
+git status

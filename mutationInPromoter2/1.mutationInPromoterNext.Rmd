@@ -48,12 +48,10 @@ ggplot(data = samples, aes(x = factor(Cancer.Type), fill = Sequencing.Type)) +
   
 ```
 
-## Cancer Type Summary
-```{r Cancer Type}
-# Load data
-cancers <- read.table(file = "/home/cliu18/liucj/reference/SANGER/cancer/AlexandrovEtAl/cancer_type_summary.txt", header = T, sep = "\t")
+## Check mutation in these data
+I use clean somatic file
+> /home/cliu18/liucj/reference/SANGER/cancer/AlexandrovEtAl/somatic_mutation_data/Breast/Breast_clean_somatic_mutations_for_signature_analysis.txt
 
-```
 
 
 # Analyze KIRC,LUAD
