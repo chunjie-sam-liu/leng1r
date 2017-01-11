@@ -6,3 +6,5 @@ cd ../
 ls
 ll
 liucj
+ls
+cd ../

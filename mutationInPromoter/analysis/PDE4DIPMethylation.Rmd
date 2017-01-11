@@ -1,0 +1,34 @@
+---
+title: "PDE4DIPMethylation"
+author: "C.J. Liu"
+date: "1/11/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load data}
+# PDE4DIP expression
+ROOT='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression'
+PDE4DIP.expression <- read.table(file = file.path(ROOT, 'PDE4DIP.expression.txt'), header = T, sep = "\t" )
+
+#load Methylation data.
+methPath <- '/extraspace/TCGA/WXS_RAW/BRCA/Methylation/downloadList/Meth450'
+sampleNames <- dir(methPath)
+```
+
