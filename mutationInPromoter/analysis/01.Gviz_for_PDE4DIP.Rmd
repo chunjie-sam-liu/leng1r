@@ -155,16 +155,17 @@ PDE4DIP.transcripts.separate.motif <- read.table(file = '/home/cliu18/liucj/refe
 
 colnames(PDE4DIP.transcripts.separate.motif) <- c("chromosome", "start", "end", "tf")
 
-PDE4DIP.transcripts.separate.motif <- PDE4DIP.transcripts.separate.motif %>% mutate(strand = "+")
+PDE4DIP.transcripts.separate.motif <- PDE4DIP.transcripts.separate.motif %>% mutate(strand = "*")
 
 #chr1    148660601       148660614       USF1
 #chr1    148661025       148661133       TCF7L2
-PDE4DIP.ensr <- data.frame(chromosome = c('chr1', 'chr1'), start = c(148660601, 148661025), end = c(148660614,148661133), tf = c('USF1', 'TCF7L2'), strand = c("+","+"))
+#chr1    148660601       148664799       ENSR00000013230
+PDE4DIP.ensr <- data.frame(chromosome = c('chr1', 'chr1', 'chr1'), start = c(148660601, 148661025, 148660601), end = c(148660614,148661133,148664799), tf = c('USF1', 'TCF7L2','ENSR00000013230'), strand = c("*","*","*"))
 
 PDE4DIP.transcripts.separate.motif <- rbind(PDE4DIP.ensr, PDE4DIP.transcripts.separate.motif)
 
 # there are too many binding on the same position, draw only part of them.
-PDE4DIP.transcripts.separate.motif <- PDE4DIP.transcripts.separate.motif %>% filter(tf %in% c("USF1", "TCF7L2", "EP300","BRCA1","CDK9","MYC"))
+PDE4DIP.transcripts.separate.motif <- PDE4DIP.transcripts.separate.motif %>% filter(tf %in% c("USF1", "TCF7L2", "EP300","BRCA1","CDK9","MYC","ENSR00000013230"))
 # PDE4DIP.transcripts.separate.motif <- PDE4DIP.transcripts.separate.motif %>% filter(!tf  %in% c("SPI1","CTCF","POLR2A","YY1","TFAP2C"))
 
 PDE4DIP.transcripts.separate.motif.grange <- makeGRangesFromDataFrame(PDE4DIP.transcripts.separate.motif,keep.extra.columns=TRUE)
@@ -214,9 +215,39 @@ dTrack <- DataTrack(PDE4DIP.transcripts.expression.one.dtrack, name = 'Isoform E
 
 
 ```{r level-5}
+
 plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148517038, to = 149033019, groupAnnotation = "feature")
+plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148900000, to = 149033019, groupAnnotation = "feature")
+plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148517038, to = 148700000, groupAnnotation = "feature")
+
 ```
 
+## Level-6 Hightlight mutation
+The point mutation **chr1:148661032A>T**
+```{r level-6}
+
+ht <- HighlightTrack(trackList = list(atrack,grTrack,dTrack), start = 148661032, width = 1, chromosome = 1 )
+
+# The whole picture
+plotTracks(list(itrack, gtrack, ht), from = 148517038, to = 149033019, groupAnnotation = "feature")
+pdf(file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/mutationTFBindingTranscriptsExpression.whole.pdf")
+plotTracks(list(itrack, gtrack, ht), from = 148517038, to = 149033019, groupAnnotation = "feature")
+dev.off()
+
+# The mutation picture
+plotTracks(list(itrack, gtrack,ht), from = 148657038, to = 148670000, groupAnnotation = "feature")
+pdf(file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/mutationTFBindingTranscriptsExpression.mutation.pdf")
+plotTracks(list(itrack, gtrack,ht), from = 148657038, to = 148670000, groupAnnotation = "feature")
+dev.off()
+
+# The PDE4DIP transcripts
+plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148940000, to = 148963019, groupAnnotation = "feature")
+pdf(file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/mutationTFBindingTranscriptsExpression.transcripts.pdf")
+plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148940000, to = 148963019, groupAnnotation = "feature")
+dev.off()
+
+
+```
 
 
 

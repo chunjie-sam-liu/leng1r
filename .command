@@ -214,3 +214,27 @@ l
 cd ../
 ls
 git status
+git add -A
+git commit -m 'good R code'
+git push origin master
+l
+cd testCode/
+l
+cd
+ls
+cd goodRCode/
+ls
+cd .,./
+l
+cd goodRCode/
+ls
+wget https://www.synapse.org/Portal/filehandle?entityId=syn1356421&preview=false&proxy=false&xsrfToken=2D8C229328FDE5EF44232A71B262D887&version=1
+l
+rm filehandle\?entityId\=syn1356421 
+ps xf
+breast
+ls
+cd mutationInPromoter
+ls
+git status
+git add -m "Gviz for PDE4DIP"
