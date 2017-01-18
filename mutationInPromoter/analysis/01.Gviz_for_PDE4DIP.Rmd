@@ -245,9 +245,14 @@ plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148940000, to = 1
 pdf(file = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/mutationTFBindingTranscriptsExpression.transcripts.pdf")
 plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148940000, to = 148963019, groupAnnotation = "feature")
 dev.off()
-
-
 ```
+
+## Brief result
+
+1. ENSR maybe an enhancer, point mutation occur in the TCF7L2 binding region may affect the affinity between TCF7L2 and DNA.
+2. ENSG00000313431 transcripts expression have siginificant change between MT, WT and NM.
+3. Many TFs can bind to the PDE4DIP promoters, including TCF7L2, EP300 and BRCA1.
+4. TCF7L2 can interact with EP300 from PPI data.
 
 
 
