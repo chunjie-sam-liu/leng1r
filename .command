@@ -245,3 +245,9 @@ ps xf
 ll
 cd mutationInPromoter
 l
+git add -A
+git status
+git commit -m "readme for Gviz"
+git push origin master
+dc
+cd
