@@ -238,3 +238,10 @@ cd mutationInPromoter
 ls
 git status
 git add -m "Gviz for PDE4DIP"
+git add -A
+git commit -m "Gviz for PDE4DIP"
+git push origin master
+ps xf
+ll
+cd mutationInPromoter
+l

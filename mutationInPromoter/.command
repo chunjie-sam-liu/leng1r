@@ -45,3 +45,7 @@ l
 cd ../
 ls
 cd analysis/
+l
+vim README.
+vim README.md 
+cd ../
