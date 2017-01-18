@@ -251,3 +251,10 @@ git commit -m "readme for Gviz"
 git push origin master
 dc
 cd
+;s
+ls
+cd mutationInPromoter
+l
+cd goodRCode/
+ls
+git status

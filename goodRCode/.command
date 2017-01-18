@@ -27,3 +27,5 @@ l
 cd  linearModel/
 ls
 cd linearModel/
+ls
+cd /extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp/

@@ -49,3 +49,7 @@ l
 vim README.
 vim README.md 
 cd ../
+ls
+cd analysis/
+l
+cd ../

@@ -12,7 +12,7 @@ expressionPath = '/extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp/'
 expressionFileAll <- list.files(path = expressionPath, pattern = "_mRNA_each_exp_20160513")
 APAFilepath = '/home/yxiang/data/Project/refine_APA_coverage_30off/01_refined_data_using_30_coverage//TCGA/refined_data/'
 APAFileAll <- list.files(path =APAFilepath,   pattern = "_result.txt")
-APAfactorID = read.table('~/Database/APA_geneID.txt')
+APAfactorID = read.table('/tmp/APA_geneID.txt')
 APAfactorID = APAfactorID$V1 %>% as.character()
 getExpressionID = function(x){
     strsplit(x, split = '|', fixed = T)[[1]][2]
