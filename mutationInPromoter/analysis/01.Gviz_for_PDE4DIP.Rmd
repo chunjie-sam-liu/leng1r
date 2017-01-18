@@ -247,7 +247,7 @@ plotTracks(list(itrack, gtrack,atrack, grTrack,dTrack), from = 148940000, to = 1
 dev.off()
 ```
 
-## Brief result
+## Brief conclusion
 
 1. ENSR maybe an enhancer, point mutation occur in the TCF7L2 binding region may affect the affinity between TCF7L2 and DNA.
 2. ENSG00000313431 transcripts expression have siginificant change between MT, WT and NM.
