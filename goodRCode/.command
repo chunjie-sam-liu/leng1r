@@ -20,3 +20,10 @@ ll
 vim 240831 
 mv 240831 mechineLearning.html
 cd ../
+ls
+ll
+mkdir linearModel
+l
+cd  linearModel/
+ls
+cd linearModel/

@@ -22,13 +22,39 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+```{r load library}
+require(dplyr)
+require(tidyr)
+```
+
+
 ```{r load data}
 # PDE4DIP expression
 ROOT='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression'
 PDE4DIP.expression <- read.table(file = file.path(ROOT, 'PDE4DIP.expression.txt'), header = T, sep = "\t" )
 
+header <- as.character(unname(unlist(read.table(file = '/extraspace/TCGA/WXS_RAW/BRCA/Methylation/downloadList/header', sep = "\t"))))
+
 #load Methylation data.
 methPath <- '/extraspace/TCGA/WXS_RAW/BRCA/Methylation/downloadList/Meth450'
 sampleNames <- dir(methPath)
+
+#merge all tables
+methData <- data.frame(REF=c("cg03866074","cg09366969","cg10010376","cg10505902","cg12594911"))
+for(i in sampleNames){
+  #print(file.path(methPath, i))
+  samplePath <- file.path(methPath, i)
+  tmp <- read.table(file = samplePath, sep = "\t")[c(1,2)]
+  names(tmp) <- c("REF", i)
+  methData <- left_join(methData,tmp, by="REF")
+}
+head(methData)
+# rownames(methData) <- methData$REF
+methData <- gather(methData, barcode, beta_value, -REF)
+
+gather(methData, Sample, Beta_value, -REF)
+methData$barcode <- gsub('-','.',methData$barcode)
+meth.expr <- left_join(methData, PDE4DIP.expression, by = 'barcode')
+
 ```
 

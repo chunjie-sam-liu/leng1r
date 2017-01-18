@@ -6,3 +6,7 @@ ll
 cd lls
 ls
 liucj
+ls
+mv 01.Gviz_for_PDE4DIP 01.Gviz_for_PDE4DIP.Rmd
+ll
+cd

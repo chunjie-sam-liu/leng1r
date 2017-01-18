@@ -43,3 +43,5 @@ ls
 cd ../
 l
 cd ../
+ls
+cd analysis/
