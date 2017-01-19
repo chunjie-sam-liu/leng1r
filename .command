@@ -258,3 +258,13 @@ l
 cd goodRCode/
 ls
 git status
+git add -A
+git commit -m "PDE4DIP methylation"
+git push origin master
+l
+cd
+ls
+cd mutationInPromoter
+ls
+ll
+git status

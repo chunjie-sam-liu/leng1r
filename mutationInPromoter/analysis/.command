@@ -18,3 +18,9 @@ ll
 ll *Rmd
 l
 cd ../
+ls
+ll *Rmd
+grep -i PDE4DIP.expression.txt *Rmd
+ll
+cd .exit
+exit

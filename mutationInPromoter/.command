@@ -53,3 +53,6 @@ ls
 cd analysis/
 l
 cd ../
+kls
+ls
+cd analysis/

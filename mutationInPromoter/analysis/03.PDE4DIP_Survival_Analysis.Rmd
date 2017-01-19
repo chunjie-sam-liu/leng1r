@@ -1,0 +1,130 @@
+---
+title: "PDE4DIP_Survival_Analysis"
+author: "C.J. Liu"
+date: "1/18/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Survival Analysis
+
+```{r load library}
+suppressMessages(require(dplyr))
+suppressMessages(require(tidyr))
+suppressMessages(require(survival))
+suppressMessages(require(survminer))
+```
+```{r load PDE4DIP expression}
+ROOT='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression'
+PDE4DIP.gene.expression <- read.table(file = file.path(ROOT, 'PDE4DIP.expression.txt'), header = T, sep = "\t" )
+
+PDE4DIP.gene.expression.noNM <- PDE4DIP.gene.expression %>% filter(type %in% c("MT","WT"))
+
+PDE4DIP.gene.expression.noNM$barcode <- gsub('\\.','-',substr(as.character(PDE4DIP.gene.expression.noNM$barcode), 1,12))
+```
+
+```{r load clinical data}
+ROOT = '/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/9.Survival'
+clinical <- read.table(file = file.path(ROOT, 'BRCA_clinical_clean.PDE4DIP.txt'), header = T, sep = "\t")
+```
+```{r merge clinical and expression}
+mutation.clinical.expression <- clinical %>% dplyr::select(barcode,time = os_days, status = os_status) %>% inner_join(PDE4DIP.gene.expression.noNM, by = 'barcode')
+
+mutation.clinical.expression$status <- ifelse(mutation.clinical.expression$status == "Dead", 1, 0)
+
+#mutation.clinical.expression$type <- ifelse(mutation.clinical.expression$type == "MT", 1, 0)
+```
+
+
+## PDE4DIP expression 
+```{r expression}
+# Calculate the 
+model.expression <- coxph(Surv(time, status) ~ expression, data=mutation.clinical.expression, na.action=na.exclude)
+summary(model.expression)$coefficients[1,c("coef", "exp(coef)", "Pr(>|z|)" )]
+
+# cut group as median expression
+mutation.clinical.expression$group <- ifelse(as.vector(mutation.clinical.expression$expression) <= median(as.vector(mutation.clinical.expression$expression)), "Low","High")
+
+model.expression <- survdiff(Surv(time, status) ~ group, data= mutation.clinical.expression, na.action=na.exclude)
+
+e.Low <- mean(mutation.clinical.expression$group == "Low")
+e.High <- mean(mutation.clinical.expression$group == "High")
+e.FC <- log2((e.Low + 1)/(e.High + 1))
+
+e.fit <- survfit(Surv(time, status) ~ group, data = mutation.clinical.expression, na.action = na.exclude)
+
+ggsurvplot(e.fit, pval=T, ggtheme = theme_light(), xlab = "Survival in days", ylab = '', main = paste("Kaplan-Meier Curves PDE4DIP Expression",sep=""))
+```
+
+
+## Point mutation chr1:148661032A>T
+```{r mutation}
+
+model.mutation <- survdiff(Surv(time, status) ~ type, data = mutation.clinical.expression)
+
+m.KMp <- 1 - pchisq(model.mutation$chisq, df = length(levels(factor(mutation.clinical.expression$type))) - 1)
+m.MT <- mean(mutation.clinical.expression$type == "MT")
+m.WT <- mean(mutation.clinical.expression$type == "WT")
+m.FC <- log2((m.MT + 1)/(m.WT + 1))
+
+m.fit <- survfit(Surv(time, status) ~ type, data = mutation.clinical.expression, na.action = na.exclude)
+
+ggsurvplot(m.fit, pval=T, ggtheme = theme_light(), xlab = "Survival in days", ylab = '', main = paste("Kaplan-Meier Curves PDE4DIP Mutation",sep=""))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
