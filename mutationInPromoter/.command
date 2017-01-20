@@ -56,3 +56,6 @@ cd ../
 kls
 ls
 cd analysis/
+ls
+ll
+cd ../mutationInPromoter2/

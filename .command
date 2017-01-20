@@ -268,3 +268,12 @@ cd mutationInPromoter
 ls
 ll
 git status
+git add -A
+git commit -m "PDE4DIP survival"
+git push origin master
+l
+cd
+ls
+cd mutationInPromoter
+ls
+git status
