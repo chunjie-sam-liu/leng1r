@@ -38,7 +38,7 @@ coln <- c("uuid", "chrom", "pos", "depth", "type", "barcode")
 #tmp.txt <- read.table(file.path("/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc", paste(paste(recurr, paste("chr", chrom, sep = ""), pos, sep = "_"), ".10.mtwt.barcode", sep = "")), sep = "\t", header = F)
 
 loadBarcode <- function(x, directory){
-  path <- file.path(directory,paste(paste(as.numeric(x["recurr"]), paste("chr", x["chrom"], sep = ""), as.numeric(x["pos"]), sep = "_"), ".10.mtwt.barcode", sep = ""))
+  path <- file.path(directory,paste(paste(as.numeric(x["recurr"]), paste("chr", as.numeric(x["chrom"]), sep = ""), as.numeric(x["pos"]), sep = "_"), ".10.mtwt.barcode", sep = ""))
   if(file.exists(path)){
     #print(path)
     tmp <- read.table(file = path, header = F, sep = "\t")
@@ -50,6 +50,7 @@ loadBarcode <- function(x, directory){
   }
 }
 nearestProteinCodingGene.distinct <- distinct(nearestProteinCodingGene, ensembl_gene_id, .keep_all = T)
+
 expr.candidate <- apply(nearestProteinCodingGene.distinct, 1, loadBarcode, directory = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/refined_goc")
 names(expr.candidate) <- nearestProteinCodingGene.distinct$ensembl_gene_id
 

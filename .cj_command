@@ -1,0 +1,20 @@
+ls
+ll
+ls -al 
+cd .Rproj.user/
+l
+cd /tmjp
+cd /tmp/
+ls
+ll
+ls -al
+cd .Rproj.user/
+l
+cd ../
+ls
+ll
+du -sh /home/*
+du -sh /home/*|sort -h
+du -sh /home/*|sort -hr
+cd /home/cliu18
+git status
