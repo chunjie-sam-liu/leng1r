@@ -18,3 +18,13 @@ du -sh /home/*|sort -h
 du -sh /home/*|sort -hr
 cd /home/cliu18
 git status
+git add -A
+git commit -m 'regression analysis'
+git push origin master
+ps xf
+l
+exit
+ls
+leng2 /home/cliu18/liucj/github/RstudioWithGit/cjFun.R
+ls
+git status
