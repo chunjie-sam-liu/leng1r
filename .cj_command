@@ -28,3 +28,14 @@ ls
 leng2 /home/cliu18/liucj/github/RstudioWithGit/cjFun.R
 ls
 git status
+git add -A
+git commit -m 'add cjFun'
+top
+l
+git push origin master
+ls
+cd mutationInPromoter
+l
+liucj
+ls
+git status
