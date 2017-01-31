@@ -1,0 +1,149 @@
+---
+title: "ReanalysisBRCAMutationData"
+author: "C.J. Liu"
+date: "1/30/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r library}
+suppressMessages(require(tidyverse))
+suppressMessages(require(stringr))
+```
+
+# Reanlysis the BRCA data
+
+The previous running pipeline has many problems. Such as:
+
+1. The clue of analysis is not clear.
+2. We lost some information which cause false positive site.
+3. All downstream analysis is messy not tidy.
+
+Now I will retry two pipeline: 
+
+1. Try mutect2 merged into GATK call somatic mutation
+2. raw snp vcf result to filter the candidate position
+
+Notice:
+
+- **Every step every operation must be tidy and clear.**
+- **Every step result should stored to RData follow the Rmd name**
+
+## Manifest information
+
+The raw manifest file download from DGC data-portal `BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv` was converted into `BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv.map2submitterID` by my uuidmapping barcode python script.
+
+```{r manifest}
+downloadPath <- '/extraspace/TCGA/WXS_RAW/BRCA/downloadDataList'
+
+manifestFile <- file.path(downloadPath, 'BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv.map2submitterID')
+
+manifestData <- read_tsv(file = manifestFile)
+
+# Select field we need
+manifestData<- 
+  manifestData %>% 
+  dplyr::select(
+  case = cases_0_submitter_id,
+  barcode = cases_0_samples_0_submitter_id, 
+  type = cases_0_samples_0_sample_type, 
+  uuid = file_id, 
+  bam = file_name,
+  aliquot = cases_0_samples_0_portions_0_analytes_0_aliquots_0_submitter_id)
+
+# filter un paired 
+manifestData <- 
+  manifestData %>% 
+  count(case) %>% 
+  filter(n >= 2) %>% 
+  semi_join(manifestData, ., by = 'case')
+
+# get files size
+rawManifestFile <- file.path(downloadPath, 'BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv')
+
+manifestData <- 
+  read_tsv(rawManifestFile) %>%
+  dplyr::select(uuid = id,  size) %>%
+  left_join(manifestData, ., by = 'uuid')
+
+# extracted bam file size
+extractedFileSize <- file.path(downloadPath, 'total.extractedbam.file.size')
+
+manifestData <- 
+  read_delim(extractedFileSize, delim = " ") %>%
+  mutate(bam = str_replace(bam, '\\.extracted', '')) %>%
+  inner_join(manifestData, ., by = 'bam')
+
+```
+
+## Check difference of two pipeline
+
+1. Use one case **TCGA-3C-AAAU** for test somatic mutation difference `just minus` and `gatk mutect2`
+
+```{r test TCGA-3C-AAAU}
+testCase <- 
+  manifestData %>%
+  filter(case == 'TCGA-3C-AAAU') %>%
+  dplyr::select(uuid, bam, type, aliquot)
+
+# The minus analysis
+# Load VariantAnnotation
+suppressMessages(require(VariantAnnotation))
+
+minusPath <- '/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus'
+
+minusNormal <- 
+  readVcf(file.path(minusPath, '2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf'),
+          genome = "hg19")
+
+minusTumor <- 
+  readVcf(file = file.path(minusPath, '552d2edb157ccf877109a7fa1b5e21b7_gdc_realn.bam.SNP.vcf'),
+          genome = "GRCh38")
+
+# Convert S4Vector into data.frame
+minusNormal.AD <- as.data.frame(geno(minusNormal)$AD)
+colnames(minusNormal.AD) <- 'AD'
+minusNormal.AD %>% separate(AD, c('refDP', 'altDP'), sep = ",")
+
+
+minusNormal.MQ <- as.data.frame(info(minusNormal)['MQ'])
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

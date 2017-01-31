@@ -39,3 +39,10 @@ l
 liucj
 ls
 git status
+git add -A
+git commit -m 'check PDE4DIP mutation'
+git push origin master
+breast
+ls
+git status
+git add -a
