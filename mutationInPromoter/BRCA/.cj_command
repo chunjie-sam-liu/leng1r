@@ -1,0 +1,56 @@
+ls
+ll
+ln -s "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus/2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf" .
+ln -s "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus/2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.idx" .
+l
+ll
+gzip 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.gz 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf
+l
+ls
+ll
+vim main.sh
+ls
+l
+mv main.sh noncodingMutation.sh
+l
+bash noncodingMutation.sh 
+l
+vim README.md
+ls
+rm README.md
+ls
+convert2annovar.pl 
+l
+liucj
+ll
+rm 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.idx
+ll
+vim regulatoryFeature.py
+l
+python regulatoryFeature.py 
+lsd
+cl
+ls
+ll
+vim mutect2Call.sh
+wchi gatk
+which gatk
+gatk
+liucj
+ls
+bash mutect2Call.sh 
+export PATH=$JAVA_HOME:$PATH
+exprot JAVA_HOME=/usr/bin
+export JAVA_HOME=/usr/bin
+export PATH=$JAVA_HOME:$PATH
+java -version
+bash mutect2Call.sh 
+bg 1
+ps xf
+ll
+3
+ls
+bash 02.getSomatic.R 
+Rscript 02.getSomatic.R 
+which Rscript
+Rscript 02.getSomatic.R 

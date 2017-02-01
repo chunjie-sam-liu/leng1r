@@ -1,0 +1,23 @@
+# Reanalysis the BRCA data
+
+The RAW bam data download from GDC is extracted to subbam for recheck. And the calling process was done through GATK. Ignoring the `hard filter` provided by the GATK. Now I walk through the whole process for the project.
+
+The outline follows the instruction:  
+preprocessing:
+
+1. Download BRCA WXS data from [GDC]('https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA').
+2. Dwonload Regulatory Build from Ensembl (release-v86).
+3. Call mutation at regulatory regions by GATK (**-L regulatoryRegion.bed**)
+
+Filteration: 
+
+1. R script for obtain somatic mutation for every sample.
+  + manifest statistics for file size and mutation.
+  + Normal: MQ > 20, DP >= 5, altDP >= 3
+  + Tumor: MQ > 20, DP >= 10, altDP >= 3
+  + Somatic: combined Tumor - combined Normal for one case
+2. Bash script ANNOVAR to filter dbSNP
+  + `annotate_variation`
+3. Annotate with regulatory region.
+4. Find recurrent > 3 mutation point.
+5. Find nearest target protein coding genes.

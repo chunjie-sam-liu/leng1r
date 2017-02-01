@@ -46,3 +46,14 @@ breast
 ls
 git status
 git add -a
+git add -A
+git commit -m "reanalysis BRCA
+"
+git push origin master
+ps xf
+cd mutationInPromoterB
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter
+ls
+git status
