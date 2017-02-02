@@ -62,7 +62,7 @@ def getInfoFromVCFandRegulatoryBed(s):
     print(*info, sep="\t")
     
 def run(vcf):
-    title = "\t".join("chrom,pos,ref,alt,id,ensr,feature".split(","))
+    title = "\t".join("chrom,pos,ref,alt,id,depth,refdepth,altdepth,mq,barcode,ensr,feature".split(","))
     print(title)
     with open(vcf ,'r') as foo:
         for line in foo:

@@ -54,3 +54,88 @@ bash 02.getSomatic.R
 Rscript 02.getSomatic.R 
 which Rscript
 Rscript 02.getSomatic.R 
+ls
+bash 02.getSomatic.R 
+Rscript 02.getSomatic.R 
+ls
+cd ls
+liucj
+ls
+nohup bash noncodingMutation.sh &
+ps xf
+les no
+l
+les nohup.out 
+l
+rm nohup.out 
+nohup bash noncodingMutation.sh &
+ps xf
+l
+ps xf
+ll
+ps xf
+l
+les nohup.out 
+l
+ll
+rm nohup.out 
+nohup bash noncodingMutation.sh &
+ps xf
+l
+les no
+les nohup.out 
+l
+bash noncodingMutation.sh 
+l
+les nohup.out 
+l
+rm no
+rm nohup.out 
+l
+bash noncodingMutation.sh &
+ps xf
+l
+les noncodingMutation.sh 
+ps xf
+top
+ps xf
+l
+ps xf
+killparallel noncodingMutation.sh
+ps xf
+killparallel ./removedbSNP.sh
+ps xf
+killparallel /home/cliu18/liucj/pipelines/exome_pipeline/software/annovar/annotate_variation.pl
+ps xf
+l
+nohup bash noncodingMutation.sh &
+ps xf
+top
+ls
+ps xf
+l
+Rscript 02.getSomatic.R
+l
+Rscript 02.getSomatic.R 
+l
+rm nohup.out 
+l
+nohup Rscript 02.getSomatic.R &
+ps xf
+rm no
+l
+rm nohup.out 
+nohup Rscript 02.getSomatic.R &
+ps xf
+ps xf
+lsd
+ps xf
+les nohup.out 
+l
+rm nohup.out 
+l
+lsd
+l
+nohup bash noncodingMutation.sh &
+ps xf
+ll

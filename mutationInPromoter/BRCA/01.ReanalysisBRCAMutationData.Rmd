@@ -240,7 +240,8 @@ mutectPath <- "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/mutect2"
  #     -o output.vcf
 ```
 
-Very very slow for Mutect2 calling method.
+Very very slow for Mutect2 calling method. Mutect2 method aborted.
+
  
 
 

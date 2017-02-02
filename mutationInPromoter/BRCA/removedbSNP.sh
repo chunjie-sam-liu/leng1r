@@ -39,10 +39,10 @@ sortchrom='/home/cliu18/liucj/scripts/sortChromosomeAndPosition.py'
 perl ${annotate_variation} ${avinput} ${humandb38} -filter -build hg38 -dbtype avsnp147
 
 droped=${avinput}.hg38_avsnp147_dropped
-awk '{print $3,$4,$6,$7,$8,$2}' ${droped} |sed -e "s/  / /g" -e "s/ /\t/g" > ${droped}.reorder
+awk '{print $3,$4,$6,$7,$2,$8,$9,$10,$11,$12}' ${droped} |sed -e "s/  / /g" -e "s/ /\t/g" > ${droped}.reorder
 
 filtered=${avinput}.hg38_avsnp147_filtered
-awk '{print $1,$2,$4,$5,$6,"."}' ${filtered} |sed -e "s/  / /g" -e "s/ /\t/g" > ${filtered}.reorder
+awk '{print $1,$2,$4,$5,".",$6,$7,$8,$9,$10}' ${filtered} |sed -e "s/  / /g" -e "s/ /\t/g" > ${filtered}.reorder
 
 echo "NOTICE: Combined dbSNP"
 cat ${droped}.reorder ${filtered}.reorder > ${avinput}.dbsnp
