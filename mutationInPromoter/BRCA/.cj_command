@@ -139,3 +139,98 @@ l
 nohup bash noncodingMutation.sh &
 ps xf
 ll
+ls
+ll
+cat nohup.out 
+ls
+vim noncodingMutation.sh 
+ls
+ps xf
+ps xf|grep python|wc -l
+ls
+vim noncodingMutation.sh 
+ps xf
+top
+ls
+ps xf
+ps xf|les
+ps xf
+exit
+ls
+tail no
+tail nohup.out 
+ls
+cd ..
+ls
+ll
+l
+nohup Rscript 03.loadAnnoSomatic.R > nohup.out.03 &
+ps xf
+ls
+l
+les nohup.out.03 
+ls
+ps xf
+ls
+ps xf
+ps xf|grep python
+exit
+s
+ls
+liucj
+ls
+ll
+gitr
+l
+rm nohup.out 
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+les nohup.out 
+ps xfl
+tail nohup.out 
+rm nohup.out 
+tail noncodingMutation.sh 
+ps xf
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+ll
+tail nohup.out 
+l
+rm no
+rm nohup.out 
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+l
+ll
+ps xf
+l
+les nohup.out 
+rm nohup.out 
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+tail no
+tail nohup.out 
+ls
+rm nohup.out 
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+les nohup.out 
+l
+ll
+mv README.Rmd technicalREADME.Rmd
+l
+ll
+vim storyREADME.Rmd
+ll
+rm README.html
+ll
+rm nohup.out 
+l
+ll
+l

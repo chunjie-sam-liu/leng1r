@@ -73,8 +73,8 @@ vcf2tibble <- function(x){
   }
   # write to path
   write_tsv(tmpCombined,
-            file.path(filtersnpPath, paste(bam, "SNP.vcf.filter", sep = ".")
-                      ))
+          file.path(filtersnpPath, paste(bam, "SNP.vcf.filter", sep = ".")
+                   ))
   return(tmpCombined)
 }
   

@@ -66,3 +66,29 @@ ls
 cd mutationInPromoter/BRCA/
 ls
 git status
+git add -A
+git commit -m "loadAnnoSomatic"
+git push origin master
+ls
+cd mutationInPromoter
+ls
+cd mutationInPromoter
+ls
+cd mutationInPromoter
+ls
+cd mutationInPromoter
+ls
+cd mutationInPromoter/BRCA/
+ls
+git status
+rm mutationInPromoter/BRCA/nohup.out.03
+git status
+ps xf
+ls
+0.
+ls
+cd mutationInPromoter
+ls
+git status
+git push add -A
+git push origin master

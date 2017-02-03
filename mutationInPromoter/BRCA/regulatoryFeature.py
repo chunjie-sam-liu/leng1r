@@ -37,7 +37,7 @@ def getInfoFromVCFandRegulatoryBed(s):
     
     feature = [".","."]
     
-    while indexArr[0] != arr[0] or (int(arr[1]) - int(indexArr[1])) > 10000:
+    while indexArr[0] != arr[0] or (int(arr[1]) - int(indexArr[1])) > 5000:
         indexArr = index.readline().rstrip().split("\t")
     
     seek1 = int(indexArr[2])

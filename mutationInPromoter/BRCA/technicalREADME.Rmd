@@ -12,12 +12,25 @@ preprocessing:
 Filteration: 
 
 1. R script for obtain somatic mutation for every sample.
+  + `02.getSomatic.R`
   + manifest statistics for file size and mutation.
-  + Normal: MQ > 20, DP >= 5, altDP >= 3
-  + Tumor: MQ > 20, DP >= 10, altDP >= 3
-  + Somatic: combined Tumor - combined Normal for one case
+  + Normal: MQ > 20, DP >= 5, altDP >= 3; write to 02.filtersnp
+  + Tumor: MQ > 20, DP >= 10, altDP >= 3; write to 02.filtersnp
+  + Somatic: $Tumor -  Normal for one case$; write to 03.somatic/01.annotation
 2. Bash script ANNOVAR to filter dbSNP
-  + `annotate_variation`
+  + `removedbSNP.sh`
 3. Annotate with regulatory region.
-4. Find recurrent > 3 mutation point.
-5. Find nearest target protein coding genes.
+  + `regulatoryFeture.py`
+4. Transform file to rds for analysis
+  + `03.loadAnnoSomatic.R`
+5. Reduce false positive site
+  + `04.somaticMutationAnalysis.R`
+  + normalMutation recurrent >=2
+  + truePositiveSomaticMutation = somaticMutation - normalMutation
+  + draw **01.SomaticMutationStat.png**
+  + Filter position which recurrent > 5
+ 
+ 
+ 
+ 
+ 
