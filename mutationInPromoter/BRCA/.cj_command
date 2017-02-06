@@ -234,3 +234,58 @@ rm nohup.out
 l
 ll
 l
+ls
+ll
+ls
+ll
+ll
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/scripts/extractCoverage.sh .
+l
+ll
+vim extractCoverage.sh 
+liucj
+somatic='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles/realSomaticMutation.recur5ForAnalysis.refinePositions.tsv'
+mpileups='/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/tumor'
+output="/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions"
+ls
+ll
+cat $somatic | while read pos; do  cat $somatic | while read pos
+cat $somatic | while read pos; do  echo $pos; done
+cat $somatic | while read pos; do  echo $pos; done|wc -l
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t"
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t"; done
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t";name="${arr[-1]}_${arr[0]}_${arr[1]}";cmd="grep --perl-regex \"$key\"  *mpileup> $output/$name";echo $cmd;  done
+grep --perl-regex "chr8\t85651191\t" *mpileup> /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions/T_chr8_85651191
+grep --perl-regex "chr8\t85651191\t" *mpileup 
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; done
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; echo $cmd;done
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; echo $cmd;done|tail
+l
+ll
+bash extractCoverage.sh 
+lsd
+ll
+bash noncodingMutation.sh 
+bash noncodingMutation.sh |tail 1
+bash noncodingMutation.sh |tail -1
+grep --perl-regex "chr8\t85651191\t" /extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/tumor/TCGA-E2-A1B6-01A-31D-A12Q-09_IlluminaGA-DNASeq_exome_gdc_realn.extracted.bam.mpileup > /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions/chr8_85651191_A_T
+ls
+ll
+nohup bash noncodingMutation.sh &
+ps xf
+top
+ps xf
+top
+ps xf
+l
+ll
+ps xf
+k
+ll
+lsd
+ls
+ll
+l
+Rscript 05.targetGenesForMutation.R 
+ls
+ll

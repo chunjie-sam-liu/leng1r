@@ -135,4 +135,4 @@ allFilterPositions %>%
   saveRDS(file = file.path(saveFilesDir, "allTumorFilterPositions.rds"))
 
 # Save the working space
-save.image(file = file.path(forAnalysisDir, "z.loadAnnoSomatic.RData"))
+save(list = ls(), file = file.path(forAnalysisDir, "03.loadAnnoSomatic.RData"))

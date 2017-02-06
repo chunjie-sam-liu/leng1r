@@ -89,13 +89,16 @@ realSomaticMutation.recur5ForAnalysis %>%
 realSomaticMutation.recur5ForAnalysis %>%
   write_rds(path = file.path(forAnalysisDir, "realSomaticMutation.recur5ForAnalysis.rds"))
 
-# cj
+# write recur5 to tsv for revising rate and rate
+saveThePositions <- function(x){
+  fileName <- paste(x["chrom"], x["pos"], sep = "_")
+  print(name)
+}
+
+realSomaticMutation.recur5ForAnalysis %>%
+  distinct(mutation) %>%
+  separate(mutation, into = c("chrom", "pos", "ref", "alt")) %>%
+  write_tsv(path = file.path(forAnalysisDir, "realSomaticMutation.recur5ForAnalysis.refinePositions.tsv"), col_names = F)
 
 
-
-
-
-
-
-
-save.image(file = file.path(forAnalysisDir, "somaticMutationAnalysis.RData"))
+save(list = ls(), file = file.path(forAnalysisDir, "04.somaticMutationAnalysis.RData"))

@@ -28,8 +28,13 @@ Filteration:
   + normalMutation recurrent >=2
   + truePositiveSomaticMutation = somaticMutation - normalMutation
   + draw **01.SomaticMutationStat.png**
-  + Filter position which recurrent > 5
- 
+  + Filter position which recurrent >= 6
+6. Refined recurrent mutation.
+  + 60 mutation positions recur >=6 and save them to scan all mpileups.
+  + `extractCoverage.sh` extract position from all samples. 
+  + The process is working for the ratio and ensure the position is a real somatic mutation.
+7. Use biomaRt to get target genes for mutation
+  + `05.targetGeneForMutation.R` get nearest target genes.
  
  
  

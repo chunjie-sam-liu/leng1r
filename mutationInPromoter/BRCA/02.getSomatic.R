@@ -131,4 +131,5 @@ manifest %>%
   somaticMutation() %>%
   write_tsv(path = file.path(dataRootPath, 'somaticStat.tsv'))
   
-
+save(list = ls(), 
+     file = file.path(somaticAnnoPath, "02.getSomatic.RData"))

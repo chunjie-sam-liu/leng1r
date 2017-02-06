@@ -92,3 +92,11 @@ ls
 git status
 git push add -A
 git push origin master
+git add -A
+git commit -m "somaticMutationAnalysis"
+git push origin master
+liucj
+ls
+cd mutationInPromoter/BRCA/
+ls
+git status
