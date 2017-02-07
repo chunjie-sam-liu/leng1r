@@ -29,7 +29,7 @@ normalMutation <-
   readRDS(file = file.path(forAnalysisDir, 
                            "allNormalFilterPositions.rds")) %>%
   group_by(mutation) %>%
-  filter(n() >= 2) %>%
+  filter(n() >= 1) %>%
   ungroup()
   
 
@@ -62,7 +62,8 @@ realSomaticMutation.recurStat.barplot <-
   theme_minimal() + 
   xlab("Recurrent") + 
   ylab("Count") + 
-  ggtitle(paste("Total # of Somatic Mutation:", sum(realSomaticMutation.recurStat$recurrent))) +
+  ggtitle(paste("Total # of Somatic Mutation:", 
+                sum(realSomaticMutation.recurStat$recurrent))) +
   scale_fill_brewer(palette = "Dark2")
 
 print(realSomaticMutation.recurStat.barplot)
@@ -79,7 +80,7 @@ realSomaticMutation.recur5ForAnalysis <-
   group_by(mutation, feature) %>%
   count() %>%
   rename(recurrent = n) %>%
-  filter(recurrent > 5) %>% 
+  filter(recurrent >= 5) %>% 
   ungroup() %>%
   inner_join(realSomaticMutation, by = c("mutation", "feature")) 
 

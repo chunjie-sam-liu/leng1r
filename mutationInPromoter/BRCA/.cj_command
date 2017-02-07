@@ -289,3 +289,30 @@ l
 Rscript 05.targetGenesForMutation.R 
 ls
 ll
+ls
+ll
+bash noncodingMutation.sh 
+Rscript 04.somaticMutationAnalysis.R 
+l
+ll
+rm nohup.out 
+l
+ll
+nohup bash extractCoverage.sh &
+l
+les extractCoverage.sh 
+les nohup.out 
+ps xf
+l
+ps xf
+ls
+l
+ll
+ls
+ll
+ps xf
+l
+ps xf
+l
+ps xf
+exit

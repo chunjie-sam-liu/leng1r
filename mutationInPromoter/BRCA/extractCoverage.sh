@@ -10,7 +10,7 @@ somatic='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_thr
 
 mpileups='/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/tumor'
 
-output="/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions"
+output="/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions/tumor"
 
 pipe='/tmp/$$.fifo'
 mkfifo $pipe

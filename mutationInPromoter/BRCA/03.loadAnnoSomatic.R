@@ -111,7 +111,8 @@ loadPositionFunction <-
 
 allFilterPositions <-
   filterPositionFiles %>%
-  lapply(loadPositionFunction, filterPositionDir = filterPositionDir) %>%
+  lapply(loadPositionFunction, 
+         filterPositionDir = filterPositionDir) %>%
   bind_rows()
 
 allFilterPositions <- 

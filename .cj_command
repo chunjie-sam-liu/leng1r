@@ -100,3 +100,15 @@ ls
 cd mutationInPromoter/BRCA/
 ls
 git status
+git add -A
+git commit -m "getExpression"
+git push origin master
+ls
+liucj
+l
+cd mutationInPromoter/BRCA/
+l
+cd mutationInPromoter/BRCA/
+ls
+git status
+git add -

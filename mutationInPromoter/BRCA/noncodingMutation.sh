@@ -50,12 +50,12 @@ ROOT=`dirname $0`
 ################################
 # filter somatic recur position#
 ################################
-# Rscript ${ROOT}/04.somaticMutationAnalysis.R
+ # Rscript ${ROOT}/04.somaticMutationAnalysis.R
 
 ############################################
 # extract position information from mpileup#
 ############################################
-# bash ${ROOT}/extractCoverage.sh
+bash ${ROOT}/extractCoverage.sh
 
 ###################################
 #Find target gene for the mutation#
@@ -65,4 +65,4 @@ ROOT=`dirname $0`
 #######################
 #Find gene expression #
 #######################
-Rscript ${ROOT}/06.geneExpression.R
+# Rscript ${ROOT}/06.geneExpression.R

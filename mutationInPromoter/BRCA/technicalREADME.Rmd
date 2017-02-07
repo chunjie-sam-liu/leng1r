@@ -25,17 +25,24 @@ Filteration:
   + `03.loadAnnoSomatic.R`
 5. Reduce false positive site
   + `04.somaticMutationAnalysis.R`
-  + normalMutation recurrent >=2
+  + normalMutation recurrent >=1
   + truePositiveSomaticMutation = somaticMutation - normalMutation
   + draw **01.SomaticMutationStat.png**
-  + Filter position which recurrent >= 6
+  + Filter position which recurrent >= 5
 6. Refined recurrent mutation.
   + 60 mutation positions recur >=6 and save them to scan all mpileups.
   + `extractCoverage.sh` extract position from all samples. 
   + The process is working for the ratio and ensure the position is a real somatic mutation.
 7. Use biomaRt to get target genes for mutation
   + `05.targetGeneForMutation.R` get nearest target genes.
- 
+  + mark as Oncogene or tumor supressor genes.
+8. Target gene expression
+  + `06.targetGeneExpression.R` calculate gene expression.
+9. Recheck the mutation point.
+  + Get mpileup coverage `extractCoverage.sh`
+  + Load point mpileup file for recheck, the position cov don't attached with base quality.
+  + 
+
  
  
  
