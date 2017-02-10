@@ -136,26 +136,67 @@ preprocessing:</p>
 <ul>
 <li><code>02.getSomatic.R</code></li>
 <li>manifest statistics for file size and mutation.</li>
-<li>Normal: MQ &gt; 20, DP &gt;= 5, altDP &gt;= 3; write to 02.filtersnp</li>
-<li>Tumor: MQ &gt; 20, DP &gt;= 10, altDP &gt;= 3; write to 02.filtersnp</li>
-<li>Somatic: <span class="math inline">\(combined Tumor - combined Normal for one case\)</span>; write to 03.somatic/01.annotation</li>
+<li><strong>Normal: MQ &gt; 20, DP &gt;= 5, altDP &gt;= 3</strong>; write to 02.filtersnp</li>
+<li><strong>Tumor: MQ &gt; 20, DP &gt;= 10, altDP &gt;= 3</strong>; write to 02.filtersnp</li>
+<li><strong>Somatic: <span class="math inline">\(Tumor - Normal\ per\ case\)</span></strong>; write to 03.somatic/01.annotation</li>
 </ul>
 <ol start="2" style="list-style-type: decimal">
-<li>Bash script ANNOVAR to filter dbSNP</li>
+<li>Bash script ANNOVAR to <strong>filter dbSNP</strong></li>
 </ol>
 <ul>
 <li><code>removedbSNP.sh</code></li>
 </ul>
 <ol start="3" style="list-style-type: decimal">
-<li>Annotate with regulatory region.</li>
+<li>Annotate with <strong>regulatory region</strong>.</li>
 </ol>
 <ul>
 <li><code>regulatoryFeture.py</code></li>
 </ul>
 <ol start="4" style="list-style-type: decimal">
-<li>Find recurrent &gt; 3 mutation point.</li>
-<li>Find nearest target protein coding genes.</li>
+<li>Transform file to rds for analysis</li>
 </ol>
+<ul>
+<li><code>03.loadAnnoSomatic.R</code></li>
+</ul>
+<ol start="5" style="list-style-type: decimal">
+<li>Reduce false positive site</li>
+</ol>
+<ul>
+<li><code>04.somaticMutationAnalysis.R</code></li>
+<li><strong>normalMutation recurrent &gt;=1</strong></li>
+<li><strong><span class="math inline">\(truePositiveSomaticMutation = somaticMutation - normalMutation\)</span></strong></li>
+<li>draw <strong>01.SomaticMutationStat.png</strong></li>
+<li><strong>Filter position which recurrent &gt;= 5</strong></li>
+</ul>
+<ol start="6" style="list-style-type: decimal">
+<li>Refined recurrent mutation.</li>
+</ol>
+<ul>
+<li>60 mutation positions recur &gt;=5 and save them to scan all mpileups.</li>
+<li><code>extractCoverage.sh</code> extract position from all samples.</li>
+<li>The process is working for the ratio and ensure the position is a real somatic mutation.</li>
+</ul>
+<ol start="7" style="list-style-type: decimal">
+<li>Use biomaRt to get target genes for mutation</li>
+</ol>
+<ul>
+<li><code>05.targetGeneForMutation.R</code> get nearest target genes.</li>
+<li>mark as Oncogene or tumor supressor genes.</li>
+</ul>
+<ol start="8" style="list-style-type: decimal">
+<li>Target gene expression</li>
+</ol>
+<ul>
+<li><code>06.targetGeneExpression.R</code> calculate gene expression.</li>
+</ul>
+<ol start="9" style="list-style-type: decimal">
+<li>Recheck the mutation point.</li>
+</ol>
+<ul>
+<li>Get mpileup coverage <code>extractCoverage.sh</code></li>
+<li>Load point mpileup file for recheck, the position cov don’t attached with base quality.</li>
+<li></li>
+</ul>
 </div>
 
 

@@ -316,3 +316,21 @@ ps xf
 l
 ps xf
 exit
+ls
+ll
+l
+Rscript 07.loadRecheckPositions.R 
+exit
+ls
+ll
+cat extractCoverage.sh 
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles
+ls
+ll
+Rscript 07.loadRecheckPositions.R
+l
+exit
+ls
+l
+ll
+cd ../
