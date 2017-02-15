@@ -1,0 +1,37 @@
+ls
+ll
+l
+ll
+les manifest_hard.tsv
+l
+ll
+cd ../
+ls
+ll
+les manifest_hard.tsv
+ll
+rm manifest_hard.rds manifest_hard.tsv
+ll
+cd ../
+ls
+ll
+cd ../
+ls
+ll
+les table1_manifest_hard.tsv 
+sort -k 7 -rn table1_manifest_hard.tsv 
+sort -k 7 -rn table1_manifest_hard.tsv |les
+l
+ll
+les table1_manifest_hard.tsv
+l
+ls
+ll
+les table1_manifest_hard.tsv 
+ls
+ll
+les table2_mutation_annotation_filter.tsv
+ls
+ll
+ls
+ll

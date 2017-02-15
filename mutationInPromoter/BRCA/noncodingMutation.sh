@@ -55,7 +55,7 @@ ROOT=`dirname $0`
 ############################################
 # extract position information from mpileup#
 ############################################
-bash ${ROOT}/extractCoverage.sh
+# bash ${ROOT}/extractCoverage.sh
 
 ###################################
 #Find target gene for the mutation#
@@ -66,3 +66,18 @@ bash ${ROOT}/extractCoverage.sh
 #Find gene expression #
 #######################
 # Rscript ${ROOT}/06.geneExpression.R
+
+#############################
+# Recheck the point mutation#
+#############################
+# Rscript ${ROOT}/07.loadRecheckPositions.R
+
+####################
+# Survival analysis#
+####################
+# Rscript ${ROOT}/08.survival_analysis.R
+
+##########################
+# Check the binding motif#
+##########################
+bash find_motif_affect_by_nutation.sh

@@ -25,4 +25,14 @@ write.tsv<-function(x = "", file = ""){
 }
 
 
+#' Convert signif numeric to math symbol annotation
+#' @param signif numeric vector
+#' @return expression object vector
+numeric_2_plotmath <- function(x){
+  require(tidyverse)
+  require(latex2exp)
+  str_split(format(signif(x, 3)), "e[\\+\\-]") %>% 
+    sapply(function(x){TeX(paste('$',x[1],' \\times 10^{',x[2],"}$", sep = ""))})
+}
+
 

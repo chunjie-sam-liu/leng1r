@@ -131,3 +131,31 @@ ls
 cd mutationInPromoter/BRCA/
 l
 git status
+git add -A
+git commit -m "reanalysis"
+git push origin master
+ls
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter/BRCA/
+l
+breast
+ls
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter
+l
+sll
+ls
+cd mutationInPromoter/BRCA/
+ls
+l
+cd mutationInPromoter
+ls
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter/BRCA/
+ls
+git status

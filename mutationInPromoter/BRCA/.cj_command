@@ -334,3 +334,81 @@ ls
 l
 ll
 cd ../
+ls
+ll
+liucj
+ls
+ll
+lsd
+ll
+lsd
+l
+ll
+ls
+ll
+lsd
+l
+ll
+ls
+ls
+perl -e "split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[0-9]/, '24S76M')"
+perl -e "print shift split(/[0-9]/, '24S76M')"
+perl -e "shift split(/[0-9]/, '24S76M')"
+perl -e "print shift split(/[0-9]/, '24S76M')"
+perl -e "split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[0-9]/, '24S76M')"
+perl -e "print split(/[MIDNSHP]/, '24S76M')"
+ls
+ls
+cd ../../
+ls
+ll
+ls
+l
+vim findMotif.py
+rm findMotif.py 
+vim find_motif_affect_by_nutation.sh
+bash noncodingMutation.sh 
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+-f /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+ll /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+ll /home/cliu18/liucj/reference/TFs/hTFtarget_datasetfilteredpeak.bed.sortByChrom
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+l
+bash noncodingMutation.sh &
+ps xf
+ls
+ll
+cd ../
+ls
+mkdir summary_2017_01_13
+l
+cd summary_2017_01_13/
+l
+cd us
+cd sy
+cdls
+ll
+cd summary_2017_01_13/
+l
+mkdir summary
+l
+mv summary_2017_01_13/su
+mv summary_2017_01_13 summary
+l
+cd summary/
+ls
+ll
+cd summary/
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles
+ls
+ll
+cd summary/
+l
+cd summary/2017_01_13/
+ls
+l
+cd summary/

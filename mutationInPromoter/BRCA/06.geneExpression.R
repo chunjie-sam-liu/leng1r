@@ -79,13 +79,17 @@ all_expression_barplot_p0.05 <-
   filter(p.value < 0.05) %>%
   ggplot(aes(x = type, y = expression)) +
   geom_boxplot(aes(color = type), outlier.shape = NA) +
-  scale_color_brewer(palette = "Dark2") +
-  theme_minimal() +
+  scale_color_brewer(palette = "Set1") +
+  theme_bw() +
+  labs(x = "Type", y = "Gene Expression (FPKM)", title = "Target Gene Expression") +
+  theme(strip.background = element_rect(fill = 'white', color = 'black'),
+        panel.grid = element_blank(),
+        axis.line = element_line(color = 'black'),
+        plot.title = element_text(hjust = 0.5)) + 
   facet_wrap( ~ mutation + 
-                ensid + 
-                symbol +
-                paste("p-value", p.value, sep = ": ") + 
-                paste("FDR", fdr, sep = ": "), 
+                paste(ensid, symbol, sep = "/") +
+                paste("p-value", p.value, sep = ": ")# + paste("FDR", fdr, sep = ": ")
+              , 
               ncol = 4, scales = "free")
 
 print(all_expression_barplot_p0.05)
@@ -93,7 +97,7 @@ print(all_expression_barplot_p0.05)
 all_expression_barplot_p0.05 %>%
   ggsave(filename = file.path(geneExpressionDir, 
                               "02.all_expression_barplot_p0.05.png"),
-         device = "png", width = 10, height = 13)
+         device = "png", width = 5, height = 5)
 
 all_expression_barplot_p0.05 %>%
   write_rds( path = file.path(geneExpressionDir, 
@@ -122,6 +126,11 @@ candidate_mutation_with_normal <-
          type = "NM") %>%
   dplyr::select(mutation, barcode, ensid, type, symbol, expression) %>%
   bind_rows(candidate_p0.01)
+candidate_mutation_with_normal %>%
+  write_tsv(file.path(geneExpressionDir, "candidate_mutation_with_normal.tsv"))
+candidate_mutation_with_normal %>% 
+  write_rds(file.path(geneExpressionDir, "candidate_mutation_with_normal.rds"))
+
 
 candidate_mutation_expression_model<-
   candidate_mutation_with_normal %>%
@@ -138,11 +147,10 @@ candidate_mutation_2_barplot <-
   ggplot(aes(x = type, y = expression)) +
   geom_boxplot(aes(color = type), outlier.shape = NA) +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal() + 
+  theme_bw() + 
   scale_x_discrete(limits = c("NM", "WT","MT")) +
   facet_wrap( ~ mutation + 
-                ensid + 
-                symbol +
+                paste(ensid, symbol, sep = "/") +
                 paste("p-value", signif(p.value,4), sep = ": "), 
               ncol = 4, scales = "free")
 
@@ -204,4 +212,5 @@ realSomaticMutation.recurStat.barplot %>%
 
 # Save workspace
 save(list = ls(), file = file.path(geneExpressionDir, "06.geneExpression.RData"))
+load(file.path(geneExpressionDir, "06.geneExpression.RData"))
 

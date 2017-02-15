@@ -72,9 +72,7 @@ vcf2tibble <- function(x){
       filter(MQ >= 20, Depth >= 5, altDepth >= 3)
   }
   # write to path
-  write_tsv(tmpCombined,
-          file.path(filtersnpPath, paste(bam, "SNP.vcf.filter", sep = ".")
-                   ))
+  write_tsv(tmpCombined,file.path(filtersnpPath, paste(bam, "SNP.vcf.filter", sep = ".")))
   return(tmpCombined)
 }
   
@@ -88,7 +86,8 @@ somaticMutation <- function(mani){
   cases <- 
     unique(mani$case)
   numStat <- 
-    tibble(barcode = character(), somatic = numeric())
+    tibble(barcode = character(), 
+           somatic = numeric())
   
   for(i in cases){
     normal <- 
@@ -105,21 +104,25 @@ somaticMutation <- function(mani){
       tumor %>%
       anti_join(normal, by = "mutation")
     
+    # n_num <- 
+    #   data_frame(normal = base::nrow(normal), 
+    #              tumor = base::nrow(tumor))
+    
     # Stat number
     numStat <- 
       somatic %>%
       group_by(barcode) %>%
       count() %>%
       dplyr::rename(somatic = n) %>%
+      # bind_cols(n_num) %>%
       bind_rows(numStat)
-      
     # for annotation
     barcode <- unique(somatic$barcode)[1]
-    somatic %>% 
+    somatic %>%
       separate(mutation, c("chrom", "pos", "ref", "alt"), convert = T) %>%
       mutate(end = pos) %>%
-      dplyr::select(chrom, pos, end, ref, alt, 
-                    Depth, refDepth, altDepth, MQ, barcode) %>% 
+      dplyr::select(chrom, pos, end, ref, alt,
+                    Depth, refDepth, altDepth, MQ, barcode) %>%
       write_tsv(path = file.path(somaticAnnoPath,
                                  paste(barcode,"avinput", sep = ".")),
                 col_names = F)
@@ -133,3 +136,4 @@ manifest %>%
   
 save(list = ls(), 
      file = file.path(somaticAnnoPath, "02.getSomatic.RData"))
+

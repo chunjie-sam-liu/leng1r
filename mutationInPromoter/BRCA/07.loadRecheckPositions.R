@@ -90,27 +90,34 @@ mutation_feature <-
   distinct()
 
 label_observation_count <- function(x){
-  return(c(y = 6000, label = length(x)))
+  return(c(y = 180, label = length(x)))
 }
 
 # Figure 
 depth_for_tumor_normal_barplot <- 
   totalMutationBase %>%
+  anti_join(filter_out_mutation, by = "mutation") %>%
   left_join(mutation_feature, by = "mutation") %>%
   unite(mutation, mutation, alt, sep = "/") %>%
   filter(count >= 10) %>%
   ggplot(aes(type, count)) +
-  geom_boxplot(aes(color = type)) +
-  scale_color_brewer(palette = "Dark2") +
-  theme_minimal() +
+  geom_boxplot(aes(color = type), outlier.shape  = NA) +
+  scale_color_brewer(palette = "Set1") +
+  scale_y_continuous(limits = c(0, 200)) +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black")
+  ) +
   stat_summary(fun.data = label_observation_count, geom = "text") +
   labs(title = "SAMtools mpileup check for candidate mutations",
        x = "Type", y = "Depth") +
   facet_wrap(~mutation)
-#print(depth_for_tumor_normal_barplot)
+print(depth_for_tumor_normal_barplot)
 ggsave(filename = file.path(recheckDir, 
                             "01.depth_for_tumor_normal_barplot.png"),
-       device = "png", width = 10, height = 20)
+       device = "png", width = 9, height = 12)
 depth_for_tumor_normal_barplot %>%
   write_rds(path = file.path(recheckDir, 
                              "01.depth_for_tumor_normal_barplot.rds"))
@@ -222,3 +229,4 @@ candidate_mutation_coverage %>%
 
 # save workspace
 save(list = ls(), file = file.path(recheckDir, "07.loadRecheckPositions.RData"))
+load(file.path(recheckDir, "07.loadRecheckPositions.RData"))
