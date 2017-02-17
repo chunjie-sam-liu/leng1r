@@ -11,3 +11,15 @@ ls
 cd ../
 ls
 ll
+ls
+cd ./
+l
+cd ../
+ls
+ll
+cd ../
+ls
+ls
+cd ../tables
+l
+cd ../

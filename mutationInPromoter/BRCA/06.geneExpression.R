@@ -148,10 +148,14 @@ candidate_mutation_2_barplot <-
   geom_boxplot(aes(color = type), outlier.shape = NA) +
   scale_color_brewer(palette = "Dark2") +
   theme_bw() + 
+  labs(x = "Type", y = "Gene Expression (FPKM)", title = "Target Gene Expression") +
+  theme(strip.background = element_rect(fill = 'white', color = 'black'),
+        panel.grid = element_blank(),
+        axis.line = element_line(color = 'black'),
+        plot.title = element_text(hjust = 0.5)) + 
   scale_x_discrete(limits = c("NM", "WT","MT")) +
   facet_wrap( ~ mutation + 
-                paste(ensid, symbol, sep = "/") +
-                paste("p-value", signif(p.value,4), sep = ": "), 
+                paste(ensid, symbol, sep = "/"), 
               ncol = 4, scales = "free")
 
 print(candidate_mutation_2_barplot)
@@ -159,7 +163,7 @@ print(candidate_mutation_2_barplot)
 candidate_mutation_2_barplot %>%
   ggsave(filename = file.path(geneExpressionDir, 
                               "03.candidate_mutation_2_barplot.png"),
-         device = "png", width = 10, height = 13)
+         device = "png", width = 5, height = 5)
 
 candidate_mutation_2_barplot %>%
   write_rds( path = file.path(geneExpressionDir, 

@@ -7,11 +7,14 @@ require(methods)
 require(tidyverse)
 require(stringr)
 library(latex2exp)
+library(gridExtra)
 
 # set data path
 save_files_dir <- "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles"
 recheck_dir <- "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions"
 target_gene_dir <- "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/04.targetGenesForMutation"
+expression_dir <- "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/06.geneExpression"
+survival_dir <- "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/07.survival"
 
 # output path
 out_table_dir <- "/home/cliu18/liucj/github/RstudioWithGit/mutationInPromoter/BRCA/summary/2017_01_13/tables"
@@ -52,11 +55,13 @@ manifest_hard %>%
 #########
 # Figure 1 Exome reads located in the regulatory region
 #######
+slope <- tidy(lm(regulatory_file_size ~ file_size, manifest_hard))[2,2]
 figure1_file_size_comparison_point <- 
   manifest_hard %>% 
   ggplot(aes(x = file_size / 10 ^ 10, 
              y = regulatory_file_size / 10 ^ 10)) +
   geom_point() + 
+  annotate("text", x = 1,y = 1, label = paste("slope", signif(slope, digits = 2), sep = ": ")) + 
   geom_smooth(method = loess) + 
   theme_bw() +
   theme(panel.border = element_blank(),
@@ -166,7 +171,7 @@ ggsave(file.path(out_pic_dir, "figure4_somatic_mutation_feature_annotation_stata
 
 #######################
 # Load rda 02-15-2017
-#load(file.path(out_table_dir, "summary_function.rda"))
+# load(file.path(out_table_dir, "summary_function.rda"))
 ######################
 
 my_theme <- theme_bw() +
@@ -179,7 +184,16 @@ my_theme <- theme_bw() +
 #######
 # table 3 recurent >=5  mutation coverage 
 #####
+table3_mtuation_coverage <- 
+  read_rds(file.path(recheck_dir, 'totalCoverage.rds')) %>%
+  tbl_df() %>%
+  select(- starts_with('bam'), - starts_with('type')) %>%
+  select(case,barcode_normal,barcode_tumor,uuid_normal, uuid_tumor,`chr1:111755648_normal`:`chr9:135751043_tumor`) 
 
+table3_mtuation_coverage %>%
+  write_tsv(file.path(out_table_dir, 'table3_mtuation_coverage.tsv'))
+table3_mtuation_coverage %>%
+  write_rds(file.path(out_table_dir, 'table3_mtuation_coverage.rds'))
 
 #####################################
 # figure 5  candidate mutation coverage
@@ -205,12 +219,48 @@ table4_target_genes %>%
 ################
 # figure 6 mutation target gene expression
 ###############
+figure6_1_target_gene_expression_filter_boxplot <-
+  read_rds(file.path(expression_dir, '02.all_expression_barplot_p0.05.rds')) +
+  theme(legend.position = 'none')
 
+print(figure6_1_target_gene_expression_filter_boxplot)
 
+ggsave(file.path(out_pic_dir, "figure6_1_target_gene_expression_filter_boxplot.png"), 
+       plot = figure6_1_target_gene_expression_filter_boxplot, 
+       device = 'png', width = 5, height = 5)
+
+figure6_2_target_gene_expression_filter_with_normal_boxplot <-
+  read_rds(file.path(expression_dir, '03.candidate_mutation_2_barplot.rds')) +
+  theme(legend.position = 'none') +
+  scale_x_discrete(limits = c("NM", "WT", "MT"), 
+                   labels = c("WT-Normal","WT-Tumor","MT-Tumor"))
+  
+
+print(figure6_2_target_gene_expression_filter_with_normal_boxplot)
+
+ggsave(file.path(out_pic_dir, "figure6_2_target_gene_expression_filter_with_normal_boxplot.png"),
+       plot = figure6_2_target_gene_expression_filter_with_normal_boxplot, 
+       device = 'png', width = 5, height = 5)
 
 ###############
 # figure 7 survival analysis of two target genes
 ###############
+figure7_1_RRM2B_1_4_survival <-
+  read_rds(file.path(survival_dir, '02.RRM2B_1_4_survival.rds'))
+print(figure7_1_RRM2B_1_4_survival)
+ggsave(file.path(out_pic_dir, "figure7_1_RRM2B_1_4_survival.png"), 
+       device = 'png',
+       width = 6,
+       height = 5)
+
+figure7_2_TANGO6_survival <-
+  read_rds(file.path(survival_dir, '03.TANGO6_survival.rds')) 
+print(figure7_2_TANGO6_survival)
+ggsave(file.path(out_pic_dir, "figure7_2_TANGO6_survival.png"), 
+       device = 'png',
+       width = 6,
+       height = 5)
+
 
 
 # Save sessions.

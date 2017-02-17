@@ -106,11 +106,15 @@ fit_RRM2B_1_4 <-
           data = RRM2B_1_4,
           na.action = na.exclude)
 RRM2B_1_4_survival <-
-  ggsurvplot(fit_RRM2B_1_4, pval=T, ggtheme = theme_light(), 
-           xlab = "Survival in days", 
-           ylab = '',
-           main = "Kaplan-Meier Curves RRM2B Expression (1/4)")
+  ggsurvplot(fit_RRM2B_1_4, pval=T, 
+             palette = c("#eb1a08", "#3f51b5"),
+           xlab = "Overall survival (days)", 
+           ylab = 'Surviving',
+           legend.labs = c("High (top 1/4)", "Low (bottom 1/4)"))
 print(RRM2B_1_4_survival)
+
+RRM2B_1_4_survival %>%
+  write_rds(file.path(survivalPath, '02.RRM2B_1_4_survival.rds'))
 ggsave(filename = file.path(survivalPath, "02.RRM2B_1_4_survival.png"), device = "png", width = 7, height = 7)
 
 TANGO6 <- filter(for_survival, ensid == "ENSG00000103047")
@@ -119,11 +123,14 @@ fit_TANGO6 <-
                data = TANGO6,
                na.action = na.exclude)
 TANGO6_survival <- 
-  ggsurvplot(fit_TANGO6, pval=T, ggtheme = theme_light(), 
-           xlab = "Survival in days", 
-           ylab = '', 
-           main = "Kaplan-Meier Curves TANGO6 Expression (All)")
+  ggsurvplot(fit_TANGO6, pval=T, 
+             palette = c("#eb1a08", "#3f51b5"),
+             xlab = "Overall survival (days)", 
+             ylab = 'Surviving',
+             legend.labs = c("High", "Low"))
 print(TANGO6_survival)
+TANGO6_survival %>%
+  write_rds(file.path(survivalPath, '03.TANGO6_survival.rds'))
 ggsave(filename = file.path(survivalPath, "03.TANGO6_survival.png"), device = "png", width = 7, height = 7)
 # 1/4 TANGO6 data
 TANGO6_1_4 <- 
@@ -165,12 +172,39 @@ mutation_for_survival <-
 mutation_for_survival_coxph_model<-
   mutation_for_survival %>%
   group_by(mutation, ensid, symbol) %>%
-  do(tidy(coxph(Surv(time, status) ~ expression, .)))
+  do(tidy(coxph(Surv(time, status) ~ type, .)))
+
+
+RRM2B <- 
+  mutation_for_survival %>% 
+  filter(ensid == "ENSG00000048392")
+fit_RRM2B <- 
+  survfit(Surv(time, status) ~ type, 
+          data = RRM2B,
+          na.action = na.exclude)
+
+RRM2B_survival <-
+  ggsurvplot(fit_RRM2B, pval=T, ggtheme = theme_light(), 
+             xlab = "Survival in days", 
+             ylab = '',
+             main = "Kaplan-Meier Curves RRM2B Expression (All)")
+
+print(RRM2B_survival)
 
 
 
-
-
+TANGO6 <- filter(mutation_for_survival, ensid == "ENSG00000103047")
+fit_TANGO6 <- 
+  survfit(Surv(time, status) ~ type, 
+          data = TANGO6,
+          na.action = na.exclude)
+TANGO6_survival <- 
+  ggsurvplot(fit_TANGO6, pval=T, 
+             palette = c("#eb1a08", "#3f51b5"),
+             xlab = "Overall survival (days)", 
+             ylab = 'Surviving',
+             legend.labs = c("High", "Low"))
+print(TANGO6_survival)
 
 
 
@@ -182,4 +216,4 @@ mutation_for_survival_coxph_model<-
 
 # Save workspace
 save(list = ls(), file = file.path(survivalPath, "08.survival_analysis.RData"))
-
+load(file.path(survivalPath, "08.survival_analysis.RData"))

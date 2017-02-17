@@ -19,7 +19,7 @@ normalList = list.files(path = normalDir)
 
 maniDir = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles")
 manifest <- read_rds(path = file.path(maniDir, "manifestData.info.rds")) %>%
-  dplyr::select(barcode, type, bam)
+  dplyr::select(barcode, type, bam, uuid)
 
 forAnalysisDir <- file.path(dataRootPath, '03.somatic/03.somaticForAnalysis.saveFiles')
 # Load somatic mutation with recur >= 6
@@ -60,6 +60,13 @@ normalMutationBase <-
 
 totalMutationBase <- 
   bind_rows(normalMutationBase, tumorMutationBase) 
+
+
+totalMutationBase %>%
+  write_rds(file.path(recheckDir, "totalMutationBase.rds"))
+
+totalMutationBase %>%
+  write_tsv(file.path(recheckDir, "totalMutationBase.tsv"))
 
 # save the pileup info
 write_tsv(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles/totalMutationBase.tsv"))

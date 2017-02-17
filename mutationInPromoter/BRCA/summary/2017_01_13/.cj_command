@@ -65,3 +65,19 @@ ll
 cd tables/
 l
 cd figs/
+l
+cd tables/
+l
+cd figs
+l
+liucj
+ls
+ll
+cd tables/
+l
+cd figs
+l
+exit
+ls
+cd tables/
+l
