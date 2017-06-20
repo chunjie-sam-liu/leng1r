@@ -1,0 +1,11 @@
+ls
+ll
+cd code/
+l
+rm code/
+ls
+ll
+cd ../
+l
+ll
+cd ../

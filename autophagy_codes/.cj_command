@@ -1,0 +1,28 @@
+ls
+ll
+l
+ll
+mv code/ ye_circadian_code
+l
+ll
+ls
+cd ye_circadian_code/
+l
+ll
+c d../
+l
+ll
+cd ../
+ls
+ll
+cd ye_circadian_code/
+l
+ll
+cd ../
+ls
+ll
+vim README.md
+l
+ls
+git status
+cd ../
