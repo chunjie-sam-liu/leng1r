@@ -6,14 +6,16 @@
 require(methods)
 require(tidyverse)
 require(stringr)
-require(biomaRt)
+
 ######################
 # Load anno data
 #####################
 dataRootPath = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis"
+
 recheckDir = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.recheckPositions")
-tumorDir = file.path(recheckDir, "tumor")
-normalDir = file.path(recheckDir, "normal")
+
+tumorDir = file.path(recheckDir, "tumor_tmp")
+normalDir = file.path(recheckDir, "normal_tmp")
 tumorList = list.files(path = tumorDir)
 normalList = list.files(path = normalDir)
 
@@ -22,21 +24,23 @@ manifest <- read_rds(path = file.path(maniDir, "manifestData.info.rds")) %>%
   dplyr::select(barcode, type, bam, uuid)
 
 forAnalysisDir <- file.path(dataRootPath, '03.somatic/03.somaticForAnalysis.saveFiles')
-# Load somatic mutation with recur >= 6
+# Load somatic mutation with recur >= 3
 somaticMutation <- 
   read_rds(path = file.path(forAnalysisDir, 
-                            'realSomaticMutation.recur5ForAnalysis.rds')) %>%
-  separate(mutation, into = c("mutation", "alt"), sep = "\\/")
+                            'somatic_mutation_recur3_for_analysis.rds')) %>%
+  separate(mutation, into = c("mutation", "alt2"), sep = "\\/") 
 
 ##Mutation target
 mutationTarget <- 
   read_rds(path = file.path(forAnalysisDir,
-                            "nearestTargetProteinCodingGenes.rds"))
+                            "nearest_target_coding_genes_3.rds")) %>% 
+  as_tibble()
 
 getPileupInfo <- function(x, path){
+  print(x)
   read_tsv(file.path(path, x), 
            col_names = c("pileup","pos", "ref", "count", "base", "qual"),
-           col_types = cols(ref = "c")) %>%
+           col_types = cols(ref = "c", count = 'c')) %>%
     separate(pileup, into = c("bam","chrom"), sep = ":") %>%
     mutate(bam = str_replace(bam, "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/",""),
            alt_pile = str_replace_all(base, pattern = "[\\,\\.\\$\\^\\-\\+\\:\\d\\@QP\"\\<\\]\\*\\!\\#\\/]","")) %>%
@@ -63,14 +67,14 @@ totalMutationBase <-
 
 
 totalMutationBase %>%
-  write_rds(file.path(recheckDir, "totalMutationBase.rds"))
+  write_rds(file.path(recheckDir, "recur3_totalMutationBase.rds"))
 
 totalMutationBase %>%
-  write_tsv(file.path(recheckDir, "totalMutationBase.tsv"))
+  write_tsv(file.path(recheckDir, "recur3_totalMutationBase.tsv"))
 
 # save the pileup info
-write_tsv(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles/totalMutationBase.tsv"))
-write_rds(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles/totalMutationBase.rds"))
+write_tsv(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles/recur3_totalMutationBase.tsv"))
+write_rds(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somaticForAnalysis.saveFiles/recur3_totalMutationBase.rds"))
 
 ##################################
 # Calculate the refined recurrent#
@@ -80,12 +84,14 @@ write_rds(totalMutationBase, path = file.path(dataRootPath, "03.somatic/03.somat
 
 tumor_mutation_base_count_10 <- 
   tumorMutationBase %>% 
-  filter(count >= 10) %>%
+  filter(as.integer(count) >= 10) %>%
   group_by(mutation) 
 
+# this is the false positive
+# anti_join false positive mutation in normal
 filter_out_mutation <- 
   totalMutationBase %>%
-  filter(count >= 10, alt_count >= 3, type == "normal") %>%
+  filter(as.integer(count) >= 10, alt_count >= 3, type == "normal") %>%
   group_by(mutation) %>%
   count() %>%
   filter(n >=3)
@@ -100,14 +106,21 @@ label_observation_count <- function(x){
   return(c(y = 180, label = length(x)))
 }
 
+totalMutationBase %>% 
+  drop_na() %>% 
+  mutate(
+    count = as.integer(count)
+  ) %>% 
+  drop_na() ->
+  totalMutationBase
 # Figure 
 depth_for_tumor_normal_barplot <- 
   totalMutationBase %>%
   anti_join(filter_out_mutation, by = "mutation") %>%
   left_join(mutation_feature, by = "mutation") %>%
   unite(mutation, mutation, alt, sep = "/") %>%
-  filter(count >= 10) %>%
-  ggplot(aes(type, count)) +
+  filter(as.integer(count) >= 10) %>%
+  ggplot(aes(type, as.integer(count))) +
   geom_boxplot(aes(color = type), outlier.shape  = NA) +
   scale_color_brewer(palette = "Set1") +
   scale_y_continuous(limits = c(0, 200)) +
@@ -121,13 +134,13 @@ depth_for_tumor_normal_barplot <-
   labs(title = "SAMtools mpileup check for candidate mutations",
        x = "Type", y = "Depth") +
   facet_wrap(~mutation)
-print(depth_for_tumor_normal_barplot)
+# print(depth_for_tumor_normal_barplot)
 ggsave(filename = file.path(recheckDir, 
-                            "01.depth_for_tumor_normal_barplot.png"),
-       device = "png", width = 9, height = 12)
+                            "01.recur3_depth_for_tumor_normal_barplot.png"),
+       device = "png", width = 20, height = 20)
 depth_for_tumor_normal_barplot %>%
   write_rds(path = file.path(recheckDir, 
-                             "01.depth_for_tumor_normal_barplot.rds"))
+                             "01.recur3_depth_for_tumor_normal_barplot.rds"))
 
 #######################
 #filter false positive#
@@ -143,7 +156,7 @@ totalMutationBase %>%
   anti_join(filter_out_mutation, by = "mutation") %>% 
   filter(type == "tumor", count >= 10) %>%
   tbl_df() %>%
-  dplyr::select(mutation, depth = count,alt_depth = alt_count, barcode) %>%
+  dplyr::select(mutation, depth = count, alt_depth = alt_count, barcode) %>%
   ggplot(aes(x = reorder(mutation, mutation, function(x) -length(x)))) +
   geom_bar() +
   theme_minimal() +
@@ -174,9 +187,9 @@ merged_mutation <-
   distinct(mutation, barcode, .keep_all = T)
 
 merged_mutation %>% 
-  write_tsv(path=file.path(forAnalysisDir, "candidate_merged_mutation.tsv"))
+  write_tsv(path=file.path(forAnalysisDir, "recur3_candidate_merged_mutation.tsv"))
 merged_mutation %>%
-  write_rds(path = file.path(forAnalysisDir, "candidate_merged_mutation.rds"))
+  write_rds(path = file.path(forAnalysisDir, "recur3_candidate_merged_mutation.rds"))
 
 mutated_samples_barplot <- 
   merged_mutation %>%
@@ -192,7 +205,7 @@ mutated_samples_barplot <-
 print(mutated_samples_barplot)
 ggsave(filename = file.path(forAnalysisDir, 
                             "02.mutated_samples_barplot.png"),
-       device = "png", width = 10, height = 10)
+       device = "png", width = 20, height = 20)
 mutated_samples_barplot %>%
   write_rds(path = file.path(forAnalysisDir, 
                              "02.mutated_samples_barplot.rds"))
@@ -224,16 +237,14 @@ print(candidate_mutation_coverage)
 
 candidate_mutation_coverage %>%
   ggsave(filename = file.path(forAnalysisDir, 
-                            "03.candidate_mutation_coverage.png"),
-       device = "png", width = 10, height = 10)
+                            "03.recur3_candidate_mutation_coverage.png"),
+       device = "png", width = 20, height = 20)
 candidate_mutation_coverage %>%
   write_rds(path = file.path(forAnalysisDir, 
                              "03.candidate_mutation_coverage.rds"))
 
 
 
-
-
 # save workspace
-save(list = ls(), file = file.path(recheckDir, "07.loadRecheckPositions.RData"))
-load(file.path(recheckDir, "07.loadRecheckPositions.RData"))
+save(list = ls(), file = file.path(recheckDir, "07.recur3_loadRecheckPositions.RData"))
+load(file.path(recheckDir, "07.recur3_loadRecheckPositions.RData"))

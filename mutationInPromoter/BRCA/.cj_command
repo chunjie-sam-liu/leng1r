@@ -417,3 +417,110 @@ ll
 cd summary/
 ls
 cd summary/
+ls
+nohup Rscript 03a.recur3.r &
+l
+ll
+les no
+ll
+les nohup.out 
+ps xf
+ll
+les nohup.out 
+ls
+R
+l
+rm no
+rm nohup.out 
+l
+nohup Rscript 03a.recur3.r &
+ps xf
+l
+les no
+les nohup.out 
+ll
+les nohup.out 
+cat nohup.out 
+lls
+l
+cat nohup.out 
+rm nohup.out 
+nohup Rscript 03a.recur3.r &
+ps xf
+ll
+cat no
+cat nohup.out 
+cat no
+cat nohup.out 
+rm nohup.out 
+nohup Rscript 03a.recur3.r &
+cat nohup.out 
+ps xf
+cat nohup.out 
+l
+grep "candidate_merged_mutation.rds" *
+l
+ll
+cp extractCoverage.sh extractCoverage_01.sh 
+l
+bash extractCoverage_01.sh 
+bash extractCoverage_01.sh |les
+l
+nohup bash extractCoverage_01.sh 
+ps xf
+les nohup.out 
+l
+ps xf
+rm nohup.out 
+l
+ps xf
+top
+nohup bash extractCoverage_01.sh &
+tail nohup.out 
+ps xf
+top
+ps xf
+ps xfl
+l
+cat nohup.out 
+nohup bash extractCoverage_01.sh &
+psxf
+ps xf
+top
+ql
+l
+tail nohup.out 
+l
+ll
+top
+ls
+ll
+grep candidate_merged_mutation.rds *
+l
+ll
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/LINSIGHT
+ls
+cd ../
+ls
+les nohup.out 
+rm nohup.out 
+l
+nohup Rscript 07.loadRecheckPositions.R &
+ls
+ll
+grep candidate_merged_mutation *
+grep 03.recur3_candidate_mutation_coverage.png *
+cd 
+ls
+ll
+rm nohup.out 
+l
+nohup Rscript 07.loadRecheckPositions.R &
+l
+ll
+les nohup.out 
+ll
+les nohup.out 
+l
+ls
+cd ../

@@ -1,57 +1,57 @@
 #!usr/bin/Rscript
+library(methods)
+library(tidyverse)
+library(biomaRt)
+library(stringr)
 
-###################
-#Load library
-##################
-require(methods)
-require(tidyverse)
-require(stringr)
-require(biomaRt)
-######################
-# Load anno data
-#####################
+
+
 dataRootPath = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis"
 
 forAnalysisDir <-
   file.path(dataRootPath, '03.somatic/03.somaticForAnalysis.saveFiles')
 
+real_somatic <-
+  read_rds(path = file.path(forAnalysisDir, "realSomaticMutation.rds"))
+
+
 mutationDir <-
   file.path(dataRootPath, "03.somatic/04.targetGenesForMutation")
 
-# Load somatic mutation with recur >= 6
-somaticMutation <-
-  read_rds(path = file.path(forAnalysisDir,
-                            'realSomaticMutation.recur5ForAnalysis.rds'))
-
-###################
-#Position analysis#
-###################
-somaticMutationPos <-
-  somaticMutation %>%
-  group_by(mutation) %>%
+recur3 <-
+  real_somatic %>%
+  group_by(mutation, feature) %>%
   mutate(recurrent = n()) %>%
+  filter(recurrent >= 3) %>%
   ungroup() %>%
-  dplyr::select(mutation, feature, ensr, recurrent) %>%
-  distinct() %>%
   separate(
-    "mutation",
+    mutation,
     into = c("chrom", "pos", "ref", "alt"),
-    convert = T,
-    remove = F
+    remove = F,
+    convert = T
   )
 
-# get nearest genes
+write_rds(recur3, path = file.path(forAnalysisDir, "somatic_mutation_recur3_for_analysis.rds"))
+write_tsv(recur3, path = file.path(forAnalysisDir, "somatic_mutation_recur3_for_analysis.tsv"))
+
+somatic_pos <-
+  recur3 %>%
+  dplyr::select(mutation:alt, feature, ensr, recurrent) %>%
+  distinct()
+
+# annotation
 GENES = useMart("ENSEMBL_MART_ENSEMBL",
-                dataset = "hsapiens_gene_ensembl",
-                host = "useast.ensembl.org")
+                dataset = "hsapiens_gene_ensembl")
 GENES.ATTRIBUTES <- listAttributes(GENES)
 GENES.FILTERS <- listFilters(GENES)
 
-# Access from Ensembl
+
+# get target genes
 getAroundGenes <- function(x, len) {
   # The function is used for apply function
   # len set big one
   # get around genes
+
   around.genes <-
     getBM(
       attributes = c(
@@ -104,19 +104,20 @@ getAroundGenes <- function(x, len) {
     )
   
   strand.plus %>%
-    bind_rows(strand.minus)
+    bind_rows(strand.minus) ->
+    result
+  result %>% dplyr::select(-chromosome_name)
 }
 
-# anno gene function
+# ts genes
 refDir <- "/home/cliu18/liucj/reference/TSONCOG"
 collectGenes <-
   read_tsv(file = file.path(refDir, "collectedOncoAndTumorsupressorGenes.tsv"))
 
-nearestTargetProteinCodingGenes <-
-  somaticMutationPos %>%
+nearest_target_coding_genes <-
+  somatic_pos %>%
   apply(1, getAroundGenes, len = "100000000") %>%
   bind_rows() %>%
-  dplyr::select(-chromosome_name) %>%
   rename(
     ensg = ensembl_gene_id,
     start = start_position,
@@ -126,14 +127,19 @@ nearestTargetProteinCodingGenes <-
   ) %>%
   left_join(collectGenes, by = "symbol")
 
-nearestTargetProteinCodingGenes %>%
-  write_tsv(path = file.path(mutationDir, "nearestTargetProteinCodingGenes.tsv"))
-nearestTargetProteinCodingGenes %>%
-  write_rds(path = file.path(mutationDir, "nearestTargetProteinCodingGenes.rds"))
+write_tsv(
+  nearest_target_coding_genes,
+  path = file.path(mutationDir,
+                   "nearest_target_coding_genes_3.tsv")
+)
+write_rds(
+  nearest_target_coding_genes,
+  path = file.path(mutationDir,
+                   "nearest_target_coding_genes_3.rds")
+)
 
 
 # save workspace
-save(
-  list = ls(),
-  file = file.path(mutationDir, "05.targetGenesForMutation.RData")
-)
+save(list = ls(),
+     file = file.path(mutationDir,
+                      "recur3.rda"))

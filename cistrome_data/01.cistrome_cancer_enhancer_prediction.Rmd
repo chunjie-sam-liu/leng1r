@@ -1,0 +1,46 @@
+---
+title: "01.cistrome_cancer_enhancer_prediction"
+author: "C.J. Liu"
+date: "3/29/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+> use test data from cistrome cancer enhancer predition[](http://cistrome.org/CistromeCancer/TCGA_enhancer/).
+
+# Cancer genes
+## BRCA_1 Breast invasive carcinoma 1 (luminal) 
+```{r}
+brca_luminal_cg <- 
+  read_tsv("http://cistrome.org/~czang/data/TCGA_MARGE/BRCA_1.txt", col_names = "genes")
+
+write_tsv(brca_luminal_cg, path = "cistrome_data/brca_luminal_cg.tsv")
+
+```
+## BRCA_2 Breast invasive carcinoma 2 (basal)
+```{r}
+brca_basal_cg <-
+  read_tsv("http://cistrome.org/~czang/data/TCGA_MARGE/BRCA_2.txt", col_names = "genes")
+write_tsv(brca_basal_cg, path = "cistrome_data/brca_basal_cg.tsv")
+```
+
+
+```{r}
+union(brca_luminal_cg, brca_basal_cg) %>% write_tsv("cistrome_data/luminal_basal_union.tsv")
+intersect(brca_basal_cg, brca_luminal_cg) %>% write_tsv("cistrome_data/luminal_basal_intersect.tsv")
+
+library(Vennerable)
+venn_list <- Venn(list(basal = brca_basal_cg$genes, luminal = brca_luminal_cg$genes))
+
+
+png(filename = "cistrome_data/intersection.png", width = 500)
+plot(venn_list, doWeight = F)
+
+graphics.off()
+```
+
+

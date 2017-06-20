@@ -14,6 +14,7 @@ library(reshape2)
 #####################
 dataRootPath = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis"
 forAnalysisDir <- file.path(dataRootPath, '03.somatic/03.somaticForAnalysis.saveFiles')
+
 geneExpressionDir <- 
   file.path(dataRootPath, "03.somatic/06.geneExpression")
 # Load mutation and target genes

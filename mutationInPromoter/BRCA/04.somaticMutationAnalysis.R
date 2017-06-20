@@ -51,7 +51,8 @@ realSomaticMutation.recurStat <-
   group_by(mutation, feature) %>%
   count() %>%
   rename(recurrent = n) %>%
-  filter(recurrent > 2)
+  filter(recurrent > 2) %>%
+  ungroup()
 
 realSomaticMutation.recurStat.barplot <- 
   realSomaticMutation.recurStat %>%
@@ -82,7 +83,8 @@ realSomaticMutation.recur5ForAnalysis <-
   rename(recurrent = n) %>%
   filter(recurrent >= 5) %>% 
   ungroup() %>%
-  inner_join(realSomaticMutation, by = c("mutation", "feature")) 
+  inner_join(realSomaticMutation, by = c("mutation", "feature"))
+
 
 # Save it for further analysis
 realSomaticMutation.recur5ForAnalysis %>%

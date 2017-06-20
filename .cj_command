@@ -173,3 +173,50 @@ cd mutationInPromoter
 ls
 git status
 git add -a
+git add -A
+git commit -m "brca reanalysis"
+git push origin master
+ls
+exit
+ls
+ll
+git status
+git add mutationInPromoter/BRCA/06_1.geneExpression.R 
+git commit -m "geneexpression"
+git push origin master
+cat /home/cliu18/.ssh/id_rsa
+L
+l
+R
+ipython
+exit
+ls
+ll
+l
+df -h
+ps xf
+kill 42845
+ls
+df -h
+cd /home/
+ls
+cd mutationInPromoter/BRCA/
+ls
+l
+cd mutationInPromoter/BRCA/
+ls
+cd mutationInPromoter
+l
+ls
+cd mutationInPromoter2/
+l
+cd mutationInPromoter
+ls
+ll
+ls
+cd mutationInPromoter
+ls
+ll
+cd cistrome_data/
+l
+git status

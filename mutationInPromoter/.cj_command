@@ -27,3 +27,25 @@ l
 cd BRCA/
 ls
 cd BRCA/
+ls
+cd BRCA/
+l
+cd analysis/
+l
+cd ../
+ls
+cd BRCA/
+ls
+cd BRCA/
+l
+ps xf
+ls
+top
+w
+top
+w
+df -h
+top
+ls
+top
+exit
