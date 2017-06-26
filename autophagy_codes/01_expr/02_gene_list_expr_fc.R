@@ -158,7 +158,10 @@ gene_expr_pattern %>%
   ) %>%
   dplyr::ungroup() %>%
   tidyr::unnest() %>%
-  dplyr::arrange(rank) -> gene_rank
+  dplyr::arrange(rank) %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(x = type, replace = c("Autophagy" = "red", "Lysosome" = "black"))) %>% 
+  dplyr::select(symbol, rank, up, down, type, color) -> gene_rank
 
 gene_expr_pattern %>%
   dplyr::summarise_if(.predicate = is.numeric, dplyr::funs(sum(abs(.)))) %>%
@@ -186,6 +189,7 @@ ggplot(gene_list_fc_pvalue_simplified_filter,
     panel.grid = element_blank(),
     axis.title = element_blank(),
     axis.ticks = element_blank(),
+    axis.text.y = element_text(color = gene_rank$color),
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 14),
     legend.key = element_rect(fill = "white", colour = "black")
@@ -234,6 +238,7 @@ ggplot(gene_list_fc_pvalue_simplified_filter,
       linetype = "dashed",
       size = 0.2
     ),
+    axis.text.y = element_text(color = gene_rank$color),
     axis.title = element_blank(),
     axis.ticks = element_line(color = "black"),
     legend.text = element_text(size = 12),

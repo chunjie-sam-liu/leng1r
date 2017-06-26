@@ -39,3 +39,5 @@ cd ../
 ls
 l
 cd 01_expr/
+l
+cd ../

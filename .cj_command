@@ -294,3 +294,49 @@ ll
 mv autophagy_codes/ye_circadian_code ../
 ll
 git status
+git add -A
+git commit -m "rm ye_code"
+git push origin master
+l
+mv ../ye_circadian_code/ autophagy_codes/
+l
+cd autophagy_codes/
+l
+git status
+echo autophagy_codes/ye_circadian_code >> .gitignore 
+cat .gitignore 
+exit
+ls
+ll
+git status
+cat .gitignore 
+vim .gitignore 
+ls
+ll
+cd ../
+ls
+ll
+git status
+exit
+ls
+l
+git status
+vim .gitignore 
+cd ../
+ls
+ll
+git status
+git add autophagy_codes/01_expr/02_gene_list_expr_fc.R
+git commit -m "mod 02"
+git status
+git push origin master
+git status
+l
+exit
+ls
+ll
+git status
+cat .gitignore 
+ls
+ll
+git status
