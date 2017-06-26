@@ -27,6 +27,7 @@ for(m in 1:length(files.names)){
     if ((nrow(participant) >=2)){
       sub <- apply( BLCA.names[grep(i,BLCA.names$X3),] , 1 , paste , collapse = "." )
       filter <- c(filter,sub)
+      # wrong way to extract paired samples.
     }
   }
   

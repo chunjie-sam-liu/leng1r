@@ -26,3 +26,13 @@ l
 ls
 git status
 cd ../
+ls
+ll
+l
+ll
+cd 01_expr/
+ls
+ll
+cd 01_expr/
+l
+cd ../

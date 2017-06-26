@@ -1,0 +1,14 @@
+ls
+ll
+cd ll
+ll /extraspace/TCGA/TCGA_exp_DataPortal
+ll /extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp/
+ll /home/yye1/Circadian/expression/tumor.normal.sample.calculate_morethan_10pairs.txt
+ll /home/yye1/Circadian/expression/../circadian.genes.txt
+ll
+cd /home/yye1/Circadian/expression/
+ll
+cd /extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp/
+ls
+ll
+cd ../

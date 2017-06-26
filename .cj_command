@@ -246,3 +246,44 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "new project autophagy-lysosome"
+git push orgin master
+git push origin master
+ls
+git status
+git add -a
+git add -A
+l
+ll
+cd testCode/
+l
+ll
+cd cjFun.R 
+ls
+ll
+cd ../
+ls
+ll
+l
+ll
+ls
+ll
+cd autophagy_codes/
+ls
+grep brca.fpkm.txt */*
+grep brca.fpkm.txt */*/*
+grep brca.fpkm.txt */*/*/*
+grep brca.fpkm.txt */*/*/*/*
+grep brca.fpkm.txt */*/*/*/*/*
+grep brca.fpkm.txt */*/*/*/*/*/*
+grep brca.fpkm.txt */*/*/*/*/*/*/*
+grep brca.fpkm.txt */*/*/*/*/*/*/*/*
+grep brca.fpkm.txt *
+grep brca.fpkm.txt */*
+grep brca.fpkm.txt */*/*
+ls
+l
+cd autophagy_codes/
+l
+git status
