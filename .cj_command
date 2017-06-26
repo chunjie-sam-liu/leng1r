@@ -287,3 +287,10 @@ l
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "autophagy expr"
+git push origin master
+ll
+mv autophagy_codes/ye_circadian_code ../
+ll
+git status
