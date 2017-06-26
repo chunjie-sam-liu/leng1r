@@ -12,3 +12,5 @@ cd /extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp/
 ls
 ll
 cd ../
+ls
+ll
