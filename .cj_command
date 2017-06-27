@@ -340,3 +340,20 @@ cat .gitignore
 ls
 ll
 git status
+git add -A
+git commit -m "mod 02 r"
+ls
+git status
+which leng
+cat ~/liucj/scripts/leng
+exit
+exit
+ls
+l
+cd autophagy_codes/
+l
+cd mutationInPromoter
+ls
+mv autophagy_codes/ye_circadian_code ../
+ll
+git status

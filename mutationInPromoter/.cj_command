@@ -49,3 +49,8 @@ top
 ls
 top
 exit
+ls
+ll
+grep -i tex */*
+ll
+cd BRCA/

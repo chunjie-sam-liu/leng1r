@@ -524,3 +524,8 @@ les nohup.out
 l
 ls
 cd ../
+ls
+grep -i tex *
+grep -i latex *
+grep TeX *R
+cd

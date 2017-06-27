@@ -41,3 +41,11 @@ l
 cd 01_expr/
 l
 cd ../
+ls
+ll
+cp /home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/fig_01_expr_pattern.pdf .
+ll
+l
+ll
+l
+cd ../

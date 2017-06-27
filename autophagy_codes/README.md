@@ -9,20 +9,20 @@ The data and pipeline should be segregated. Because the data was process by othe
 ## Data
 Here is the data position and data description.
 ### Location
-Project Data Root Path: 
+Project Data Root Path:
 
 * data_path = "/home/cliu18/liucj/projects/6.autophagy"
 
-Code Path: 
+Code Path:
 
 * code_path = "/home/cliu18/liucj/github/RstudioWithGit/autophagy_codes"
-  
-  
-TCGA Data Path: 
+
+
+TCGA Data Path:
 
 * source_path = "/extraspace/TCGA/TCGA_exp_DataPortal"
 * tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
-  
+
 
 
 ## Pipeline

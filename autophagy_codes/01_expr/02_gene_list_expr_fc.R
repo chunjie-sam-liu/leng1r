@@ -218,15 +218,15 @@ ggplot(gene_list_fc_pvalue_simplified_filter,
     high = "red",
     midpoint = 0,
     na.value = "white",
-    breaks = seq(-2, 2, length.out = 5),
-    labels = c("<= -4", "-1", "0", "1", ">= 4"),
+    breaks = seq(-3, 3, length.out = 5),
+    labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
     name = "Fold change"
   ) +
   scale_size_continuous(
     limit = c(-log10(0.05), 15),
     range = c(1, 6),
     breaks = c(-log10(0.05), 5, 10, 15),
-    labels = c("0.05", "1e-5", "1e-10", "<1e-15")
+    labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$"))
   ) +
   scale_y_discrete(limit = gene_rank$symbol) +
   scale_x_discrete(limit = cancer_types_rank$cancer_types) +
@@ -288,7 +288,7 @@ ggplot(
     ),
     panel.grid.major = element_line(linetype = "dashed", color = "lightgray"),
     axis.title = element_blank(),
-    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = gene_rank$color),
     axis.ticks.x = element_blank(),
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 14),
