@@ -1,33 +1,120 @@
 library(magrittr)
 library(ggplot2)
+# processed path
+tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+expr <- readr::read_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"))
 
-# split autophagy gene and lysosome genes
-expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr"
-load(file = file.path(expr_path, "rda_00_gene_expr.rda"))
-rm(expr)
 
-# gene_list
-# gene_list_fc_pvalue_simplified
-# gene_list_fc_pvalue_simplified_filter
-# 
-# gene_expr_pattern
-# 
-# gene_rank
-# cancer_types_rank
+#output path
+expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
+
+# Read gene list
+# Gene list was compress as rds
+
+gene_list <- readr::read_rds(file.path(expr_path, "rds_03_atg_gene_list.rds.gz"))
+
+#######################
+# filter out genes
+#######################
+filter_gene_list <- function(.x, gene_list) {
+  gene_list %>%
+    dplyr::select(symbol) %>%
+    dplyr::left_join(.x, by = "symbol")
+}
+
+expr %>%
+  dplyr::mutate(filter_expr = purrr::map(expr, filter_gene_list, gene_list = gene_list)) %>%
+  dplyr::select(-expr) -> gene_list_expr
+
+
+#################################
+# Caculate p-value and fold-change.
+##################################
+calculate_fc_pvalue <- function(.x, .y) {
+  .y %>%
+    tibble::add_column(cancer_types = .x, .before = 1) -> df
+  
+  # get cancer types and get # of smaple >= 10
+  samples <-
+    tibble::tibble(barcode = colnames(df)[-c(1:3)]) %>%
+    dplyr::mutate(
+      sample = stringr::str_sub(
+        string = barcode,
+        start = 1,
+        end = 12
+      ),
+      type = stringr::str_split(barcode, pattern = "-", simplify = T)[, 4] %>% stringr::str_sub(1, 2)
+    ) %>%
+    dplyr::filter(type %in% c("01", "11")) %>%
+    dplyr::mutate(type = plyr::revalue(
+      x = type,
+      replace = c("01" = "Tumor", "11" = "Normal"),
+      warn_missing = F
+    )) %>%
+    dplyr::group_by(sample) %>%
+    dplyr::filter(n() >= 2, length(unique(type)) == 2) %>%
+    dplyr::ungroup()
+  sample_type_summary <- table(samples$type) %>% as.numeric()
+  if (gtools::invalid(sample_type_summary) ||
+      any(sample_type_summary < c(10, 10))) {
+    return(NULL)
+  }
+  
+  # filter out cancer normal pairs
+  df_f <-
+    df %>%
+    dplyr::select(c(1, 2, 3), samples$barcode) %>%
+    tidyr::gather(key = barcode, value = expr, -c(1, 2, 3)) %>%
+    dplyr::left_join(samples, by = "barcode")
+  
+  # pvalue & fdr
+  df_f %>%
+    dplyr::group_by(cancer_types, symbol, entrez_id) %>%
+    tidyr::drop_na(expr) %>%
+    dplyr::do(broom::tidy(t.test(expr ~ type, data = .))) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(fdr = p.adjust(p.value, method = "fdr")) %>%
+    dplyr::select(cancer_types, symbol, entrez_id, p.value, fdr) -> df_pvalue
+  
+  # log2 fold change mean
+  df_f %>%
+    dplyr::group_by(cancer_types, symbol, entrez_id, type) %>%
+    tidyr::drop_na(expr) %>%
+    dplyr::summarise(mean = mean(expr)) %>%
+    tidyr::spread(key = type, mean) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(fc = (Tumor + 0.1) / (Normal + 0.1)) -> df_fc
+  
+  df_fc %>%
+    dplyr::inner_join(df_pvalue, by = c("cancer_types", "symbol", "entrez_id")) %>%
+    dplyr::mutate(n_normal = sample_type_summary[1], n_tumor = sample_type_summary[2]) -> res
+  return(res)
+}
+
+purrr::map2(.x = gene_list_expr$cancer_types,
+            .y = gene_list_expr$filter_expr,
+            .f = calculate_fc_pvalue) -> gene_list_fc_pvalue
+names(gene_list_fc_pvalue) <- gene_list_expr$cancer_types
+
+gene_list_fc_pvalue %>% dplyr::bind_rows() -> gene_list_fc_pvalue_simplified
+
+readr::write_rds(
+  x = gene_list_fc_pvalue_simplified,
+  path = file.path(out_path, "rds_03_a_at_gene_list_fc_pvalue_simplified.rds.gz"),
+  compress = "gz"
+)
+readr::write_tsv(
+  x = gene_list_fc_pvalue_simplified,
+  path = file.path(out_path, "rds_03_a_at_gene_list_fc_pvalue_simplified.tsv")
+)
 
 gene_list_fc_pvalue_simplified %>% 
-  dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::select(-c(desc, ensembl_gene_id)) -> gene_fc_pvalue
+  dplyr::left_join(gene_list, by = "symbol") -> gene_fc_pvalue
 
 gene_fc_pvalue_autophagy <- 
   gene_fc_pvalue %>% 
   dplyr::filter(type == "Autophagy")
 
-gene_fc_pvalue_lysosome <-
-  gene_fc_pvalue %>% 
-  dplyr::filter(type == "Lysosome")
-
-# filter fc and pval
 filter_fc_pval <- function(.x){
   .x %>% 
     dplyr::filter(abs(log2(fc)) >= log2(1.5), fdr <= 0.05) %>%
@@ -51,8 +138,8 @@ filter_pattern <- function(fc, p.value) {
 get_pattern <- function(.x){
   .x %>% 
     dplyr::mutate(expr_pattern = purrr::map2_dbl(fc, p.value, filter_pattern)) %>%
-      dplyr::select(cancer_types, symbol, expr_pattern) %>%
-      tidyr::spread(key = cancer_types, value = expr_pattern)
+    dplyr::select(cancer_types, symbol, expr_pattern) %>%
+    tidyr::spread(key = cancer_types, value = expr_pattern)
 }
 
 # gene rank by up and down
@@ -186,54 +273,23 @@ plot_cancer_count <- function(.x_filter, gene_rank, cancer_types_rank){
   return(p)
 }
 
-plot_rect_point_count <- function(.x){
-  # .x is gene_list_fc_pvalue_simplified
-  # pattern
-  type = unique(.x$type)
-  
-  # filter out not significant
-  .x_filter <- .x %>% filter_fc_pval()
-    
-  # get pattern
-  .x %>% get_pattern() -> pattern
-  
-  # gene rank
-  pattern %>% get_gene_rank() -> gene_rank
-  
-  # cancer rank
-  pattern %>% get_cancer_types_rank() -> cancer_types_rank
-  
-  #plot_rect_pattern
-  p_rect <- plot_rect_pattern(.x_filter, gene_rank = gene_rank, cancer_types_rank = cancer_types_rank )
-  #plot_fc_pval_pattern
-  p_point <- plot_fc_pval_pattern(.x_filter, gene_rank = gene_rank, cancer_types_rank = cancer_types_rank)
-  #plot_cancer_count
-  p_count <- plot_cancer_count(.x_filter, gene_rank = gene_rank, cancer_types_rank = cancer_types_rank)
-  
-  tibble::tibble(type = type, p_rect = list(p_rect), p_point = list(p_point), p_count = list(p_count))
-}
-plot_rect_point_count(gene_fc_pvalue_autophagy) -> autophagy_plot
-plot_rect_point_count(gene_fc_pvalue_lysosome) -> lysosome_plot
-#################################################################
-
-# autophagy
 at_filter <- 
   gene_fc_pvalue_autophagy %>% 
   filter_fc_pval()
+
+at_cancer_rank <- 
+  gene_fc_pvalue_autophagy %>% 
+  get_pattern() %>% 
+  get_cancer_types_rank()
 
 at_gene_rank <- 
   gene_fc_pvalue_autophagy %>% 
   get_pattern() %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(desc, replace = c("Initation" = "red", "Nucleation" = "green", "Elongation" = "blue", "Fusion" = "yellow"))) %>% 
-  dplyr::mutate(color = ifelse(desc %in% c("Initation", "Nucleation", "Fusion", "Elongation"), color, "black")) %>% 
-  dplyr::arrange(desc(complex), rank)
-
-at_cancer_rank <- 
-  gene_fc_pvalue_autophagy %>% 
-  get_pattern() %>% 
-  get_cancer_types_rank()
+  dplyr::mutate(color = plyr::revalue(description, replace = c("LC3 complex" = "red", "ATG5-ATG12-ATG16L complex" = "green", "ULK complex" = "blue", "PI3K III complex" = "yellow", "Mitophagy" = "black"))) %>% 
+  dplyr::filter(color %in% c("red", "green", "blue", "yellow", "black")) %>% 
+  dplyr::arrange(color, rank)
 
 p <- plot_rect_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
   theme(axis.text.y = element_text(color = at_gene_rank$color))
@@ -250,6 +306,7 @@ readr::write_rds(
   path = file.path(out_path, "fig_04_at_expr_rect.pdf.rds.gz"),
   compress = "gz"
 )
+
 
 p <- plot_fc_pval_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
   theme(axis.text.y = element_text(color = at_gene_rank$color))
@@ -268,57 +325,6 @@ readr::write_rds(
 )
 
 
-# autophagy
-ly_filter <- 
-  gene_fc_pvalue_lysosome %>% 
-  filter_fc_pval()
-
-ly_gene_rank <- 
-  gene_fc_pvalue_lysosome %>% 
-  get_pattern() %>% 
-  get_gene_rank() %>% 
-  dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(desc, replace = c("Initation" = "red", "Nucleation" = "green", "Elongation" = "blue", "Fusion" = "yellow"))) %>% 
-  dplyr::mutate(color = ifelse(desc %in% c("Initation", "Nucleation", "Fusion", "Elongation"), color, "black")) %>% 
-  dplyr::arrange(desc(complex), rank)
-
-ly_cancer_rank <- 
-  gene_fc_pvalue_lysosome %>% 
-  get_pattern() %>% 
-  get_cancer_types_rank()
-
-p <- plot_rect_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
-  theme(axis.text.y = element_text(color = ly_gene_rank$color))
-ggsave(
-  filename = "fig_04_ly_expr_rect.pdf",
-  plot = p,
-  device = "pdf",
-  width = 10,
-  height = 20,
-  path = expr_path
-)
-readr::write_rds(
-  p,
-  path = file.path(out_path, "fig_04_ly_expr_rect.pdf.rds.gz"),
-  compress = "gz"
-)
-
-p <- plot_fc_pval_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
-  theme(axis.text.y = element_text(color = ly_gene_rank$color))
-ggsave(
-  filename = "fig_05_ly_expr_fc_pval.pdf",
-  plot = p,
-  device = "pdf",
-  width = 10,
-  height = 20,
-  path = expr_path
-)
-readr::write_rds(
-  p,
-  path = file.path(out_path, "fig_05_ly_expr_fc_pval.pdf.rds.gz"),
-  compress = "gz"
-)
 
 
-
-save.image(file = file.path(expr_path, "rda_01_gene_expr_detail.rda.gz"), compress = T)
+save.image(file = file.path(out_path, "rda_03_a_at_gene_expr.rda"))

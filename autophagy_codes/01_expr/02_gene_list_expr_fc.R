@@ -1,19 +1,17 @@
 library(magrittr)
 # processed path
 tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
-expr <-
-  readr::read_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"))
+expr <- readr::read_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"))
 
 # Read gene list
 # Gene list was compress as rds
-gene_list_path <-
-  "/home/cliu18/liucj/projects/6.autophagy/01_autophagy_gene_list"
-gene_list <-
-  readr::read_rds(file.path(gene_list_path, "999.complte_gene_list.rds.gz"))
+gene_list_path <- "/home/cliu18/liucj/projects/6.autophagy/01_autophagy_gene_list"
+gene_list <- readr::read_rds(file.path(gene_list_path, "999.complte_gene_list.rds.gz"))
+
+
 
 #output path
-out_path <-
-  "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
+out_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 
 #######################
 # filter out genes
