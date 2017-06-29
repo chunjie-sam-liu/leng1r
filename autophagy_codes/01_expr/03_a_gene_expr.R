@@ -11,7 +11,7 @@ expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 # Read gene list
 # Gene list was compress as rds
 
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_atg_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
 
 #######################
 # filter out genes
@@ -100,20 +100,17 @@ gene_list_fc_pvalue %>% dplyr::bind_rows() -> gene_list_fc_pvalue_simplified
 
 readr::write_rds(
   x = gene_list_fc_pvalue_simplified,
-  path = file.path(out_path, "rds_03_a_at_gene_list_fc_pvalue_simplified.rds.gz"),
+  path = file.path(expr_path, ".rds_03_a_at_ly_comb_gene_list_fc_pvalue_simplified.rds.gz"),
   compress = "gz"
 )
 readr::write_tsv(
   x = gene_list_fc_pvalue_simplified,
-  path = file.path(out_path, "rds_03_a_at_gene_list_fc_pvalue_simplified.tsv")
+  path = file.path(expr_path, "rds_03_a_at_ly_comb_gene_list_fc_pvalue_simplified.tsv")
 )
 
 gene_list_fc_pvalue_simplified %>% 
   dplyr::left_join(gene_list, by = "symbol") -> gene_fc_pvalue
 
-gene_fc_pvalue_autophagy <- 
-  gene_fc_pvalue %>% 
-  dplyr::filter(type == "Autophagy")
 
 filter_fc_pval <- function(.x){
   .x %>% 
@@ -154,7 +151,8 @@ get_gene_rank <- function(pattern){
     ) %>%
     dplyr::ungroup() %>%
     tidyr::unnest() %>%
-    dplyr::arrange(rank) 
+    dplyr::mutate(total = up + down) %>% 
+    dplyr::arrange(rank)
 }
 
 # cancer types rank by gene
@@ -162,7 +160,7 @@ get_cancer_types_rank <- function(pattern){
   pattern %>% 
     dplyr::summarise_if(.predicate = is.numeric, dplyr::funs(sum(abs(.)))) %>%
     tidyr::gather(key = cancer_types, value = rank) %>%
-    dplyr::arrange(-rank)
+    dplyr::arrange(dplyr::desc(rank))
 }
 
 # rect plot
@@ -273,6 +271,75 @@ plot_cancer_count <- function(.x_filter, gene_rank, cancer_types_rank){
   return(p)
 }
 
+#------------------------------------
+# Autophagy and Lysosome combined
+#-----------------------------------------
+gene_fc_pvalue %>% filter_fc_pval() -> gene_fc_pvalue_filter
+gene_fc_pvalue %>% get_pattern() -> gene_fc_pvalue_pattern
+
+# Cancer and gene rank
+gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
+gene_fc_pvalue_pattern %>% 
+  get_gene_rank() %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::filter(up+down > 2) %>% 
+  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red")))-> gene_rank
+
+p <- plot_rect_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) +
+  theme(axis.text.y = element_text(color = gene_rank$color))
+ggsave(
+  filename = "fig_03_a_at_ly_comb_expr_rect.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 15,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_at_ly_comb_expr_rect.pdf.rds.gz"),
+  compress = "gz"
+)
+
+
+p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
+  theme(axis.text.y = element_text(color = gene_rank$color))
+ggsave(
+  filename = "fig_03_a_at_ly_comb_expr_fc_pval.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 22,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_at_ly_comb_expr_fc_pval.pdf.rds.gz"),
+  compress = "gz"
+)
+
+p <- plot_cancer_count(.x_filter = gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + theme(axis.text.y = element_text(color = gene_rank$color))
+ggsave(
+  filename = "fig_03_a_at_ly_comb_cancer_count.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 22,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_at_ly_comb_cancer_count.pdf.rds.gz"),
+  compress = "gz"
+)
+
+
+#----------------------------------------------
+# Autophagy
+#-----------------------------------------------
+  gene_fc_pvalue %>% 
+  dplyr::filter(type == "Autophagy")
+
 at_filter <- 
   gene_fc_pvalue_autophagy %>% 
   filter_fc_pval()
@@ -280,30 +347,31 @@ at_filter <-
 at_cancer_rank <- 
   gene_fc_pvalue_autophagy %>% 
   get_pattern() %>% 
-  get_cancer_types_rank()
+  get_cancer_types_rank() 
+  # dplyr::filter(!cancer_types %in% c("KICH", "LUSC"))
 
 at_gene_rank <- 
   gene_fc_pvalue_autophagy %>% 
   get_pattern() %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(description, replace = c("LC3 complex" = "red", "ATG5-ATG12-ATG16L complex" = "green", "ULK complex" = "blue", "PI3K III complex" = "yellow", "Mitophagy" = "black"))) %>% 
-  dplyr::filter(color %in% c("red", "green", "blue", "yellow", "black")) %>% 
-  dplyr::arrange(color, rank)
+  dplyr::filter(up + down > 2) %>%
+  # dplyr::mutate(color = ifelse(is.na(core), "black", "red")) %>%
+  dplyr::arrange(rank)
 
 p <- plot_rect_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
   theme(axis.text.y = element_text(color = at_gene_rank$color))
 ggsave(
-  filename = "fig_04_at_expr_rect.pdf",
+  filename = "fig_03_a_at_expr_rect.pdf",
   plot = p,
   device = "pdf",
-  width = 10,
-  height = 20,
+  width = 8,
+  height = 11,
   path = expr_path
 )
 readr::write_rds(
   p,
-  path = file.path(out_path, "fig_04_at_expr_rect.pdf.rds.gz"),
+  path = file.path(expr_path, ".fig_03_a_at_expr_rect.pdf.rds.gz"),
   compress = "gz"
 )
 
@@ -311,20 +379,110 @@ readr::write_rds(
 p <- plot_fc_pval_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
   theme(axis.text.y = element_text(color = at_gene_rank$color))
 ggsave(
-  filename = "fig_05_at_expr_fc_pval.pdf",
+  filename = "fig_03_a_at_expr_fc_pval.pdf",
   plot = p,
   device = "pdf",
-  width = 10,
-  height = 20,
+  width = 8,
+  height =11,
   path = expr_path
 )
 readr::write_rds(
   p,
-  path = file.path(out_path, "fig_05_at_expr_fc_pval.pdf.rds.gz"),
+  path = file.path(expr_path, ".fig_03_a_at_expr_fc_pval.pdf.rds.gz"),
+  compress = "gz"
+)
+
+p <- plot_cancer_count(at_filter, at_gene_rank, at_cancer_rank) + 
+  theme(axis.text.y = element_text(color = at_gene_rank$color))
+ggsave(
+  filename = "fig_03_a_at_cancer_count.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 22,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_at_cancer_count.pdf.rds.gz"),
+  compress = "gz"
+)
+
+#--------------------------------------------
+#Lysosome
+#---------------------------------------------
+gene_fc_pvalue_lysosome <- 
+  gene_fc_pvalue %>% 
+  dplyr::filter(type == "Lysosome")
+
+ly_filter <- 
+  gene_fc_pvalue_lysosome %>% 
+  filter_fc_pval()
+
+ly_cancer_rank <- 
+  gene_fc_pvalue_lysosome %>% 
+  get_pattern() %>% 
+  get_cancer_types_rank() 
+# dplyr::filter(!cancer_types %in% c("KICH", "LUSC"))
+
+ly_gene_rank <- 
+  gene_fc_pvalue_lysosome %>% 
+  get_pattern() %>% 
+  get_gene_rank() %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::filter(up + down > 2) %>%
+  # dplyr::mutate(color = ifelse(is.na(core), "black", "red")) %>%
+  dplyr::arrange(rank)
+
+p <- plot_rect_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
+  theme(axis.text.y = element_text(color = ly_gene_rank$color))
+ggsave(
+  filename = "fig_03_a_ly_expr_rect.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 11,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_ly_expr_rect.pdf.rds.gz"),
   compress = "gz"
 )
 
 
+p <- plot_fc_pval_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
+  theme(axis.text.y = element_text(color = ly_gene_rank$color))
+ggsave(
+  filename = "fig_03_a_ly_expr_fc_pval.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height =14,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_ly_expr_fc_pval.pdf.rds.gz"),
+  compress = "gz"
+)
+
+p <- plot_cancer_count(ly_filter, ly_gene_rank, ly_cancer_rank) + 
+  theme(axis.text.y = element_text(color = ly_gene_rank$color))
+ggsave(
+  filename = "fig_03_a_ly_cancer_count.pdf",
+  plot = p,
+  device = "pdf",
+  width = 8,
+  height = 22,
+  path = expr_path
+)
+readr::write_rds(
+  p,
+  path = file.path(expr_path, ".fig_03_a_ly_cancer_count.pdf.rds.gz"),
+  compress = "gz"
+)
 
 
-save.image(file = file.path(out_path, "rda_03_a_at_gene_expr.rda"))
+save.image(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))
+load(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))

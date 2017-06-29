@@ -357,3 +357,31 @@ ls
 mv autophagy_codes/ye_circadian_code ../
 ll
 git status
+git add -A
+git commit -m "add 03"
+git push origin master
+ls
+mv ../ye_circadian_code/ autophagy_codes/
+git status
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+git status
+git add autophagy_codes/01_expr/*
+git commit -m "at details"
+git push origin master
+ls
+ll
+cd autophagy_codes/
+l
+git status
+git add autophagy_codes/01_expr/.cj_command autophagy_codes/01_expr/03_a_atg_gene_list.R
+git add autophagy_codes/01_expr/03_a_atg_gene_list.R autophagy_codes/01_expr/03_a_gene_expr.R autophagy_codes/01_expr/04_use_all_samples.R
+ls
+ll
+vim .gitignore 
+cd
+l
+git status

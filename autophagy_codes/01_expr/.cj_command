@@ -16,3 +16,13 @@ ls
 ll
 l
 cd ../
+ls
+cd ../../
+ls
+ll
+mv 03_a_atg_gene_list.R 03_a_expr_gene_list.R 
+ll
+mv 03_a_expr_gene_list.R 03_a_gene_expr.R
+ll
+l
+cd ../
