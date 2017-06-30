@@ -151,7 +151,7 @@ get_gene_rank <- function(pattern){
     ) %>%
     dplyr::ungroup() %>%
     tidyr::unnest() %>%
-    dplyr::mutate(total = up + down) %>% 
+    dplyr::mutate(up_p = up / 14, down_p = down / 14, none = 1 - up_p - down_p) %>% 
     dplyr::arrange(rank)
 }
 
@@ -482,6 +482,7 @@ readr::write_rds(
   path = file.path(expr_path, ".fig_03_a_ly_cancer_count.pdf.rds.gz"),
   compress = "gz"
 )
+
 
 
 save.image(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))

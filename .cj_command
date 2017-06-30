@@ -385,3 +385,17 @@ vim .gitignore
 cd
 l
 git status
+git add -A
+ls
+git status
+git push origin master
+ll
+git status
+git commit -m "add 03_gene_expr"
+git push origin master
+ls
+ll
+cat .gitignore 
+ls
+git status
+git add A
