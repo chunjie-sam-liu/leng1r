@@ -26,3 +26,10 @@ mv 03_a_expr_gene_list.R 03_a_gene_expr.R
 ll
 l
 cd ../
+s
+ls
+ll
+cat 03_b_stage_gene_expr.R 
+ls
+ll
+cd ../

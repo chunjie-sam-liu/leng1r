@@ -399,3 +399,36 @@ cat .gitignore
 ls
 git status
 git add A
+git add -A
+git status
+git commit -m "03_a_gene_expr.R"
+git push origin master
+ls
+ll
+cd /extraspace/TCGA/TCGA_clinical/
+ls
+cd autophagy_codes/
+l
+cd mutationInPromoter
+l
+ll
+find . -name "*.R"
+find . -name "*.R"|grep -i "kruskal.test"
+find . -name "*.r"|grep -i "kruskal.test"
+find . -name "*.r"|grep -i "kruskal"
+find . -name "*.R"|grep -i "kruskal"
+top
+ps xf
+top
+ll
+git status
+ls
+ll
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+git status

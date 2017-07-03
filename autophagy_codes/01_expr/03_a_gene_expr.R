@@ -26,6 +26,8 @@ expr %>%
   dplyr::mutate(filter_expr = purrr::map(expr, filter_gene_list, gene_list = gene_list)) %>%
   dplyr::select(-expr) -> gene_list_expr
 
+readr::write_rds(x = gene_list_expr, path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"), compress = "gz")
+
 
 #################################
 # Caculate p-value and fold-change.
@@ -337,8 +339,10 @@ readr::write_rds(
 #----------------------------------------------
 # Autophagy
 #-----------------------------------------------
+gene_fc_pvalue_autophagy <- 
   gene_fc_pvalue %>% 
-  dplyr::filter(type == "Autophagy")
+  dplyr::filter(type == "Autophagy") 
+    
 
 at_filter <- 
   gene_fc_pvalue_autophagy %>% 
@@ -483,6 +487,45 @@ readr::write_rds(
   compress = "gz"
 )
 
+
+gene_rank %>% 
+  dplyr::filter(up + down >=2) %>% 
+  tidyr::gather(key = up_down, value = portion, c(up_p, down_p, none)) %>% 
+  dplyr::mutate(color = plyr::revalue(type, replace = c("Autophagy" = "red", "Lysosome" = "black"))) %>% 
+  dplyr::select(symbol, rank, up_down, portion, color) %>%
+  dplyr::mutate(up_down = forcats::fct_relevel(up_down,"up_p", "down_p", "none")) %>% 
+  dplyr::mutate(symbol = forcats::as_factor(symbol)) -> gene_rank_portion
+
+gene_rank_portion %>% head(2) %>% 
+  ggplot(mapping = aes(x = factor(1), y = portion, fill = up_down)) +
+  geom_bar(stat = "identity",
+           width = 1,
+           position = "stack") +
+  facet_wrap( ~ symbol) +
+  coord_polar("y") +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.background = element_blank(),
+    legend.title = element_blank(),
+    axis.ticks = element_blank(),
+    strip.text.x = element_text(
+      size = 11,
+      vjust = 0
+    ),
+    legend.text = element_text(size = 14),
+    legend.position = "bottom",
+    panel.spacing  = unit(0.02, "lines")
+  ) -> p
+
+ggsave(
+  filename = "fig_03_a_at_ly_gene_portion.pdf",
+  plot = p,
+  device = "pdf",
+  width = 20,
+  height = 22,
+  path = expr_path
+)
 
 
 save.image(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))

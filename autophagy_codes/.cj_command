@@ -59,3 +59,16 @@ ls
 cd 01_expr/
 l
 cd ../
+ls
+ls
+ll
+l
+exit
+ls
+ll
+cd 01_expr/
+l
+ll
+cd /extraspace/liucj/projects/6.autophagy/02_autophagy_expr
+ls
+cd ../

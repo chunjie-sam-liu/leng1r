@@ -54,3 +54,9 @@ ll
 grep -i tex */*
 ll
 cd BRCA/
+ls
+find . -name "*.R"
+find . -name "*.R"|grep -i 'kru
+find . -name "*.R"|grep -i 'kru'
+find . -name "*.r"|grep -i 'kru'
+cd ../

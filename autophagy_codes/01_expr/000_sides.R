@@ -30,3 +30,25 @@ te[1, ] %>% unnest() %>% filter(symbol %in% change_symbol) %>% .[, c(1:3)]
 expr <- te
 tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
 expr %>% readr::write_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"), compress = "gz")
+
+# save clinical data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -93,7 +93,7 @@ names(gene_list_fc_pvalue) <- gene_list_expr$cancer_types
 
 gene_list_fc_pvalue %>% dplyr::bind_rows() -> gene_list_fc_pvalue_simplified
 
-expr_path <- file.path(expr_path, "all_samples")
+expr_path <- file.path(expr_path, "04_all_samples")
 
 readr::write_rds(
   x = gene_list_fc_pvalue_simplified,
