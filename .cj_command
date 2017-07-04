@@ -446,3 +446,10 @@ ls
 ll
 cd autophagy_codes/
 l
+git add -A
+git commit -m "rppa'
+git commit -m "rppa"
+git push origin master
+ls
+ls
+git status
