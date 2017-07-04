@@ -178,7 +178,7 @@ fun_draw_boxplot <- function(cancer_types, merged_clean, symbol, p.value, fdr){
     ggpubr::ggboxplot(x = "stage", y = "expr",  color = "stage", pallete = "jco"  ) +
     ggpubr::stat_compare_means(comparisons = comp_list, method = "t.test") + 
     ggpubr::stat_compare_means(method = "anova", label.y = 14) +
-    labs(x  = "", y = "Expression (log2 RSEM)", title = paste(gene, "expression subtype change in", cancer_types)) +
+    labs(x  = "", y = "Expression (log2 RSEM)", title = paste(gene, "expression stage change in", cancer_types)) +
     ggthemes::scale_color_gdocs() -> p
     ggsave(filename = fig_name, plot = p, path = file.path(stage_path, "boxplot"), width = 6, height = 6,  device = "pdf")
 }

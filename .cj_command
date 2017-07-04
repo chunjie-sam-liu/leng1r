@@ -432,3 +432,17 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "survival"
+git push origin master
+git status
+exit
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l

@@ -33,3 +33,8 @@ cat 03_b_stage_gene_expr.R
 ls
 ll
 cd ../
+ls
+ll
+cat 01_b_rppa_rds.R 
+ls
+cd ../

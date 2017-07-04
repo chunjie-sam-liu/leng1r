@@ -72,3 +72,13 @@ ll
 cd /extraspace/liucj/projects/6.autophagy/02_autophagy_expr
 ls
 cd ../
+ls
+cd ye_circadian_code/
+ls
+cd
+ls
+cd 01_expr/
+l
+git status
+git add -A
+cd ../
