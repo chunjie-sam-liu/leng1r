@@ -87,12 +87,60 @@ pathway_replace <- c(
   "CellCycle"="Cell Cycle",
   "DNADamage"="DNA Damage Response"
 )
+
+pathway_name <- c("Apoptosis","Cell Cycle","DNA Damage Response","EMT","Hormone AR","Hormone ER","PI3K/AKT","RAS/MAPK","RTK","TSC/mTOR")
+
 gene_rppa_sig_pval %>% 
   tidyr::unnest(diff_pval) %>% 
   dplyr::filter(!is.na(p.value)) %>% 
   dplyr::mutate(pathway = plyr::revalue(pathway, pathway_replace)) %>% 
-  dplyr::mutate(class = ifelse(fdr < 0.05 && diff > 0, "Activation", "None")) %>% 
-  dplyr::mutate(class = ifelse(fdr < 0.05 && diff < 0, "Inhibition", class)) -> gene_rppa_sig_pval_class
+  dplyr::mutate(class = ifelse(fdr < 0.05 & diff > 0, "Activation", "None")) %>% 
+  dplyr::mutate(class = ifelse(fdr < 0.05 & diff < 0, "Inhibition", class)) -> gene_rppa_sig_pval_class
+
+fn_draw_pathway <- function(symbol, data){
+  print(symbol)
+  fig_name <- paste(symbol, "pathway.pdf", sep = "_")
+  data %>%
+    ggplot(aes(x = cancer_types, y = pathway)) +
+    geom_tile(aes(fill = factor(class)), col = "white") +
+    scale_fill_manual(
+      limits=c("Activation","Inhibition","None"),
+      values = c("red","blue","lightgray"),
+      na.value="white",
+      labels=c("Activation","Inhibition","None"),
+      name= symbol) +
+    scale_y_discrete(limits=pathway_name, label=pathway_name) +
+    theme(panel.background=element_rect(colour=NA,fill="white",size=2),
+          panel.grid=element_line(colour="white",linetype="dashed"),
+          panel.grid.major=element_line(colour="white",linetype="dashed"),
+          axis.title=element_blank(),
+          axis.text.y=element_text(size=16,colour = "black"),
+          axis.text.x=element_text(size=16,colour = "black",angle=90,vjust=0.5,hjust=1),
+          axis.ticks=element_line(color="black"),
+          legend.text=element_text(size=16),
+          legend.title=element_text(size=14),legend.position="bottom",legend.direction="horizontal") -> p
+  ggsave(filename = fig_name, plot = p, device = "pdf", path = file.path(rppa_path, "tileplot"), width = 9, height = 4.5)
+}
+
+
+cl <- parallel::detectCores()
+cluster <- multidplyr::create_cluster(floor(cl * 5 / 6))
+gene_rppa_sig_pval_class %>% 
+  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>% 
+  tidyr::nest(-symbol) %>% 
+  multidplyr::partition(cluster = cluster) %>%
+  multidplyr::cluster_library("magrittr") %>%
+  multidplyr::cluster_assign_value("fn_draw_pathway", fn_draw_pathway)  %>%
+  multidplyr::cluster_assign_value("rppa_path", rppa_path) %>% 
+  purrr::pwalk(fn_draw_pathway) %>% 
+  dplyr::collect() 
+on.exit(parallel::stopCluster(cluster))
+
+
+gene_rppa_sig_pval_class %>% 
+  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>% 
+  tidyr::nest(-symbol) %>% 
+  purrr::pwalk(fn_draw_pathway)
 
 
 
