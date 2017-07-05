@@ -38,3 +38,25 @@ ll
 cat 01_b_rppa_rds.R 
 ls
 cd ../
+ls
+ll
+grep has_name *
+l
+ll
+ls
+ll
+cd ../
+ll
+mv 03_gene_list_detailed.R 03_test_a_gene_expr.R
+l
+ll
+mv 04_use_all_samples.R 03_test_b_all_samples.R
+ll
+les 03_test_a_gene_expr.R
+git status
+ll
+git add *
+git commit -m "heatmap"
+git push origin master
+ls 
+git status
