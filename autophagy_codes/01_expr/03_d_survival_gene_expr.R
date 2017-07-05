@@ -4,6 +4,7 @@ library(ggplot2)
 expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 survival_path <- file.path(expr_path, "03_d_survival")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+expr_path <- file.path(expr_path, "03_a_gene_expr")
 
 clinical <- readr::read_rds(path = file.path(tcga_path,"pancan_clinical.rds.gz")) 
 

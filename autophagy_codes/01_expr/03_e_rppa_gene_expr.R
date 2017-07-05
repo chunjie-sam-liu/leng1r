@@ -4,6 +4,7 @@ library(ggplot2)
 expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 rppa_path <- file.path(expr_path, "03_e_rppa")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+expr_path <- file.path(expr_path, "03_a_gene_expr")
 
 # rppa <- readr::read_rds(path = file.path(tcga_path,"pancan_clinical_stage.rds.gz")) %>% 
   # dplyr::filter(n >= 40) %>% 
@@ -119,30 +120,112 @@ fn_draw_pathway <- function(symbol, data){
           axis.ticks=element_line(color="black"),
           legend.text=element_text(size=16),
           legend.title=element_text(size=14),legend.position="bottom",legend.direction="horizontal") -> p
-  ggsave(filename = fig_name, plot = p, device = "pdf", path = file.path(rppa_path, "tileplot"), width = 9, height = 4.5)
+  ggsave(filename = fig_name, plot = p, device = "pdf", path = file.path(rppa_path, "gene_tileplot"), width = 9, height = 4.5)
 }
+# save picture
+gene_rppa_sig_pval_class %>%
+  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>%
+  tidyr::nest(-symbol) %>%
+  purrr::pwalk(fn_draw_pathway) 
+  
+fn_ai_n <- function(symbol, data){
+  print(symbol)
+  data %>% 
+    dplyr::group_by(pathway, class) %>% 
+    dplyr::count() %>% 
+    dplyr::ungroup() %>% 
+    tidyr::spread(key = class, value = n) %>% 
+    dplyr::mutate(Activation = ifelse(rep(tibble::has_name(., "Activation"), 10), Activation, 0)) %>% 
+    dplyr::mutate(Inhibition = ifelse(rep(tibble::has_name(., "Inhibition"), 10), Inhibition, 0)) %>% 
+    tidyr::replace_na(replace = list(Activation = 0, Inhibition = 0, None = 0)) %>% 
+    dplyr::select(pathway, Activation, Inhibition, None)
+}
+gene_rppa_sig_pval_class %>%
+  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>%
+  tidyr::nest(-symbol) %>%
+  dplyr::mutate(st = purrr::map2(symbol, data, .f = fn_ai_n)) %>%
+  tidyr::unnest(st) -> gene_ai_n
+
+gene_ai_n %>% 
+  dplyr::mutate(a = Activation / 32, i =  Inhibition / 32 , n = None / 32 ) %>%
+  dplyr::select(symbol, pathway, a, i, n) %>%
+  tidyr::gather(key = type, value = percent, a, i, n) %>% 
+  ggplot(aes(x = factor(1), y = percent, fill = type)) +
+  geom_bar(stat = "identity", position = "stack", color = NA) +
+  scale_y_continuous(limits = c(0,1)) +
+  coord_polar("y") +
+  facet_grid(pathway~symbol) +
+  # geom_text(aes(x = factor(1), y= .5, label = val_mod, vjust = 4.5)) +
+  theme(axis.text=element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        
+        strip.text.y = element_text(angle =0,hjust=0,color="black",size=11),
+        strip.background = element_blank(),
+        strip.text.x = element_text(size=11,angle = 90,vjust = 0),
+        
+        legend.title= element_blank(), 
+        legend.text = element_text(size=14),
+        legend.position = "bottom",
+        
+        panel.background = element_blank(),
+        panel.spacing  = unit(0.02, "lines")) +
+  scale_fill_manual(label=c("Activation","Inhibition","None"), values=c("red","blue","lightgray")) -> p
+
+# ggsave(filename = "fig_03_e_rppa_all_gene_percentage.pdf", plot = p, device = "pdf", path = rppa_path, width = 30, height = 5)
 
 
-cl <- parallel::detectCores()
-cluster <- multidplyr::create_cluster(floor(cl * 5 / 6))
+
+#--------------------------------------------------------------------
 gene_rppa_sig_pval_class %>% 
-  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>% 
-  tidyr::nest(-symbol) %>% 
-  multidplyr::partition(cluster = cluster) %>%
-  multidplyr::cluster_library("magrittr") %>%
-  multidplyr::cluster_assign_value("fn_draw_pathway", fn_draw_pathway)  %>%
-  multidplyr::cluster_assign_value("rppa_path", rppa_path) %>% 
-  purrr::pwalk(fn_draw_pathway) %>% 
-  dplyr::collect() 
-on.exit(parallel::stopCluster(cluster))
+  dplyr::filter(symbol %in% c("PARK2", "BCL2", "PINK1", "CTSW", "ULK1")) %>% 
+  ggplot(aes(x=cancer_types,y=pathway))+
+  geom_tile(aes(fill=factor(class)),col="white")+
+  scale_fill_manual(limits=c("Activation","Inhibition","None"),values = c("red","blue","lightgray"),na.value="white",labels=c("Activation","Inhibition","None"),name="")+
+  
+  facet_grid(symbol~.)+
+  theme(panel.background=element_rect(colour=NA,fill="white",size=2),
+        panel.grid=element_line(colour="white",linetype="dashed"),
+        panel.grid.major=element_line(colour="white",linetype="dashed"),
+        axis.title=element_blank(),
+        axis.text.y=element_text(size=9,colour = "black"),
+        axis.text.x=element_text(size=10,colour = "black",angle=90,vjust=0.5,hjust=1),
+        axis.ticks=element_line(color="black"),
+        legend.text=element_text(size=12),strip.background = element_blank(),strip.text = element_text(size=14),
+        legend.title=element_text(size=10),legend.position="bottom",legend.direction="horizontal",
+        legend.key.size = unit(0.3, "cm"),
+        panel.spacing = unit(0.1, "lines"))
 
 
-gene_rppa_sig_pval_class %>% 
-  dplyr::select("symbol", "pathway", "cancer_types", "class", "p.value", "fdr") %>% 
-  tidyr::nest(-symbol) %>% 
-  purrr::pwalk(fn_draw_pathway)
 
 
+
+
+
+
+
+
+
+
+# gene_ai_n %>% 
+#   dplyr::arrange(dplyr::desc(Activation), dplyr::desc(Inhibition)) %>% 
+#   dplyr::filter(Activation + Inhibition> 10) 
+# 
+# gene_ai_n %>% 
+#   dplyr::filter(pathway == "Apoptosis") %>% 
+#   dplyr::mutate(a = Activation / 32 * 100, i = - Inhibition / 32 * 100) %>% 
+#   dplyr::select(symbol, pathway, a, i) %>% 
+#   dplyr::filter((a + abs(i)) > (5 / 32 * 100)) -> te
+# te %>% dplyr::arrange(a+i) %>% .$symbol -> symbol_sort
+# 
+# te %>% 
+#   tidyr::gather(key = type, value = percent, c(a,i)) %>% 
+#   tidyr::unite(col = pathway, pathway, type) %>% 
+#   ggplot(aes(x = pathway, y = symbol))+
+#   geom_tile(aes(fill = percent), col = "white") +
+#   geom_text(aes(label = percent)) +
+#   scale_y_discrete(limits=symbol_sort, label=symbol_sort) +
+#   scale_fill_gradient2()-> p
 
 save.image(file = file.path(rppa_path, ".rda_03_e_rppa_gene_expr.rda"))
 load(file = file.path(rppa_path, ".rda_03_e_rppa_gene_expr.rda"))

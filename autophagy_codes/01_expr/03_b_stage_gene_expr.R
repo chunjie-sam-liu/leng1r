@@ -4,8 +4,10 @@ library(ggplot2)
 expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 stage_path <- file.path(expr_path, "03_b_stage")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+expr_path <- file.path(expr_path, "03_a_gene_expr")
 
-clinical_stage <- readr::read_rds(path = file.path(tcga_path,"pancan_clinical_stage.rds.gz")) %>% 
+clinical_stage <- 
+  readr::read_rds(path = file.path(tcga_path,"pancan_clinical_stage.rds.gz")) %>% 
   dplyr::filter(n >= 40) %>% 
   dplyr::select(-n)
 
