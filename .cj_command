@@ -453,3 +453,22 @@ git push origin master
 ls
 ls
 git status
+git add -A
+git status
+git commit -m "rppa"
+git push origin master
+ls
+les /extraspace/yye1/analysis/Circadian/RPPA/AllCancer_AllCir_pathwayScore_pvalue.final.csv
+ll
+ls
+git status
+l
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+cd ../
+ls
+git status
+l

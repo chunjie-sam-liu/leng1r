@@ -37,10 +37,18 @@ fn_extract_pair <- function(cancer_types, filter_expr){
     )) %>%
     dplyr::group_by(sample) %>%
     dplyr::filter(n() >= 2, length(unique(type)) == 2) %>%
-    dplyr::ungroup() %>% 
-    dplyr::mutate(expr = log2(expr + 1)) -> samples
+    dplyr::ungroup() -> d
   
-  if (samples$sample %>% unique() %>% length() < 10) {
+  if(nrow(d) == 0 ){return(NULL)}
+  
+  d %>% 
+    dplyr::mutate(expr = log2(expr + 1)) %>% 
+    dplyr::select(-barcode) %>% 
+    tidyr::unite(col = sample, type, sample, sep = "_") %>% 
+    tidyr::spread(key = sample, value = expr) %>% 
+    dplyr::mutate_all(.funs = dplyr::funs(ifelse(is.na(.), 0.001, .))) -> samples
+  
+  if (samples %>% colnames() %>% unique() %>% length() -1 < 20) {
     return(NULL)
   }
   
@@ -48,7 +56,37 @@ fn_extract_pair <- function(cancer_types, filter_expr){
   
   }
 
+
 gene_list_expr %>% 
   purrr::pmap(.f = fn_extract_pair) %>% 
   dplyr::bind_rows() -> gene_list_expr_pair
   
+
+
+gene_list_expr_pair %>% 
+  head(1) %>% 
+  tidyr::unnest() -> d
+  
+mat <- as.matrix(d[, grep("TCGA", colnames(d))])
+rownames(mat) <- d$symbol
+base_mean = rowMeans(mat)
+mat_scaled = t(apply(mat, 1, scale))
+type = stringr::str_extract(string = colnames(mat), pattern = "\\w+_") %>% 
+  stringr::str_replace("_","")
+
+library(ComplexHeatmap)
+library(circlize)
+ha = HeatmapAnnotation(df = data.frame(type = type))
+Heatmap(
+  head(mat_scaled, 100),
+  name = "expression",
+  km = 2,
+  col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
+  top_annotation = ha,
+  top_annotation_height = unit(4, "mm"),
+  show_row_names = T,
+  show_column_names = T
+) 
+save.image(file = file.path(heatmap_path, ".rda_03_test_c_complexheatmap.rda"))
+load(file = file.path(heatmap_path, ".rda_03_test_c_complexheatmap.rda"))
+

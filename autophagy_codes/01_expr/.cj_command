@@ -60,3 +60,19 @@ git commit -m "heatmap"
 git push origin master
 ls 
 git status
+git add -A
+git status
+git commit -m "rename"
+git push origin master
+l
+top
+ps xf
+ps xf|grep yyel|wc -l
+ps aux|grep yyel|wc -l
+ps aux
+w
+ls
+ll
+cd ../.../
+l
+cd ../../

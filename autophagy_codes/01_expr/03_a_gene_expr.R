@@ -115,7 +115,7 @@ gene_list_fc_pvalue_simplified %>%
 filter_fc_pval <- function(.x){
   .x %>% 
     dplyr::filter(Normal > 10 & Tumor > 10) %>%
-    dplyr::filter(abs(log2(fc)) >= log2(3/2), fdr <= 0.05) %>%
+    dplyr::filter(abs(log2(fc)) >= log2(2), fdr <= 0.05) %>%
     dplyr::mutate(p.value = -log10(p.value)) %>% 
     dplyr::mutate(p.value = ifelse(p.value > 15, 15, p.value)) %>% 
     dplyr::mutate(fdr = -log10(fdr)) %>% 
@@ -125,9 +125,9 @@ filter_fc_pval <- function(.x){
 
 # filter_pattern based on
 filter_pattern <- function(fc, fdr) {
-  if ((fc > 3 / 2) && (fdr < 2 / 3)) {
+  if ((fc > 2) && (fdr < 0.05)) {
     return(1)
-  } else if ((fc < 2 / 3) && (fdr < 0.05)) {
+  } else if ((fc < 1/2) && (fdr < 0.05)) {
     return(-1)
   } else {
     return(0)
@@ -202,7 +202,7 @@ plot_rect_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
 # point plot
 plot_fc_pval_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
   ggplot(.x_filter, aes(x = cancer_types, y = symbol)) +
-    geom_point(aes(size = p.value, col = log2(fc))) +
+    geom_point(aes(size = fdr, col = log2(fc))) +
     scale_color_gradient2(
       low = "blue",
       mid = "white",
@@ -217,7 +217,8 @@ plot_fc_pval_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
       limit = c(-log10(0.05), 15),
       range = c(1, 6),
       breaks = c(-log10(0.05), 5, 10, 15),
-      labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$"))
+      labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$")),
+      name = "FDR"
     ) +
     scale_y_discrete(limit = gene_rank$symbol) +
     scale_x_discrete(limit = cancer_types_rank$cancer_types) +
@@ -286,6 +287,7 @@ gene_fc_pvalue %>% get_pattern() -> gene_fc_pvalue_pattern
 
 # Cancer and gene rank
 gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
+
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
@@ -293,46 +295,59 @@ gene_fc_pvalue_pattern %>%
   dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red"))) %>% 
   dplyr::arrange(color, rank) -> gene_rank
 
+# raw data
 p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
   theme(axis.text.y = element_text(color = gene_rank$color))
 ggsave(
-  filename = "fig_03_a_at_ly_comb_expr_fc_pval.pdf",
+  filename = "fig_03_a_atg_lys_fc_pval_1_all_color.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height = 15,
+  height = 30,
   path = expr_path
 )
 
+gene_fc_pvalue_pattern %>% 
+  get_gene_rank() %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::filter(up+down > 2) %>%
+  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red"))) %>% 
+  dplyr::arrange(color, rank) -> gene_rank
 
-p <- plot_rect_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) +
+p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
   theme(axis.text.y = element_text(color = gene_rank$color))
 ggsave(
-  filename = "fig_03_a_at_ly_comb_expr_rect.pdf",
+  filename = "fig_03_a_atg_lys_fc_pval_1_over_3_cancer_color.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height = 15,
+  height = 8,
   path = expr_path
 )
 
 
 
-p <- plot_cancer_count(.x_filter = gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
-  theme(axis.text.y = element_text(color = gene_rank$color))
-ggsave(
-  filename = "fig_03_a_at_ly_comb_cancer_count.pdf",
-  plot = p,
-  device = "pdf",
-  width = 8,
-  height = 22,
-  path = expr_path
-)
-readr::write_rds(
-  p,
-  path = file.path(expr_path, ".fig_03_a_at_ly_comb_cancer_count.pdf.rds.gz"),
-  compress = "gz"
-)
+# p <- plot_rect_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) +
+#   theme(axis.text.y = element_text(color = gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_at_ly_comb_expr_rect.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 15,
+#   path = expr_path
+# )
+# p <- plot_cancer_count(.x_filter = gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
+#   theme(axis.text.y = element_text(color = gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_at_ly_comb_cancer_count.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 22,
+#   path = expr_path
+# )
+
 
 
 #----------------------------------------------
@@ -358,8 +373,8 @@ at_gene_rank <-
   get_pattern() %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::filter(! symbol %in% c("TP53")) %>% 
-  dplyr::filter(core == "Y") %>% 
+  # dplyr::filter(! symbol %in% c("TP53")) %>%
+  # dplyr::filter(core == "Y") %>%
   # dplyr::filter(up + down > 2) %>%
   # dplyr::mutate(color = ifelse(is.na(core), "black", "red")) %>%
   dplyr::arrange(color, rank)
@@ -367,36 +382,36 @@ at_gene_rank <-
 p <- plot_fc_pval_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
   theme(axis.text.y = element_text(color = at_gene_rank$color))
 ggsave(
-  filename = "fig_03_a_at_expr_fc_pval.pdf",
+  filename = "fig_03_a_atg_fc_pval_all.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height =20,
+  height = 16,
   path = expr_path
 )
-
-p <- plot_rect_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
-  theme(axis.text.y = element_text(color = at_gene_rank$color))
-ggsave(
-  filename = "fig_03_a_at_expr_rect.pdf",
-  plot = p,
-  device = "pdf",
-  width = 8,
-  height = 11,
-  path = expr_path
-)
-
-
-p <- plot_cancer_count(at_filter, at_gene_rank, at_cancer_rank) + 
-  theme(axis.text.y = element_text(color = at_gene_rank$color))
-ggsave(
-  filename = "fig_03_a_at_cancer_count.pdf",
-  plot = p,
-  device = "pdf",
-  width = 8,
-  height = 22,
-  path = expr_path
-)
+# 
+# p <- plot_rect_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
+#   theme(axis.text.y = element_text(color = at_gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_at_expr_rect.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 11,
+#   path = expr_path
+# )
+# 
+# 
+# p <- plot_cancer_count(at_filter, at_gene_rank, at_cancer_rank) + 
+#   theme(axis.text.y = element_text(color = at_gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_at_cancer_count.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 22,
+#   path = expr_path
+# )
 
 #--------------------------------------------
 #Lysosome
@@ -420,42 +435,41 @@ ly_gene_rank <-
   get_pattern() %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::filter(up + down > 2) %>%
+  # dplyr::filter(up + down > 2) %>%
   # dplyr::mutate(color = ifelse(is.na(core), "black", "red")) %>%
-  dplyr::arrange(rank)
+  dplyr::arrange(color,rank)
 
-p <- plot_rect_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
-  theme(axis.text.y = element_text(color = ly_gene_rank$color))
-ggsave(
-  filename = "fig_03_a_ly_expr_rect.pdf",
-  plot = p,
-  device = "pdf",
-  width = 8,
-  height = 11,
-  path = expr_path
-)
 
 p <- plot_fc_pval_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
   theme(axis.text.y = element_text(color = ly_gene_rank$color))
 ggsave(
-  filename = "fig_03_a_ly_expr_fc_pval.pdf",
+  filename = "fig_03_a_lys_fc_pval_all_color.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height =14,
+  height =18,
   path = expr_path
 )
-
-p <- plot_cancer_count(ly_filter, ly_gene_rank, ly_cancer_rank) + 
-  theme(axis.text.y = element_text(color = ly_gene_rank$color))
-ggsave(
-  filename = "fig_03_a_ly_cancer_count.pdf",
-  plot = p,
-  device = "pdf",
-  width = 8,
-  height = 22,
-  path = expr_path
-)
+# p <- plot_rect_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
+#   theme(axis.text.y = element_text(color = ly_gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_ly_expr_rect.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 11,
+#   path = expr_path
+# )
+# p <- plot_cancer_count(ly_filter, ly_gene_rank, ly_cancer_rank) + 
+#   theme(axis.text.y = element_text(color = ly_gene_rank$color))
+# ggsave(
+#   filename = "fig_03_a_ly_cancer_count.pdf",
+#   plot = p,
+#   device = "pdf",
+#   width = 8,
+#   height = 22,
+#   path = expr_path
+# )
 
 
 
