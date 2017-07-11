@@ -21,7 +21,7 @@ cnv %>%
 readr::write_rds(x = gene_list_cnv, path = file.path(cnv_path, ".rds_02_cnv_a_gene_list.rds.gz"), compress = "gz")
 
 fn_get_amplitue_threshold <- function(.x){
-  ifelse(abs(.x) < 0.3, 0, .x) -> .y
+  ifelse(abs(.x) < log2(3) - 1, 0, .x) -> .y
   tibble::tibble(a = sum(.y > 0) / length(.y), d = sum(.y < 0) / length(.y)) 
 }
 fn_get_ad <- function(.d){
@@ -65,72 +65,90 @@ gene_list_cnv_per %>%
   tidyr::drop_na() %>% 
   tidyr::gather(key = type, value = per, a, d) %>% 
   dplyr::mutate(type = plyr::revalue(type, replace = c("a" = "Amplification", "d" = "Deletion"))) %>% 
-  dplyr::mutate(per = ifelse(per > 0.7, 0.7, per)) -> plot_ready
+  dplyr::mutate(per = ifelse(per > 0.6, 0.6, per)) -> plot_ready
 plot_ready %>% 
   ggplot(aes(y = symbol, x = cancer_types)) +
   geom_point(aes(size = per, color = type)) +
   scale_size_continuous(
     name = "CNV perl",
-    breaks = c(0.1, 0.3, 0.5, 0.7),
-    limits = c(0.1, 0.8),
-    labels = c("10", "30", "50", "70")
+    breaks = c(0.1, 0.2, 0.4, 0.6),
+    limits = c(0.1, 0.6),
+    labels = c("10", "20", "40", "60")
   ) +
   ggthemes::scale_color_gdocs(
     name = "SCNA Type"
   ) +
   facet_wrap(~ type) -> p
-ggsave(filename = "01_SCNV.pdf", plot = p, device = "pdf", path = cnv_path, width = 25, height = 30)
+ggsave(filename = "01_SCNV_all.pdf", plot = p, device = "pdf", path = cnv_path, width = 25, height = 30)
 
 
-# filter_pattern based on
-filter_pattern <- function(type) {
-  if(type == "Amplification"){return(1)} 
-  else if(type == "Deletion"){return(-1)}
-  else{return(0)}
-}
 
-# get up down pattern
-get_pattern <- function(.x){
-  .x %>% 
-    # dplyr::filter(Normal > 10 & Tumor > 10) %>%
-    dplyr::mutate(pattern = purrr::map_dbl(type, filter_pattern)) %>%
-    dplyr::select(cancer_types, symbol, pattern) %>% 
-    dplyr::distinct(cancer_types, symbol, .keep_all = T) %>% 
-    tidyr::spread(key = cancer_types, value = pattern) %>% print(n = Inf)
-    # dplyr::mutate_all(.funs = dplyr::funs(ifelse(is.na(.), 0, .))) 
-    dplyr::mutate_if(.predicate = is.numeric, .fun = dplyr::funs(ifelse(is.na(.), 0, .)))
-  
-}
 
-# gene rank by up and down
-get_gene_rank <- function(pattern){
-  pattern %>% 
-    dplyr::rowwise() %>%
-    dplyr::do(
-      symbol = .$symbol,
-      rank =  unlist(.[-1], use.names = F) %>% sum(),
-      up = (unlist(.[-1], use.names = F) == 1) %>% sum(),
-      down = (unlist(.[-1], use.names = F) == -1) %>% sum()
-    ) %>%
-    dplyr::ungroup() %>%
-    tidyr::unnest() %>%
-    dplyr::mutate(up_p = up / 14, down_p = down / 14, none = 1 - up_p - down_p) %>% 
-    dplyr::arrange(rank)
-}
+plot_ready %>% dplyr::filter(type == "Amplification") -> a_ready
+a_ready %>% 
+  dplyr::group_by(cancer_types) %>% 
+  dplyr::summarise(s = sum(per)) %>% 
+  dplyr::arrange(dplyr::desc(s)) -> cancer_rank
+a_ready %>% 
+  dplyr::filter(per > 0.1) %>% 
+  dplyr::group_by(symbol) %>% 
+  dplyr::summarise(s = n()) %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
+  # dplyr::filter(s > 1.8) %>% 
+  dplyr::arrange(status, s) -> a_gene_rank
 
-# cancer types rank by gene
-get_cancer_types_rank <- function(pattern){
-  pattern %>% 
-    dplyr::summarise_if(.predicate = is.numeric, dplyr::funs(sum(abs(.)))) %>%
-    tidyr::gather(key = cancer_types, value = rank) %>%
-    dplyr::arrange(dplyr::desc(rank))
-}
+a_ready %>% 
+  ggplot(aes(y = symbol, x = cancer_types)) +
+  geom_point(aes(size = per, color = type)) +
+  scale_size_continuous(
+    name = "CNV perl",
+    breaks = c(0.1, 0.2, 0.4, 0.6),
+    limits = c(0.1, 0.6),
+    labels = c("10", "20", "40", "60")
+  ) +
+  scale_y_discrete(limit = a_gene_rank$symbol) +
+  scale_x_discrete(limit = cancer_rank$cancer_types)+
+  ggthemes::scale_color_gdocs(
+    name = "SCNA Type"
+  ) +
+  ggthemes::theme_gdocs() +
+  theme(axis.text.y = element_text(color = a_gene_rank$color)) -> p
+ggsave(filename = "02_SCNV_amplification.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 30)
 
-plot_ready %>% get_pattern() -> pattern
 
-ampl <- plot_ready %>% 
-  dplyr::filter(type == "Amplification")
 
+plot_ready %>% dplyr::filter(type == "Deletion") -> d_ready
+d_ready %>% 
+  dplyr::filter(per > 0.1) %>% 
+  dplyr::group_by(cancer_types) %>% 
+  dplyr::summarise(s = sum(per)) %>% 
+  dplyr::arrange(dplyr::desc(s)) -> cancer_rank
+d_ready %>%   
+  dplyr::group_by(symbol) %>% 
+  dplyr::summarise(s = n()) %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
+  # dplyr::filter(s > 5) %>%
+  dplyr::arrange(status, s) -> d_gene_rank
+
+d_ready %>% 
+  ggplot(aes(y = symbol, x = cancer_types)) +
+  geom_point(aes(size = per, color = type)) +
+  scale_size_continuous(
+    name = "CNV perl",
+    breaks = c(0.1, 0.2, 0.4, 0.6),
+    limits = c(0.1, 0.6),
+    labels = c("10", "20", "40", "60")
+  ) +
+  scale_y_discrete(limit = d_gene_rank$symbol) +
+  scale_x_discrete(limit = cancer_rank$cancer_types)+
+  ggthemes::scale_color_gdocs(
+    name = "SCNA Type"
+  ) +
+  ggthemes::theme_gdocs() +
+  theme(axis.text.y = element_text(color = a_gene_rank$color)) -> p
+ggsave(filename = "03_SCNV_deletion.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 30)
 
 
 save.image(file = file.path(cnv_path, ".rda_02_cnv_a_gene_list.rda"))

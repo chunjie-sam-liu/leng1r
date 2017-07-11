@@ -486,3 +486,17 @@ cd autophagy_codes/
 ls
 ll
 git status
+git add -A
+git commit -m "hypoxia and cnv"
+git push origin master
+ls
+cd
+ls
+cd autophagy_codes/
+l
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+git status

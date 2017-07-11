@@ -93,3 +93,36 @@ ls
 cd 01_expr/
 l
 cd 01_expr/
+ls
+ll
+mkdir 03_mutation
+l
+cd 03_mutation/
+l
+ll
+cd ../
+ls
+ll */*R
+ll
+grep 01_expr/*R
+grep NA 01_expr/*R
+grep is.na 01_expr/*R
+ps xf
+killparallel slave
+ps xf
+killparallel slave
+ls
+l
+mkdir 04_ccle
+l
+cd 04_ccle/
+l
+top
+ps xf
+top
+l
+cd ll
+ll
+git status
+git add -A
+cd ../

@@ -1,0 +1,10 @@
+ls
+ll
+les /extraspace/yye1/share_data/CCLE/CCLE_Expression_2012-09-29.res
+wc -l /extraspace/yye1/share_data/CCLE/CCLE_Expression_2012-09-29.res
+les /extraspace/yye1/share_data/CCLE/CCLE_Expression_2012-09-29.res
+les /extraspace/yye1/share_data/CCLE/CCLE_Expression_2012-09-29.title.txt
+les /extraspace/yye1/CCLE/CCLE_Expression_09292016.txt
+ll ~/Circadian/Drug/
+ll /home/yye1/Circadian/Drug/
+cd /extraspace/yye1/share_data/CCLE/
