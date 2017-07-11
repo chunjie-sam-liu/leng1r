@@ -76,3 +76,16 @@ ll
 cd ../.../
 l
 cd ../../
+ls
+ll
+mv 03_test_e_stage_normal. 03_test_e_stage_normal.R
+ll
+les  /extraspace/yye1/analysis/Hypoxia/PSM/summary/All.signatures.summary.csv
+l
+cd ../
+ls
+ll /extraspace/yuxiang/Project_circRNA/
+ll
+ll /extraspace/yuxiang/Project_circRNA/
+ll
+cd 

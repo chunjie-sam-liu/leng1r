@@ -472,3 +472,17 @@ cd ../
 ls
 git status
 l
+git add -A
+git commit -m "expr"
+git push origin master
+l
+ps xf
+top
+ll
+cd
+ls
+ll
+cd autophagy_codes/
+ls
+ll
+git status

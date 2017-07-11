@@ -11,7 +11,7 @@ clinical_stage <-
   dplyr::filter(n >= 40) %>% 
   dplyr::select(-n)
 
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path, "rds_03_a_atg_lys_gene_list.rds.gz"))
 gene_list_expr <- readr::read_rds(path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"))
 
 
@@ -44,6 +44,20 @@ fun_expr_stage_merge <- function(filter_expr, stage){
     dplyr::select(symbol, barcode, expr) -> expr_clean
   expr_clean %>% dplyr::inner_join(stage, by = "barcode") -> expr_stage_ready
 } # merge stage and expr to clean
+fn_get_order <- function(.d){
+  .d %>% 
+    dplyr::group_by(stage ) %>% 
+    dplyr::summarise(me = mean(expr)) %>% 
+    .$me %>% rank() -> .d_m
+  
+  if(identical(.d_m, c(1,2,3,4))){
+    return(1)
+  } else if(identical(.d_m, c(4,3,2,1))){
+    return(2)
+  } else{
+    return(3)
+  }
+}
 fun_stage_test <- function(expr_stage_ready){
   expr_stage_ready %>% 
     tidyr::drop_na(expr) %>%
@@ -60,16 +74,25 @@ fun_stage_test <- function(expr_stage_ready){
       dplyr::ungroup() %>% 
       dplyr::mutate(fdr = p.adjust(p.value, method = "fdr")) %>% 
       dplyr::select(symbol, p.value, fdr) -> diff_pval
-    diff_pval %>% dplyr::filter(p.value < 0.01, fdr < 0.1)
+    
+    expr_stage_ready %>% 
+      tidyr::drop_na(expr) %>%
+      tidyr::nest(-symbol) %>% 
+      dplyr::mutate(order = purrr::map_dbl(data, .f = fn_get_order)) %>% 
+      dplyr::select(- data) -> symbol_order
+
+    diff_pval %>% 
+      dplyr::inner_join(symbol_order, by = "symbol")
   }
 } # stage_test
 
 
-# expr_stage %>% 
-#   dplyr::mutate(merged_clean = purrr::map2(filter_expr, stage, fun_expr_stage_merge)) %>% 
-#   dplyr::select(-filter_expr, -stage) %>% 
-#   dplyr::mutate(diff_pval = purrr::map(merged_clean, fun_stage_test)) %>% 
-  # tidyr::unnest(diff_pval, .drop = F) -> expr_stage_sig_pval
+# expr_stage %>%
+#   dplyr::filter(cancer_types == "BRCA") %>% 
+#   dplyr::mutate(merged_clean = purrr::map2(filter_expr, stage, fun_expr_stage_merge)) %>%
+#   dplyr::select(-filter_expr, -stage) %>%
+#   dplyr::mutate(diff_pval = purrr::map(merged_clean, fun_stage_test)) %>%
+#   tidyr::unnest(diff_pval, .drop = F) -> te
 
 cl <- parallel::detectCores()
 cluster <- multidplyr::create_cluster(floor(cl * 5 / 6))
@@ -80,6 +103,7 @@ expr_stage %>%
   multidplyr::cluster_assign_value("fun_tn_type", fun_tn_type) %>% 
   multidplyr::cluster_assign_value("fun_expr_stage_merge", fun_expr_stage_merge) %>% 
   multidplyr::cluster_assign_value("fun_stage_test", fun_stage_test) %>% 
+  multidplyr::cluster_assign_value("fn_get_order", fn_get_order) %>% 
   dplyr::mutate(merged_clean = purrr::map2(filter_expr, stage, fun_expr_stage_merge)) %>% 
   dplyr::select(-filter_expr, -stage) %>% 
   dplyr::mutate(diff_pval = purrr::map(merged_clean, fun_stage_test)) %>% 
@@ -111,6 +135,7 @@ fun_rank_gene <- function(pattern){
     tidyr::unnest() %>%
     dplyr::arrange(rank)
 } # get gene rank
+fn_f
 
 expr_stage_sig_pval %>% 
   dplyr::select(cancer_types, symbol) %>% 
@@ -121,7 +146,7 @@ cancer_rank <- pattern %>% fun_rank_cancer()
 gene_rank <- pattern %>% 
   fun_rank_gene() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red")))
+  dplyr::arrange(color, rank)
 
 expr_stage_sig_pval %>% 
   ggplot(aes(x = cancer_types, y = symbol, color = cancer_types)) +

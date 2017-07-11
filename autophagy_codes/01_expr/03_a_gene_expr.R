@@ -5,11 +5,11 @@ library(ggplot2)
 tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
 #output path
 expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
-expr_path <- file.path(expr_path, "03_a_gene_expr")
+expr_path_a <- file.path(expr_path, "03_a_gene_expr")
 # Read gene list
 # Gene list was compress as rds
 expr <- readr::read_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"))
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path_a, "rds_03_a_atg_lys_gene_list.rds.gz"))
 
 #######################
 # filter out genes
@@ -24,7 +24,7 @@ expr %>%
   dplyr::mutate(filter_expr = purrr::map(expr, filter_gene_list, gene_list = gene_list)) %>%
   dplyr::select(-expr) -> gene_list_expr
 
-readr::write_rds(x = gene_list_expr, path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"), compress = "gz")
+readr::write_rds(x = gene_list_expr, path = file.path(expr_path_a, ".rds_03_a_gene_list_expr.rds.gz"), compress = "gz")
 
 
 #################################
@@ -100,22 +100,52 @@ gene_list_fc_pvalue %>% dplyr::bind_rows() -> gene_list_fc_pvalue_simplified
 
 readr::write_rds(
   x = gene_list_fc_pvalue_simplified,
-  path = file.path(expr_path, ".rds_03_a_at_ly_comb_gene_list_fc_pvalue_simplified.rds.gz"),
+  path = file.path(expr_path_a, ".rds_03_a_atg_lys_fc_pvalue_simplified.rds.gz"),
   compress = "gz"
 )
 readr::write_tsv(
   x = gene_list_fc_pvalue_simplified,
-  path = file.path(expr_path, "rds_03_a_at_ly_comb_gene_list_fc_pvalue_simplified.tsv")
+  path = file.path(expr_path_a, "tsv_03_a_atg_lys_fc_pvalue_simplified.tsv")
 )
 
+# check autophagy gene expression distribution
+gene_list_fc_pvalue_simplified %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  tidyr::drop_na(Tumor, Normal) %>% 
+  # dplyr::filter(pathway %in% c("autophagesome formation-core", "autophagesome formation")) %>%
+  tidyr::gather(key = nt, value = expr, c(Tumor, Normal)) %>% 
+  ggplot(aes(x = log2(expr + 1), color = nt)) +
+  geom_density(aes(y = ..density..)) +
+  ggthemes::scale_color_gdocs(name = "Type") +
+  ggthemes::theme_gdocs() +
+  facet_grid(pathway ~ cancer_types, switch = "y") +
+  labs(
+    x = "Expression (log2)",
+    y = "Frenquncy"
+  ) -> p
+ggsave(filename = "03_a_expression_distribution_all.pdf", plot = p, device = "pdf", path = expr_path_a, width = 16, height = 13)
+
+gene_list_fc_pvalue_simplified %>% 
+  # dplyr::filter(cancer_types == "KICH") %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  tidyr::drop_na(Tumor, Normal) %>% 
+  tidyr::gather(key = type, value = expr, Normal, Tumor) %>% 
+  dplyr::group_by(cancer_types, pathway) %>% 
+  dplyr::do(broom::tidy(t.test(expr ~ type, data = .))) %>% 
+  dplyr::filter(p.value < 0.5)
+  
+
+
+
+#-------------------------------------------------------------------------
 gene_list_fc_pvalue_simplified %>% 
   dplyr::left_join(gene_list, by = "symbol") -> gene_fc_pvalue
 
 
 filter_fc_pval <- function(.x){
   .x %>% 
-    dplyr::filter(Normal > 10 & Tumor > 10) %>%
-    dplyr::filter(abs(log2(fc)) >= log2(2), fdr <= 0.05) %>%
+    # dplyr::filter(Normal > 10 & Tumor > 10) %>%
+    dplyr::filter(abs(log2(fc)) >= log2(3 / 2), fdr <= 0.05) %>%
     dplyr::mutate(p.value = -log10(p.value)) %>% 
     dplyr::mutate(p.value = ifelse(p.value > 15, 15, p.value)) %>% 
     dplyr::mutate(fdr = -log10(fdr)) %>% 
@@ -125,9 +155,9 @@ filter_fc_pval <- function(.x){
 
 # filter_pattern based on
 filter_pattern <- function(fc, fdr) {
-  if ((fc > 2) && (fdr < 0.05)) {
+  if ((fc > 3/ 2) && (fdr < 0.05)) {
     return(1)
-  } else if ((fc < 1/2) && (fdr < 0.05)) {
+  } else if ((fc < 2/ 3) && (fdr < 0.05)) {
     return(-1)
   } else {
     return(0)
@@ -137,7 +167,7 @@ filter_pattern <- function(fc, fdr) {
 # get up down pattern
 get_pattern <- function(.x){
   .x %>% 
-    dplyr::filter(Normal > 10 & Tumor > 10) %>%
+    # dplyr::filter(Normal > 10 & Tumor > 10) %>%
     dplyr::mutate(expr_pattern = purrr::map2_dbl(fc, fdr, filter_pattern)) %>%
     dplyr::select(cancer_types, symbol, expr_pattern) %>%
     tidyr::spread(key = cancer_types, value = expr_pattern) %>% 
@@ -168,35 +198,6 @@ get_cancer_types_rank <- function(pattern){
     dplyr::summarise_if(.predicate = is.numeric, dplyr::funs(sum(abs(.)))) %>%
     tidyr::gather(key = cancer_types, value = rank) %>%
     dplyr::arrange(dplyr::desc(rank))
-}
-
-# rect plot
-plot_rect_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
-  ggplot(.x_filter, aes(x = cancer_types, y = symbol, fill = log2(fc))) +
-    geom_tile(color = "black") +
-    scale_fill_gradient2(
-      low = "blue",
-      mid = "white",
-      high = "red",
-      midpoint = 0,
-      na.value = "white",
-      breaks = seq(-3, 3, length.out = 5),
-      labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
-      name = "log2 FC"
-    ) +
-    scale_y_discrete(limit = gene_rank$symbol) +
-    scale_x_discrete(limit = cancer_types_rank$cancer_types, expand = c(0, 0)) +
-    theme(
-      panel.background = element_rect(colour = "black", fill = "white"),
-      panel.grid = element_blank(),
-      axis.title = element_blank(),
-      axis.ticks = element_blank(),
-      legend.text = element_text(size = 12),
-      legend.title = element_text(size = 14),
-      legend.key = element_rect(fill = "white", colour = "black")
-    ) -> p
-  print(p)
-  return(p)
 }
 
 # point plot
@@ -240,6 +241,35 @@ plot_fc_pval_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
   return(p)
 }
 
+
+# rect plot
+plot_rect_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
+  ggplot(.x_filter, aes(x = cancer_types, y = symbol, fill = log2(fc))) +
+    geom_tile(color = "black") +
+    scale_fill_gradient2(
+      low = "blue",
+      mid = "white",
+      high = "red",
+      midpoint = 0,
+      na.value = "white",
+      breaks = seq(-3, 3, length.out = 5),
+      labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
+      name = "log2 FC"
+    ) +
+    scale_y_discrete(limit = gene_rank$symbol) +
+    scale_x_discrete(limit = cancer_types_rank$cancer_types, expand = c(0, 0)) +
+    theme(
+      panel.background = element_rect(colour = "black", fill = "white"),
+      panel.grid = element_blank(),
+      axis.title = element_blank(),
+      axis.ticks = element_blank(),
+      legend.text = element_text(size = 12),
+      legend.title = element_text(size = 14),
+      legend.key = element_rect(fill = "white", colour = "black")
+    ) -> p
+  print(p)
+  return(p)
+}
 # cancer count
 plot_cancer_count <- function(.x_filter, gene_rank, cancer_types_rank){
   ggplot(
@@ -291,27 +321,27 @@ gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  # dplyr::filter(up+down > 2) %>%
-  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red"))) %>% 
-  dplyr::arrange(color, rank) -> gene_rank
+  dplyr::filter(status != "l" ) %>%  # exclude "lysosome"
+  dplyr::filter(up+down > 2) %>% # at least two cancer types.
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
+  dplyr::arrange(status, rank) -> gene_rank
 
 # raw data
 p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
   theme(axis.text.y = element_text(color = gene_rank$color))
 ggsave(
-  filename = "fig_03_a_atg_lys_fc_pval_1_all_color.pdf",
+  filename = "new_fig_03_a_atg_lys_fc_pval_all_exclude_l_2.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height = 30,
-  path = expr_path
+  height = 10,
+  path = expr_path_a
 )
 
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
   dplyr::filter(up+down > 2) %>%
-  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red"))) %>% 
   dplyr::arrange(color, rank) -> gene_rank
 
 p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
@@ -321,8 +351,8 @@ ggsave(
   plot = p,
   device = "pdf",
   width = 8,
-  height = 8,
-  path = expr_path
+  height = 20,
+  path = expr_path_a
 )
 
 
@@ -355,7 +385,7 @@ ggsave(
 #-----------------------------------------------
 gene_fc_pvalue_autophagy <- 
   gene_fc_pvalue %>% 
-  dplyr::filter(type == "Autophagy") 
+  dplyr::filter(color %in% c("#DC3912", "#DD4477")) 
     
 
 at_filter <- 
@@ -387,7 +417,7 @@ ggsave(
   device = "pdf",
   width = 8,
   height = 16,
-  path = expr_path
+  path = expr_path_a
 )
 # 
 # p <- plot_rect_pattern(at_filter, at_gene_rank, at_cancer_rank) + 
@@ -418,7 +448,7 @@ ggsave(
 #---------------------------------------------
 gene_fc_pvalue_lysosome <- 
   gene_fc_pvalue %>% 
-  dplyr::filter(type == "Lysosome")
+  dplyr::filter(status == "l")
 
 ly_filter <- 
   gene_fc_pvalue_lysosome %>% 
@@ -435,20 +465,20 @@ ly_gene_rank <-
   get_pattern() %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  # dplyr::filter(up + down > 2) %>%
+  dplyr::filter(up + down > 2) %>%
   # dplyr::mutate(color = ifelse(is.na(core), "black", "red")) %>%
-  dplyr::arrange(color,rank)
+  dplyr::arrange(color, rank)
 
 
 p <- plot_fc_pval_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
   theme(axis.text.y = element_text(color = ly_gene_rank$color))
 ggsave(
-  filename = "fig_03_a_lys_fc_pval_all_color.pdf",
+  filename = "new_fig_03_a_lys_fc_pval_all_color_2.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height =18,
-  path = expr_path
+  height =14,
+  path = expr_path_a
 )
 # p <- plot_rect_pattern(ly_filter, ly_gene_rank, ly_cancer_rank) + 
 #   theme(axis.text.y = element_text(color = ly_gene_rank$color))
@@ -486,7 +516,7 @@ gene_rank_portion %>% head(2) %>%
   geom_bar(stat = "identity",
            width = 1,
            position = "stack") +
-  facet_wrap( ~ symbol) +
+  facet_wrap(~ symbol) +
   coord_polar("y") +
   theme(
     axis.text = element_blank(),
@@ -513,5 +543,5 @@ ggsave(
 )
 
 
-save.image(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))
-load(file = file.path(expr_path, ".rda_03_a_gene_expr.rda"))
+save.image(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))
+load(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))

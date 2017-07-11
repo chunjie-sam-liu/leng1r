@@ -8,7 +8,7 @@ expr_path <- file.path(expr_path, "03_a_gene_expr")
 
 clinical <- readr::read_rds(path = file.path(tcga_path,"pancan_clinical.rds.gz")) 
 
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path, "rds_03_a_atg_lys_gene_list.rds.gz"))
 gene_list_expr <- readr::read_rds(path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"))
 cancer_pairs <- readr::read_tsv(file = file.path(expr_path, "tsv_02_pancan_samples_pairs.tsv"))
 
@@ -89,18 +89,22 @@ fun_clinical_test <- function(expr_clinical_ready, cancer_types){
       ) %>%
     dplyr::ungroup() %>% 
     dplyr::filter(p.value < 0.05) %>% 
-    dplyr::select(symbol, p.value) -> d
+    dplyr::select(symbol, estimate, p.value) %>% 
+    dplyr::mutate(status = ifelse(estimate > 0, "H", "L"))-> d
   
-  d %>% purrr::pwalk(fun_draw_survival, cancer_types = cancer_types, expr_clinical_ready = expr_clinical_ready) 
+  d %>% 
+    dplyr::select(symbol, p.value) %>% 
+    purrr::pwalk(fun_draw_survival, cancer_types = cancer_types, expr_clinical_ready = expr_clinical_ready) 
   
   return(d)
 }
 
-# expr_clinical %>%  
+# expr_clinical %>%
+#   dplyr::filter(cancer_types == "KIRC") %>% 
 #   dplyr::mutate(merged_clean = purrr::map2(filter_expr, clinical, fun_expr_survival_merge)) %>%
 #   dplyr::select(-filter_expr, -clinical) %>%
 #   dplyr::mutate(diff_pval = purrr::map2(merged_clean, cancer_types, fun_clinical_test)) %>%
-#   dplyr::select(-merged_clean) %>% 
+#   dplyr::select(-merged_clean) %>%
 #   tidyr::unnest(diff_pval) -> expr_clinical_sig_pval
 
 cl <- parallel::detectCores()
@@ -155,10 +159,11 @@ cancer_rank <- pattern %>% fun_rank_cancer()
 gene_rank <- pattern %>% 
   fun_rank_gene() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(type, replace = c("Lysosome" = "black", "Autophagy" = "red")))
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
+  dplyr::arrange(color, rank)
 
 expr_clinical_sig_pval %>% 
-  ggplot(aes(x = cancer_types, y = symbol, color = cancer_types)) +
+  ggplot(aes(x = cancer_types, y = symbol, color = status)) +
   geom_point(aes(size = -log10(p.value))) +
   scale_x_discrete(limit = cancer_rank$cancer_types) +
   scale_y_discrete(limit = gene_rank$symbol) +
@@ -179,7 +184,8 @@ expr_clinical_sig_pval %>%
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 14),
     legend.key = element_rect(fill = "white", colour = "black")
-  ) -> p
+  ) +
+  ggthemes::scale_color_gdocs(name = "Surivival Worse")-> p
 ggsave(
   filename = "fig_03_d_survival_sig_genes.pdf",
   plot = p,
@@ -189,11 +195,7 @@ ggsave(
   path = survival_path
 )
 
-readr::write_rds(
-  p,
-  path = file.path(survival_path, ".fig_03_d_survival_sig_genes.pdf.rds.gz"),
-  compress = "gz"
-)
+
 
 save.image(file = file.path(survival_path, ".rda_03_d_survival_gene_expr.rda"))
-load(file = file.path(survival_path, ".rda_03_c_survival_gene_expr.rda"))
+load(file = file.path(survival_path, ".rda_03_d_survival_gene_expr.rda"))
