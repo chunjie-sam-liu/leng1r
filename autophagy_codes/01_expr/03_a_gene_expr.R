@@ -46,11 +46,12 @@ calculate_fc_pvalue <- function(.x, .y) {
       type = stringr::str_split(barcode, pattern = "-", simplify = T)[, 4] %>% stringr::str_sub(1, 2)
     ) %>%
     dplyr::filter(type %in% c("01", "11")) %>%
-    dplyr::mutate(type = plyr::revalue(
-      x = type,
-      replace = c("01" = "Tumor", "11" = "Normal"),
-      warn_missing = F
-    )) %>%
+    dplyr::mutate( type = dplyr::recode( type, "01" = "Tumor", "11" = "Normal")) %>% 
+    #dplyr::mutate(type = plyr::revalue(
+    # x = type,
+    #  replace = c("01" = "Tumor", "11" = "Normal"),
+    #  warn_missing = F
+    #)) %>%
     dplyr::group_by(sample) %>%
     dplyr::filter(n() >= 2, length(unique(type)) == 2) %>%
     dplyr::ungroup()
