@@ -512,3 +512,10 @@ cd /extraspace/
 ls
 ll
 git status
+git add -A
+git commit -m "ccle"
+git push origin master
+ll
+ps xf
+l
+git status
