@@ -190,3 +190,12 @@ l
 ll
 git status
 git add -A
+git status
+git commit -m "ccle gds"
+git push origin master
+ps xf
+ll
+cd 09_otherpathway/
+l
+ll
+cd ../

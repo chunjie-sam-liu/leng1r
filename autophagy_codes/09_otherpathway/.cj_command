@@ -25,3 +25,8 @@ ll
 touch 05_metastasis.R
 l
 cd ../
+ls
+ll
+mv 04_inmmunity.R 04_inmmunity_a_rds.R
+ll
+cd ../

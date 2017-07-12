@@ -519,3 +519,17 @@ ll
 ps xf
 l
 git status
+git add -A
+git commit -m "drug"
+git push origin master
+ps xf
+l
+ll
+cd autophagy_codes/
+l
+ll
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+l
+git status

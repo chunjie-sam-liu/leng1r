@@ -140,9 +140,9 @@ ctrp_gene_list %>%
 
 ctrp_gene_list_sig_drug %>% 
   dplyr::mutate(
-    p_val = ifelse(-log10(p_val) > 40, 40, -log10(p_val)),
-    cor_sprm = ifelse(cor_sprm > 0.4, 0.4, cor_sprm),
-    cor_sprm = ifelse(cor_sprm < -0.4, -0.4, cor_sprm)
+    p_val = ifelse(-log10(p_val) > 50, 50, -log10(p_val)),
+    cor_sprm = ifelse(cor_sprm > 0.5, 0.5, cor_sprm),
+    cor_sprm = ifelse(cor_sprm < -0.5, -0.5, cor_sprm)
   ) -> ctrp_plot_ready
 
 ctrp_plot_ready %>% 
