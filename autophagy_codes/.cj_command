@@ -126,3 +126,67 @@ ll
 git status
 git add -A
 cd ../
+ls
+ll
+mkdir 05_actionable_genes
+ll
+rm 05_actionable_genes/
+l
+ll
+rm 05_actionable_genes/
+mkdir 05_actionable_genes
+l
+ll
+mkdir 06_methylation
+ll
+mkdir 07_mirna
+ll
+mkdir 08_network
+ll
+ps xf
+ll
+git status
+ll
+git add -A
+ll
+cd
+ls
+ll
+rm 06_methylation
+rm 07_mirna/
+rm 08_network/
+ls
+ll
+mkdir 06_methylation 07_mirna/ 08_network/
+l
+lll
+ll
+mkdir 09_metastasis
+mv 09_metastasis 09_otherpathway
+l
+ll
+cd 09_otherpathway/
+l
+ll
+cd 05_actionable_genes/
+l
+ll
+cd 04_ccle/
+l
+ll
+cd 05_actionable_genes/
+l
+ll
+cd 06_methylation/
+l
+cd 07_mirna/
+l
+ll
+cd
+ls
+ll
+rm fig_01_expr_pattern.pdf 
+l
+ll
+git status
+git add -A

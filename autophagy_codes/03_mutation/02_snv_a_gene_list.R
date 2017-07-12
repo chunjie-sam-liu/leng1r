@@ -104,6 +104,9 @@ plot_ready %>%
 ggsave(filename = "01_snv_all.pdf", plot = p, device = "pdf", path = snv_path, width = 15, height = 30)
 
 
+save.image(file = file.path(snv_path, ".rda_02_snv_a_gene_list.rda"))
+load(file = file.path(snv_path, ".rda_02_snv_a_gene_list.rda"))
+
 
 
 
