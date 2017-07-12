@@ -500,3 +500,15 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "mutation and ccle drug"
+git push origin master
+ll
+ls
+ll
+git status
+ls
+cd /extraspace/
+ls
+ll
+git status
