@@ -146,8 +146,21 @@ ctrp_gene_list_sig_drug %>%
   ) -> ctrp_plot_ready
 
 ctrp_plot_ready %>% 
+  dplyr::group_by(symbol) %>% 
+  dplyr::summarise(cor_sum = sum(cor_sprm)) %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = ifelse(status == "l", "black", "red")) %>% 
+  dplyr::arrange(cor_sum) -> ctrp_gene_rank
+
+p<- 
+  ctrp_plot_ready %>% 
   ggplot(aes(x = symbol, y = drug_name, color = cor_sprm)) +
   geom_point(aes(size = p_val)) +
+  scale_x_discrete(limits = ctrp_gene_rank$symbol, expand = c(0.012,0.012)) +
+  scale_y_discrete(
+    # limits = drug_rank$drug_name, 
+    expand = c(0.012,0.012), 
+    position = "right") +
   scale_color_gradient2(
     name = "Spearman Correlation",
     high = "red",
@@ -155,15 +168,42 @@ ctrp_plot_ready %>%
     low = "blue"
   ) +
   scale_size_continuous(
-    name = "FDR"
+    name = "P-value"
   ) +
-  ggthemes::theme_gdocs() +
+  # ggthemes::theme_gdocs() +
   theme(
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.2)
-  ) +
-  labs(
-    x = "", y = ""
-  ) -> p
+    panel.background = element_rect(color = "black", fill = "white", size = 0.1),
+    panel.grid=element_line(colour="grey",linetype="dashed"),
+    panel.grid.major=element_line(colour="grey",linetype="dashed",size=0.2),
+    
+    axis.title = element_blank(),
+    axis.text.x = element_text(
+      size = 9, 
+      angle = 90,
+      hjust = 1, 
+      vjust = 0.5, 
+      color = ctrp_gene_rank$color),
+    axis.text.y = element_text(
+      # color = drug_rank$color, 
+      size = 10),
+    
+    axis.ticks = element_line(color = "black"),
+    
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 10),
+    # legend.key.width = unit(1,"cm"),
+    # legend.key.heigh = unit(0.3,"cm"),
+    legend.key = element_rect(fill="white",colour = "black")
+  ) + guides(
+    color = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barheight = 0.5,
+      barwidth = 10
+    )
+  )
 
 ggsave(filename = 'ctrp_sig_drug.pdf', plot = p, device = "pdf", path = ccle_path, width = 16, height = 22)
 

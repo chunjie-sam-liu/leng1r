@@ -533,3 +533,13 @@ ls
 cd autophagy_codes/
 l
 git status
+git add -A 
+git commit -m "ctrp"
+git push origin master
+ps f
+ll
+l
+ll
+cd autophagy_codes/
+ls
+git status
