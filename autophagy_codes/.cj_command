@@ -227,3 +227,6 @@ ll
 cd 01_expr/
 l
 cd ../
+ls
+ll
+cd 01_expr/

@@ -131,10 +131,13 @@ process_raw_data <- function(.x){
 }
 
 fn_rppa_gene_symbol <- function(names, cancer_types){
+  url
+  
   path <- "/extraspace/TCGA/TCGA_protein/"
   d <- 
     readr::read_tsv(file = file.path(path, names), progress = F) %>% 
-    dplyr::select(- dplyr::starts_with("X"))
+    dplyr::select(- dplyr::starts_with("X")) %>% 
+    dplyr::select(protein)
 }
 cancers_names %>%
   head(1) %>% 

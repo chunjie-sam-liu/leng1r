@@ -113,3 +113,11 @@ rm rppa_protein_name.rds
 gunzip rppa_protein_name.rds.gz 
 ll
 cd ../
+ls
+ll
+mv 01_b_rppa_protein_symbol.R
+mv rppa_protein_symbol.R 01_b_rppa_protein_symbol.R
+ll
+mv 01_b_rppa_protein_symbol.R 01_b_rppa_protein_symbol_rds.R
+ll
+cd ../../
