@@ -93,7 +93,9 @@ a_ready %>%
   dplyr::filter(per > 0.1) %>% 
   dplyr::group_by(symbol) %>% 
   dplyr::summarise(s = n()) %>% 
+  dplyr::filter(s >= 5) %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
+  # dplyr::filter(status %in% c("l")) %>% 
   dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
   # dplyr::filter(s > 1.8) %>% 
   dplyr::arrange(status, s) -> a_gene_rank
@@ -102,7 +104,7 @@ a_ready %>%
   ggplot(aes(y = symbol, x = cancer_types)) +
   geom_point(aes(size = per, color = type)) +
   scale_size_continuous(
-    name = "CNV perl",
+    name = "CNV percentage",
     breaks = c(0.1, 0.2, 0.4, 0.6),
     limits = c(0.1, 0.6),
     labels = c("10", "20", "40", "60")
@@ -114,19 +116,20 @@ a_ready %>%
   ) +
   ggthemes::theme_gdocs() +
   theme(axis.text.y = element_text(color = a_gene_rank$color)) -> p
-ggsave(filename = "02_SCNV_amplification.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 30)
-
+ggsave(filename = "02_SCNV_amplification_seminar.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 9)
 
 
 plot_ready %>% dplyr::filter(type == "Deletion") -> d_ready
 d_ready %>% 
-  dplyr::filter(per > 0.1) %>% 
+  dplyr::filter(per >= 0.1) %>% 
   dplyr::group_by(cancer_types) %>% 
   dplyr::summarise(s = sum(per)) %>% 
   dplyr::arrange(dplyr::desc(s)) -> cancer_rank
 d_ready %>%   
+  dplyr::filter(per >= 0.1) %>% 
   dplyr::group_by(symbol) %>% 
   dplyr::summarise(s = n()) %>% 
+  dplyr::filter(s >= 5) %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
   dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
   # dplyr::filter(s > 5) %>%
@@ -136,7 +139,7 @@ d_ready %>%
   ggplot(aes(y = symbol, x = cancer_types)) +
   geom_point(aes(size = per, color = type)) +
   scale_size_continuous(
-    name = "CNV perl",
+    name = "CNV percentage",
     breaks = c(0.1, 0.2, 0.4, 0.6),
     limits = c(0.1, 0.6),
     labels = c("10", "20", "40", "60")
@@ -147,8 +150,8 @@ d_ready %>%
     name = "SCNA Type"
   ) +
   ggthemes::theme_gdocs() +
-  theme(axis.text.y = element_text(color = a_gene_rank$color)) -> p
-ggsave(filename = "03_SCNV_deletion.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 30)
+  theme(axis.text.y = element_text(color = d_gene_rank$color)) -> p
+ggsave(filename = "03_SCNV_deletion_seminar.pdf", plot = p, device = "pdf", path = cnv_path, width = 15, height = 12)
 
 
 save.image(file = file.path(cnv_path, ".rda_02_cnv_a_gene_list.rda"))

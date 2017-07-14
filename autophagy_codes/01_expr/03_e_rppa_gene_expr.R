@@ -10,11 +10,11 @@ expr_path <- file.path(expr_path, "03_a_gene_expr")
   # dplyr::filter(n >= 40) %>% 
   # dplyr::select(-n)
 
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path, "rds_03_a_atg_lys_gene_list.rds.gz"))
 gene_list_expr <- readr::read_rds(path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"))
 
 gene_list_expr_median_cluster <- readr::read_rds(path = file.path(expr_path, ".rds_01_b_rppa_median_cluster_expr.rds.gz"))
-rppa_scores <- readr::read_rds(file.path(tcga_path, "pancan_rppa.rds.gz"))
+rppa_scores <- readr::read_rds(file.path(tcga_path, "pancan_rppa_score.rds.gz"))
 
 fn_cluster_rppa <- function(median_cluster, rppa){
   median_cluster %>% 
@@ -198,34 +198,36 @@ gene_rppa_sig_pval_class %>%
 
 
 
+gene_ai_n %>%
+  dplyr::arrange(dplyr::desc(Activation), dplyr::desc(Inhibition)) %>%
+  dplyr::filter(Activation + Inhibition> 10)
 
+gene_ai_n %>%
+  # dplyr::filter(pathway == "Apoptosis") %>%
+  dplyr::mutate(a = Activation / 32 * 100, i = - Inhibition / 32 * 100) %>%
+  dplyr::select(symbol, pathway, a, i) %>%
+  dplyr::filter((a + abs(i)) > (5 / 32 * 100)) -> te
+te %>% dplyr::arrange(a+i) %>% .$symbol -> symbol_sort
 
-
-
-
-
-
-
-
-# gene_ai_n %>% 
-#   dplyr::arrange(dplyr::desc(Activation), dplyr::desc(Inhibition)) %>% 
-#   dplyr::filter(Activation + Inhibition> 10) 
-# 
-# gene_ai_n %>% 
-#   dplyr::filter(pathway == "Apoptosis") %>% 
-#   dplyr::mutate(a = Activation / 32 * 100, i = - Inhibition / 32 * 100) %>% 
-#   dplyr::select(symbol, pathway, a, i) %>% 
-#   dplyr::filter((a + abs(i)) > (5 / 32 * 100)) -> te
-# te %>% dplyr::arrange(a+i) %>% .$symbol -> symbol_sort
-# 
-# te %>% 
-#   tidyr::gather(key = type, value = percent, c(a,i)) %>% 
-#   tidyr::unite(col = pathway, pathway, type) %>% 
-#   ggplot(aes(x = pathway, y = symbol))+
-#   geom_tile(aes(fill = percent), col = "white") +
-#   geom_text(aes(label = percent)) +
-#   scale_y_discrete(limits=symbol_sort, label=symbol_sort) +
-#   scale_fill_gradient2()-> p
+te %>%
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::filter(status %in% c("a")) %>% 
+  dplyr::rename(pathway = pathway.x) %>% 
+  tidyr::gather(key = type, value = percent, c(a,i)) %>%
+  tidyr::unite(col = pathway, pathway, type) -> te_plot
+te_plot %>% 
+  ggplot(aes(x = pathway, y = symbol))+
+  geom_tile(aes(fill = percent), col = "white") +
+  geom_text(aes(label = ceiling(percent))) +
+  scale_fill_gradient2(
+    high = "red",
+    mid = "white",
+    low = "blue"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1)
+    )-> p
+ggsave(filename = "rppa_seminar.pdf", plot = p, device = "pdf", path = rppa_path, height = 10, width = 12)
 
 save.image(file = file.path(rppa_path, ".rda_03_e_rppa_gene_expr.rda"))
 load(file = file.path(rppa_path, ".rda_03_e_rppa_gene_expr.rda"))

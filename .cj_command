@@ -543,3 +543,16 @@ ll
 cd autophagy_codes/
 ls
 git status
+git add -A
+git commit -m "clle drug"
+git push origin master
+l
+cd 
+l
+git status
+ps xf
+kill 16280
+l
+l
+source ~/.profile
+gs

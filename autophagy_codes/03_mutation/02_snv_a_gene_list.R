@@ -70,12 +70,14 @@ plot_ready %>%
   dplyr::group_by(symbol) %>% 
   dplyr::summarise(s = sum(sm_sample)) %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
-  dplyr::arrange(s) -> gene_rank
+  dplyr::filter(status %in% c("p", "i")) %>% 
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>%
+  dplyr::arrange(color,s) -> gene_rank
 
 plot_ready %>% 
   dplyr::filter(!symbol %in% c("TP53", "PTEN", "CDKN2A")) %>% 
-  dplyr::mutate(per = ifelse(per > 0.1, 01, per)) %>% 
+  dplyr::mutate(per = ifelse(per > 0.1, 0.1, per)) %>% 
+  # dplyr::filter(per > 0.02) %>% 
   ggplot(aes(x = x_label, y = symbol, fill = per)) +
   geom_tile() +
   geom_text(aes(label = sm_count)) +
@@ -99,9 +101,10 @@ plot_ready %>%
                              title.theme = element_text(angle = 90, vjust = 2), 
                              reverse = T, 
                              keywidth = 0.6, 
-                             keyheight = 0.8 )) -> p
+                             keyheight = 0.8 )) +
+  labs(x = "", y = "") -> p
 
-ggsave(filename = "01_snv_all.pdf", plot = p, device = "pdf", path = snv_path, width = 15, height = 30)
+ggsave(filename = "01_snv_all_seminar.pdf", plot = p, device = "pdf", path = snv_path, width = 9, height = 8)
 
 
 save.image(file = file.path(snv_path, ".rda_02_snv_a_gene_list.rda"))

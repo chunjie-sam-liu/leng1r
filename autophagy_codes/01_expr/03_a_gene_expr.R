@@ -112,18 +112,18 @@ readr::write_tsv(
 gene_list_fc_pvalue_simplified %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
   tidyr::drop_na(Tumor, Normal) %>% 
-  # dplyr::filter(pathway %in% c("autophagesome formation-core", "autophagesome formation")) %>%
+  dplyr::filter(status %in% c( "p")) %>%
   tidyr::gather(key = nt, value = expr, c(Tumor, Normal)) %>% 
   ggplot(aes(x = log2(expr + 1), color = nt)) +
   geom_density(aes(y = ..density..)) +
   ggthemes::scale_color_gdocs(name = "Type") +
   ggthemes::theme_gdocs() +
-  facet_grid(pathway ~ cancer_types, switch = "y") +
+  facet_wrap( ~ cancer_types) +
   labs(
     x = "Expression (log2)",
     y = "Frenquncy"
   ) -> p
-ggsave(filename = "03_a_expression_distribution_all.pdf", plot = p, device = "pdf", path = expr_path_a, width = 16, height = 13)
+ggsave(filename = "03_a_expression_distribution_promotion.pdf", plot = p, device = "pdf", path = expr_path_a, width = 6, height = 6)
 
 gene_list_fc_pvalue_simplified %>% 
   # dplyr::filter(cancer_types == "KICH") %>% 
@@ -321,10 +321,11 @@ gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::filter(status != "l" ) %>%  # exclude "lysosome"
+  dplyr::filter(status == "l" ) %>%  # exclude "lysosome"
   dplyr::filter(up+down > 2) %>% # at least two cancer types.
-  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
-  dplyr::arrange(status, rank) -> gene_rank
+  # dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>%
+  dplyr::mutate(color = plyr::revalue(color, c("#990099" = "red", "#109618" = "black"))) %>% 
+  dplyr::arrange(color, rank) -> gene_rank
 
 # raw data
 p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 

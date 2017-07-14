@@ -116,6 +116,7 @@ on.exit(parallel::stopCluster(cluster))
 
 expr_stage_sig_pval %>% 
   readr::write_rds(path = file.path(stage_path, ".rds_03_b_stage_gene_expr.rds.gz"), compress = "gz")
+# expr_stage_sig_pval <- readr::read_rds(path = file.path(stage_path, ".rds_03_b_stage_gene_expr.rds.gz"))
 #--------------------------------------------------------
 
 fun_rank_cancer <- function(pattern){
@@ -135,7 +136,7 @@ fun_rank_gene <- function(pattern){
     tidyr::unnest() %>%
     dplyr::arrange(rank)
 } # get gene rank
-fn_f
+
 
 expr_stage_sig_pval %>% 
   dplyr::select(cancer_types, symbol) %>% 
@@ -146,6 +147,7 @@ cancer_rank <- pattern %>% fun_rank_cancer()
 gene_rank <- pattern %>% 
   fun_rank_gene() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>%
   dplyr::arrange(color, rank)
 
 expr_stage_sig_pval %>% 

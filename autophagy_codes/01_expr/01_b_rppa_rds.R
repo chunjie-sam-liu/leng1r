@@ -244,6 +244,6 @@ cancers_names %>%
 on.exit(parallel::stopCluster(cluster))
 
 
-pancan_rppa %>% readr::write_rds(path = file.path(tcga_path, 'pancan_rppa.rds.gz'), compress = "gz")
+pancan_rppa %>% readr::write_rds(path = file.path(tcga_path, 'pancan_rppa_score.rds.gz'), compress = "gz")
 
 

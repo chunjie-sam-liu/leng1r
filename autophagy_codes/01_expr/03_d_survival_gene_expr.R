@@ -156,9 +156,11 @@ expr_clinical_sig_pval %>%
   tidyr::spread(key = cancer_types, value = n) -> pattern
 
 cancer_rank <- pattern %>% fun_rank_cancer()
-gene_rank <- pattern %>% 
+gene_rank <- 
+  pattern %>% 
   fun_rank_gene() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::filter( rank >= 5) %>% 
   dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>% 
   dplyr::arrange(color, rank)
 
@@ -187,11 +189,11 @@ expr_clinical_sig_pval %>%
   ) +
   ggthemes::scale_color_gdocs(name = "Surivival Worse")-> p
 ggsave(
-  filename = "fig_03_d_survival_sig_genes.pdf",
+  filename = "fig_03_d_survival_sig_genes_serminar.pdf",
   plot = p,
   device = "pdf",
   width = 14,
-  height = 25,
+  height = 9,
   path = survival_path
 )
 
