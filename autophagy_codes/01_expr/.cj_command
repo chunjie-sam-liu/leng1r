@@ -121,3 +121,6 @@ ll
 mv 01_b_rppa_protein_symbol.R 01_b_rppa_protein_symbol_rds.R
 ll
 cd ../../
+ls
+ll
+cd ../

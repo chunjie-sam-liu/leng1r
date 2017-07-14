@@ -599,3 +599,20 @@ l
 cd autophagy_codes/
 l
 gs
+ga -A
+gs "rppa name map
+"
+gp
+gm "rppa name map
+"
+gp
+l
+ll
+cd
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+gs

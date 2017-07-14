@@ -21,3 +21,6 @@ ll
 mv 01_ccle_b_drug_target.R 01_ccle_b_drug_target_rds.R
 ll
 exit
+ls
+ll
+cd ../

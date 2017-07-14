@@ -230,3 +230,21 @@ cd ../
 ls
 ll
 cd 01_expr/
+ls
+ll
+cd 01_expr/
+l
+ll
+cd 04_ccle/
+l
+ll
+cd 05_actionable_genes/
+l
+ll
+cd 06_methylation/
+l
+ll
+cd 07_mirna/
+ls
+ll
+cd 07_mirna/
