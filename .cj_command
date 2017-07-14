@@ -572,3 +572,10 @@ cd autophagy_codes/
 cd "/home/cliu18/liucj/projects/6.autophagy/TCGA"
 l
 git status
+ga -A
+gm "rppa name"
+gp
+ll
+cd autophagy_codes/
+l
+ga -a

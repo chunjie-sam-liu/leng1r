@@ -94,3 +94,11 @@ ll
 gzip rppa_protein_name.rds 
 ll
 cd ../
+ls
+ll
+R
+ls
+gunzip rppa_protein_name.rds.gz 
+l
+ll
+cd ../

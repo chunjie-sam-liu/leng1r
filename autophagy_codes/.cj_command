@@ -213,3 +213,7 @@ mv rppa_protein_name.rds 01_expr/
 cd 01_expr/
 ;
 cd ../
+ls
+cd 01_expr/
+l
+cd ../
