@@ -107,3 +107,9 @@ ll
 R
 ll
 cd ../
+l
+ll
+rm rppa_protein_name.rds
+gunzip rppa_protein_name.rds.gz 
+ll
+cd ../

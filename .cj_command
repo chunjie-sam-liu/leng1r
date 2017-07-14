@@ -585,3 +585,9 @@ gp
 ll
 cd autophagy_codes/
 l
+ga -A
+gm "rppa nam "
+gp
+cd autophagy_codes/
+l
+gs
