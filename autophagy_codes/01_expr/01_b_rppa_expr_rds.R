@@ -1,100 +1,10 @@
+library(magrittr)
 path <- "/extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp"
 files.names <- list.files("/extraspace/TCGA/TCGA_protein/", pattern="*re_20160627")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
-library(magrittr)
-
-expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
-gene_list <- readr::read_rds(file.path(expr_path, "rds_03_at_ly_comb_gene_list.rds.gz"))
-gene_list_expr <- readr::read_rds(path = file.path(expr_path, ".rds_03_a_gene_list_expr.rds.gz"))
-
-fun_barcode <- function(.b){
-  stringr::str_sub(
-    string = .b,
-    start = 1,
-    end = 12
-  )
-} #get short barcode from long barcode
-fun_tn_type <- function(.b){
-  type <- .b %>% 
-    stringr::str_split(pattern = "-", simplify = T) %>% 
-    .[, 4] %>% 
-    stringr::str_sub(1, 2)
-}
-fun_median_cluster <- function(cancer_types, filter_expr){
-  cancer <- cancer_types
-  filter_expr %>% 
-    dplyr::select(-entrez_id) %>% 
-    tidyr::gather(key = barcode, value = expr, -symbol) %>% 
-    dplyr::mutate(type = fun_tn_type(barcode)) %>% 
-    dplyr::filter(type == "01") %>%
-    dplyr::mutate(barcode = fun_barcode(barcode)) %>% 
-    dplyr::select(-type) %>% 
-    dplyr::group_by(symbol) %>% 
-    dplyr::mutate(cluster = ifelse(expr >= median(expr), 2, 1)) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::mutate(cancer_types = cancer) %>% 
-    tidyr::nest(-cancer_types, .key = median_cluster)
-}
-
-gene_list_expr %>% 
-  purrr::pmap(fun_median_cluster) %>% 
-  dplyr::bind_rows() -> gene_list_expr_median_cluster
-
-gene_list_expr_median_cluster %>% 
-  readr::write_rds(file.path(expr_path, ".rds_01_b_rppa_median_cluster_expr.rds.gz"), compress = "gz")
-
 
 cancer_types <- files.names %>% stringr::str_split(pattern = "\\_", simplify = T) %>% .[,1]
-
-fun_z_score <- function(rppa){
-  med <- median(rppa)
-  med_sd <- sd(rppa)
-  z_score <- (rppa - med) / med_sd
-}
-fun_cor <- function(pat, name, .d){
-  # print(pat)
-  .d %>% 
-    dplyr::select(-rppa) %>% 
-    dplyr::filter(stringr::str_detect(string = protein, pattern = pat)) %>% 
-      tidyr::spread(key = protein, value = z_score) %>% 
-      dplyr::select(-barcode) %>% 
-      cor() -> .d_cor
-  
-  switch (name,
-          EBP1.65.37 = .d_cor[1, 2],
-          EBP1.65.70 = .d_cor[1, 3],
-          EBP1.37.70 = .d_cor[2, 3],
-          .d_cor[1,2])
-}
-fun_check <- function(pat, name, type, pathway, .d){
-  dup <- c("Akt_", "GSK3.alpha.beta_|GSK3_pS9", "EGFR_", "S6_")
-  if(pat %in% dup){
-    .d %>% 
-      dplyr::filter(stringr::str_detect(string = protein, pattern = pat)) %>% 
-      tidyr::spread(key = protein, value = rppa) %>% 
-      dplyr::select(-barcode) %>% 
-      cor() -> .d_cor
-    
-    switch (name,
-            EBP1.65.37 = .d_cor[1, 2],
-            EBP1.65.70 = .d_cor[1, 3],
-            EBP1.37.70 = .d_cor[2, 3],
-            .d_cor[1,2]) -> .d_cor_val
-    
-    .d %>% 
-      dplyr::filter(stringr::str_detect(string = protein, pattern = pat)) %>% 
-      dplyr::group_by(barcode) %>% 
-      dplyr::summarise(rppa = ifelse(.d_cor_val > 0.85, mean(rppa), sum(rppa))) %>% 
-      dplyr::mutate(name = name, type = type, pathway = pathway)
-    
-  } else{
-    .d %>% 
-      dplyr::filter(stringr::str_detect(string = protein, pattern = pat)) %>% 
-      dplyr::group_by(barcode) %>% 
-      dplyr::summarise(rppa = sum(rppa)) %>% 
-      dplyr::mutate(name = name, type = type, pathway = pathway)
-  }
-}
+cancers_names <- tibble::tibble(names = files.names, cancer_types = cancer_types)
 
 process_raw_data <- function(.x){
   print(.x)
@@ -102,7 +12,7 @@ process_raw_data <- function(.x){
   d <- 
     readr::read_tsv(file = file.path(path, .x), progress = F) %>% 
     dplyr::select(- dplyr::starts_with("X"))
-
+  
   d %>% 
     tidyr::gather(key = barcode, value = rppa, -protein) %>% 
     dplyr::mutate(type = fun_tn_type(barcode)) %>% 
@@ -117,12 +27,12 @@ process_raw_data <- function(.x){
   
   score <- 
     tibble::tibble(pat = c("Akt_", "GSK3-alpha-beta_|GSK3_pS9", "p27_", "EGFR_", "S6_", "4E-BP1_p", "4E-BP1_p", "4E-BP1_p", "Src_", "ER-alpha"), 
-                          name = c("AKT", "GSK", "p27", "pEGFR", "pS6", "EBP1.65.37", "EBP1.65.70", "EBP1.37.70", "pSrc", "ERalpha"))
+                   name = c("AKT", "GSK", "p27", "pEGFR", "pS6", "EBP1.65.37", "EBP1.65.70", "EBP1.37.70", "pSrc", "ERalpha"))
   
   score %>% 
     dplyr::mutate(p_cor = purrr::map2_dbl(.x = pat, .y = name, .f = fun_cor, .d = d_z)) %>% 
     dplyr::select(-pat) -> score_cor
-#----------------------------------------------------------------------------------------------------------  
+  #----------------------------------------------------------------------------------------------------------  
   d_z %>% 
     dplyr::select(-z_score) %>% 
     dplyr::mutate(protein = gsub("-R-C|-R-V|-M-C|-M-V|-R-E|-G-C|-R-E|-M-E","",protein)) %>% 
@@ -218,32 +128,15 @@ process_raw_data <- function(.x){
     dplyr::summarise(score = sum(p) - sum(n)) %>% 
     dplyr::ungroup()
   
-  }
+}
 
-cancers_names <- tibble::tibble(names = files.names, cancer_types = cancer_types)
+fn_rppa_gene_symbol <- function(names, cancer_types){
+  path <- "/extraspace/TCGA/TCGA_protein/"
+  d <- 
+    readr::read_tsv(file = file.path(path, names), progress = F) %>% 
+    dplyr::select(- dplyr::starts_with("X"))
+}
 cancers_names %>%
-  head(1) %>%
-  dplyr::mutate(rppa = purrr::map(names, process_raw_data)) -> te
-
-cl <- parallel::detectCores()
-cluster <- multidplyr::create_cluster(floor(cl * 5 / 6))
-cancers_names %>%
-  multidplyr::partition(cluster = cluster) %>%
-  multidplyr::cluster_library("magrittr") %>%
-  multidplyr::cluster_assign_value("fun_z_score", fun_z_score)  %>%
-  multidplyr::cluster_assign_value("fun_tn_type", fun_tn_type)  %>%
-  multidplyr::cluster_assign_value("fun_barcode", fun_barcode)  %>%
-  multidplyr::cluster_assign_value("process_raw_data", process_raw_data)  %>%
-  multidplyr::cluster_assign_value("fun_cor", fun_cor) %>% 
-  multidplyr::cluster_assign_value("fun_check", fun_check) %>% 
-  dplyr::mutate(rppa = purrr::map(names, process_raw_data)) %>% 
-  dplyr::collect() %>%
-  dplyr::as_tibble() %>%
-  dplyr::ungroup() %>%
-  dplyr::select(-PARTITION_ID, -names) -> pancan_rppa
-on.exit(parallel::stopCluster(cluster))
-
-
-pancan_rppa %>% readr::write_rds(path = file.path(tcga_path, 'pancan_rppa_score.rds.gz'), compress = "gz")
-
-
+  head(1) %>% 
+  purrr::pmap(fn_rppa_gene_symbol)
+  

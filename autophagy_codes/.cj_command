@@ -202,3 +202,14 @@ cd ../
 ls
 ll
 cd 04_ccle/
+ls
+ll
+cd cd 05_actionable_genes/
+ls
+cd 05_actionable_genes/
+l
+ll
+mv rppa_protein_name.rds 01_expr/
+cd 01_expr/
+;
+cd ../

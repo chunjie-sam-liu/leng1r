@@ -89,3 +89,8 @@ ll
 ll /extraspace/yuxiang/Project_circRNA/
 ll
 cd 
+ls
+ll
+gzip rppa_protein_name.rds 
+ll
+cd ../

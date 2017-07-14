@@ -556,3 +556,19 @@ l
 l
 source ~/.profile
 gs
+ga -A
+gs
+gm 
+gm "seminar change"
+gs
+gp
+source ~/.profile
+../
+..
+ll
+ls
+ll
+cd autophagy_codes/
+cd "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+l
+git status
