@@ -102,3 +102,8 @@ gunzip rppa_protein_name.rds.gz
 l
 ll
 cd ../
+l
+ll
+R
+ll
+cd ../
