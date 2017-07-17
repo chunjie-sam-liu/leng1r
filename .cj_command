@@ -616,3 +616,16 @@ ll
 cd autophagy_codes/
 l
 gs
+ga -A
+gm "mirna and methylation"
+gp
+ps xf
+ll
+l
+cd 
+sl
+ll
+cd autophagy_codes/
+l
+ll
+gs

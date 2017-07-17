@@ -1,7 +1,8 @@
+`%>%` <- magrittr::`%>%`
 path <- "/extraspace/TCGA/TCGA_exp_DataPortal/mRNA_exp"
 files.names <- list.files(path="/extraspace/TCGA/TCGA_clinical/",pattern = "_clinical_clean.txt$")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
-library(magrittr)
+
 
 
 cancer_types <- files.names %>% stringr::str_split(pattern = "\\_", simplify = T) %>% .[,1]
@@ -29,7 +30,7 @@ cancers_names_shards %>%
   dplyr::ungroup() %>%
   dplyr::select(-c(names, PARTITION_ID)) -> pancan_clinical
 on.exit(parallel::stopCluster(cluster))
-pancan_clinical %>% readr::write_rds(path = file.path(tcga_path, 'pancan_clinical.rds.gz'), compress = "gz")
+pancan_clinical %>% readr::write_rds(path = file.path(tcga_path, 'pancan34_clinical.rds.gz'), compress = "gz")
 
 
 # stage data
@@ -61,7 +62,7 @@ pancan_clinical %>%
   dplyr::select(cancer_types, stage, n) -> pancan_clinical_stage
 
 pancan_clinical_stage %>% 
-  readr::write_rds(path = file.path(tcga_path, 'pancan_clinical_stage.rds.gz'), compress = "gz")
+  readr::write_rds(path = file.path(tcga_path, 'pancan34_clinical_stage.rds.gz'), compress = "gz")
 
 # age data
 age_fun <- function(.x){
@@ -91,7 +92,7 @@ pancan_clinical %>%
   dplyr::select(cancer_types, age, n) -> pancan_clinical_age
 
 pancan_clinical_age %>% 
-  readr::write_rds(path = file.path(tcga_path, 'pancan_clinical_age.rds.gz'), compress = "gz")
+  readr::write_rds(path = file.path(tcga_path, 'pancan34_clinical_age.rds.gz'), compress = "gz")
 
 #subtype
 subtype <- readr::read_tsv(file = file.path(tcga_path, "cancer_subtype.txt"))
@@ -127,7 +128,7 @@ pancan_clinical %>%
   dplyr::select(cancer_types, subtype, n) -> pancan_clinical_subtype
 
 pancan_clinical_subtype %>% 
-  readr::write_rds(path = file.path(tcga_path, 'pancan_clinical_subtype.rds.gz'), compress = "gz")
+  readr::write_rds(path = file.path(tcga_path, 'pancan34_clinical_subtype.rds.gz'), compress = "gz")
 
 
 
