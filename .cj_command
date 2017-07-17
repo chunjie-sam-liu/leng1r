@@ -629,3 +629,19 @@ cd autophagy_codes/
 l
 ll
 gs
+ga -A
+gs
+gm
+gc "update data")
+gc "update data"
+gm "update data"
+gp
+ls
+ll
+cd autophagy_codes/
+l
+ll
+ll /extraspace/liucj/projects/6.autophagy/
+cd /extraspace/liucj/projects/6.autophagy/
+ls
+gs

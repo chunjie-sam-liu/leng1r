@@ -22,7 +22,7 @@ fn_process_raw <- function(.x, path = path, man = mir_acc_name){
 
 cancers_names %>% 
   head(1) %>% 
-  dplyr::mutate(methy = purrr::map(.x = names, .f = fn_process_raw, path = path, man = mir_acc_name)) %>% 
+  dplyr::mutate(mirna = purrr::map(.x = names, .f = fn_process_raw, path = path, man = mir_acc_name)) %>% 
   dplyr::select(-names)
 
 cl <- parallel::detectCores()
@@ -33,7 +33,8 @@ cancers_names %>%
   multidplyr::cluster_assign_value("fn_process_raw", fn_process_raw)  %>%
   multidplyr::cluster_assign_value("mir_acc_name", mir_acc_name)  %>%
   multidplyr::cluster_assign_value("path", path)  %>%
-  dplyr::mutate(methy = purrr::map(
+  dplyr::mutate(
+    mirna = purrr::map(
     .x = names, 
     .f = fn_process_raw, 
     path = path, 
