@@ -30,4 +30,4 @@ cancers_names %>%
   dplyr::ungroup() %>%
   dplyr::select(-PARTITION_ID, -names) -> pancan_snv
 on.exit(parallel::stopCluster(cluster))
-pancan_snv %>% readr::write_rds(path = file.path(tcga_path, 'pancan_snv.rds.gz'), compress = "gz")
+pancan_snv %>% readr::write_rds(path = file.path(tcga_path, 'pancan33_snv.rds.gz'), compress = "gz")

@@ -254,3 +254,41 @@ cd ../
 ls
 ll
 cd ../
+ls
+ll
+cd ye_circadian_code/
+ls
+l
+find . -name "*.R"
+find . -name "*.R"|xargs grep before
+exit
+ls
+cd synapse/
+ls
+cd 03_mutation/
+l
+ll
+find . -name "*R"
+find . -name "*R"|xargs grep geom_bar
+find . -name "*R"|xargs grep -A 3 -B 3 geom_bar
+ps xf
+ls
+cd 02_cnv/
+sl
+ll
+find . -name "*R"
+find . -name "*R"|xargs grep .predictive
+find . -name "*R"|xargs grep predicate
+ls
+ls
+cd 03_mutation/
+l
+ps xf
+l
+cd 01_expr/
+cd /home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr
+ls
+ll
+cd 01_expr/
+ls
+cd 01_expr/

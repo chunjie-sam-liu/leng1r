@@ -1,0 +1,12 @@
+ls
+vim download_synapse.py
+s
+ls
+ipython
+pip install pysftp
+l
+ls
+gitr
+ls
+source activate py27
+ipython

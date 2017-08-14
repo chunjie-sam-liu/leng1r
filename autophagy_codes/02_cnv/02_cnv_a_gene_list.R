@@ -5,7 +5,7 @@ expr_path_a <- file.path(expr_path, "03_a_gene_expr")
 cnv_path <- "/home/cliu18/liucj/projects/6.autophagy/03_cnv"
 
 # load cnv and gene list
-cnv <- readr::read_rds(file.path(tcga_path, "pancan_cnv.rds.gz"))
+cnv <- readr::read_rds(file.path(tcga_path, "pancan34_cnv.rds.gz"))
 gene_list <- readr::read_rds(file.path(expr_path_a, "rds_03_a_atg_lys_gene_list.rds.gz"))
 
 filter_gene_list <- function(.x, gene_list) {
@@ -21,7 +21,7 @@ cnv %>%
 readr::write_rds(x = gene_list_cnv, path = file.path(cnv_path, ".rds_02_cnv_a_gene_list.rds.gz"), compress = "gz")
 
 fn_get_amplitue_threshold <- function(.x){
-  ifelse(abs(.x) < log2(3) - 1, 0, .x) -> .y
+  ifelse(abs(.x) < log2(4 / 2) , 0, .x) -> .y
   tibble::tibble(a = sum(.y > 0) / length(.y), d = sum(.y < 0) / length(.y)) 
 }
 fn_get_ad <- function(.d){
@@ -38,7 +38,7 @@ fn_get_percent <- function(cancer_types, filter_cnv){
     tibble::add_column(cancer_types = cancer_types, .before = 1)
 }
 
-gene_list_cnv %>% head(2) %>% 
+gene_list_cnv %>% dplyr::filter(cancer_types == "KIRC") %>% 
   dplyr::mutate(rs = purrr::map2(cancer_types, filter_cnv, fn_get_percent)) %>% 
   dplyr::select(-cancer_types, -filter_cnv) %>% 
   tidyr::unnest(rs)

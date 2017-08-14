@@ -645,3 +645,43 @@ ll /extraspace/liucj/projects/6.autophagy/
 cd /extraspace/liucj/projects/6.autophagy/
 ls
 gs
+ga -A
+gm "mirna and methylation"
+gp
+ll
+ls
+ll
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+ll
+gitr
+ls
+ll
+rm iris.xlsx 
+l
+ll
+rm r2excel_test.xlsx 
+ll
+l
+ll
+rm Mutation_count.xlsx 
+l
+ll
+exit
+ls
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+ls
+gs

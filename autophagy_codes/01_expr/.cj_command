@@ -124,3 +124,91 @@ cd ../../
 ls
 ll
 cd ../
+ls
+ll
+Rscript 03_h_coca.R
+bg 1
+ps xf
+top
+ll
+Rscript 03_h_coca.R
+ps xf
+top
+R
+ll
+Rscript 03_h_coca.R
+ll
+cd ConsensusClusterResult/
+l
+rm ConsensusClusterResult/
+ll
+R
+ll
+Rscript ll
+ll
+rm 03_h_1_coca.R
+ll
+les 03_h_coca_1.R
+Rscript 03_h_coca_1.R &
+ps xf
+ll
+l
+top
+ps xf
+ll
+Rscript 03_h_coca_2.R &
+Rscript 03_h_coca_3.R &
+ps xf
+ll
+ps xf
+l
+nohup Rscript 03_h_coca_4.R &
+ps xf
+ll
+ps xf
+R
+ls
+cat nohup.out 
+ps xf
+top
+ps xf
+top
+ls
+ll
+ls
+ll
+cat nohup.out 
+Rscript 03_h_coca_1.R &
+ps xf
+Rscript 03_h_coca_2.R &
+ps xf
+kill 18208
+ps xf
+Rscript 03_h_coca_3.R &
+ps xf
+top
+top
+ps x
+top
+ps xf
+top
+ll
+qps xf
+ps xf
+top
+free
+ps xf
+nohup Rscript 03_h_coca_cc.R &
+ps xf
+l
+les nohup.out 
+ps xf
+top
+ps xf
+top
+l
+ll
+cd
+l
+ll
+cat nohup.out 
