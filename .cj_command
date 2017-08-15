@@ -685,3 +685,17 @@ ls
 cd autophagy_codes/
 ls
 gs
+git add -A
+git status
+git commit -m "coca"
+git push origin master
+ll
+cd expr_matrix/
+ls
+ll
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+ls
+git status

@@ -1,0 +1,57 @@
+ll
+ps xf
+ll
+rm *
+ll
+ps xf
+ll
+rm *
+ps xf
+ll
+top
+ll
+ps xf
+ll
+ps xf
+ps f
+ps xf
+ll
+ps xf
+top
+ll
+ps xf
+ll
+ps xf
+ll
+rm *
+cd ../
+ll
+ps xf
+ll
+ps xf
+top
+free
+ll
+ps xf
+top
+ps xf
+l
+ll
+ps xf
+top
+ps x
+ps xf
+top
+ps xf
+ll
+ps xf
+l
+ps xf
+ll
+ps xf
+kill 73625
+ps xf
+top
+ps xf
+top
+ll

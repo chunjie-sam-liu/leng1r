@@ -115,21 +115,110 @@ methy_matrix <-
 coca <- list(mrna = expr_matrix, cnv = cnv_matrix, methy = methy_matrix)
 
 # cc for every one
-expr_cc <- ExecuteCC(clusterNum = 3, d = expr_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "expr_matrix", plot = F)
-expr_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_expr_cc.rds.gz"), compress = 'gz')
-
-cnv_cc <- ExecuteCC(clusterNum = 3, d = cnv_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "cnv_matrix", plot = F)
-cnv_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_cnv_cc.rds.gz"), compress = 'gz')
-
-methy_cc <- ExecuteCC(clusterNum = 3, d = methy_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "methy_matrix", plot = F)
-methy_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_methy_cc.rds.gz"), compress = 'gz')
+# expr_cc <- ExecuteCC(clusterNum = 3, d = expr_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "expr_matrix", plot = F)
+# expr_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_expr_cc.rds.gz"), compress = 'gz')
+# 
+# cnv_cc <- ExecuteCC(clusterNum = 3, d = cnv_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "cnv_matrix", plot = F)
+# cnv_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_cnv_cc.rds.gz"), compress = 'gz')
+# 
+# methy_cc <- ExecuteCC(clusterNum = 3, d = methy_matrix, maxK = 10, clusterAlg = "hc", distance = "pearson", title = "methy_matrix", plot = F)
+# methy_cc %>% readr::write_rds(file.path(expr_path_a, ".rds_03_h_coca_methy_cc.rds.gz"), compress = 'gz')
 
 
 
 # coca_cc <- ExecuteCC(clusterNum=3,d=coca,maxK=10,clusterAlg="hc",distance="pearson")
-coca_snf <- ExecuteSNF(coca, clusterNum=3, K=20, alpha=0.5, t=20, plot = F)
-coca_snf %>% readr::write_rds(path = file.path(expr_path_a, ".rds_03_h_coca_coca_snf.rds.gz"), compress = "gz")
+# coca_snf <- ExecuteSNF(coca, clusterNum=3, K=20, alpha=0.5, t=20, plot = F)
+# coca_snf %>% readr::write_rds(path = file.path(expr_path_a, ".rds_03_h_coca_coca_snf.rds.gz"), compress = "gz")
+coca_snf <- readr::read_rds(path = file.path(expr_path_a, ".rds_03_h_coca_coca_snf.rds.gz"))
 
+d <- coca_snf$distanceMatrix %>% as.matrix()
+
+fn_best_clust <- function(k, d){
+  # k = 3
+  group <- spectralClustering(d, K = k)
+  
+  diag(d) <- 0
+  diag(d) <- max(d)
+  
+  tibble::tibble(
+    name = paste("V", c(1:ncol(d)), sep = ""), 
+    group = group) %>% 
+    dplyr::arrange(group)  -> .rank_sample
+  
+  d %>% 
+    as.data.frame() %>% 
+    tibble::as_tibble() %>% 
+    tibble::add_column(
+      sample1 = paste("V", c(1:ncol(d)), sep = ""), 
+      .before = 1) %>% 
+    tidyr::gather(key = sample2, value = sim, -sample1) -> .plot_ready
+  
+  .plot_ready %>% 
+    dplyr::mutate(sim = ifelse(sim > quantile(sim, 0.75), 1, 0)) %>%
+    ggplot(aes(x= sample1, y = sample2, fill = sim)) +
+    geom_tile() +
+    scale_x_discrete(limits = .rank_sample$name) +
+    scale_y_discrete(limits = .rank_sample$name) +
+    theme(
+      axis.text = element_blank(),
+      axis.title = element_blank(),
+      axis.ticks = element_blank(),
+      
+      legend.position = "none"
+    )  +
+    geom_vline(xintercept = table(group) %>% as.vector() %>% purrr::accumulate(`+`), color = "red") +
+    geom_hline(yintercept = table(group) %>% as.vector() %>% purrr::accumulate(`+`), color = "red") -> p
+  
+  ggsave(filename = paste(k, "coca_clust.tif", sep = "_"), plot = p, device = "tiff", width = 8, height = 8, path = "/home/cliu18/liucj/github/RstudioWithGit/autophagy_codes/01_expr/coca_clust_trial")
+  
+  return(1)
+}
+
+cluster <- multidplyr::create_cluster(6)
+tibble::tibble(k = 2:7) %>% 
+  multidplyr::partition(cluster = cluster) %>%
+  multidplyr::cluster_library("magrittr") %>%
+  multidplyr::cluster_library("SNFtool") %>%
+  multidplyr::cluster_library("ggplot2") %>%
+  multidplyr::cluster_assign_value("fn_best_clust", fn_best_clust)  %>%
+  multidplyr::cluster_assign_value("d", d)  %>%
+  dplyr::mutate(a = purrr::walk(.x = k, .f = fn_best_clust, d = d)) 
+parallel::stopCluster(cluster)
+
+SNFtool::spectralClustering(d, K = ) -> group
+tibble::tibble(
+  sample = common_names[-1], 
+  name = paste("V", c(1:ncol(coca_snf$distanceMatrix)), sep = ""), 
+  group = coca_snf$group) %>% 
+  dplyr::arrange(group)  -> rank_sample
+
+class(coca_snf$distanceMatrix) <- "matrix"
+
+coca_snf$distanceMatrix %>% 
+  as.data.frame() %>% 
+  tibble::as_tibble() %>% 
+  tibble::add_column(
+    sample1 = paste("V", c(1:ncol(coca_snf$distanceMatrix)), sep = ""), 
+    .before = 1) %>% 
+  tidyr::gather(key = sample2, value = sim, -sample1) -> plot_ready
+
+plot_ready %>% 
+  ggplot(aes(x= sample1, y = sample2, fill = sim)) +
+  geom_tile() +
+  scale_x_discrete(limits = rank_sample$name) +
+  scale_y_discrete(limits = rank_sample$name) +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    
+    legend.position = "none"
+  ) -> p
+
+ggsave(filename = "coca_snf.tif", plot = p, device = "tiff", path = expr_path_a, width = 8, height = 8)
+#
+
+#
 save.image(file = file.path(expr_path_a, ".rda_03_h_coca.rda"))
 load(file = file.path(expr_path_a, ".rda_03_h_coca.rda"))
 
