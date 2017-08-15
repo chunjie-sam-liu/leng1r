@@ -699,3 +699,34 @@ ll
 cd autophagy_codes/
 ls
 git status
+git add -A
+git commit -m "coca+cor" 
+rm autophagy_codes/01_expr/Rplots.pdf
+ps xf
+ll
+git add -A
+git status
+git commit -m "coca + cor"
+git push origin master
+ll autophagy_codes/01_expr/Rplots.pdf
+git push origin master
+git status
+git rm autophagy_codes/01_expr/Rplots.pdf
+git log
+git revert
+git checkout master
+git checkout commit
+git log --oneline
+git checkout aaab9ac
+git status
+git log -h
+git log --oneline
+git log --oneline|head
+git checkout aaab9ac
+git checkout master
+git checkout aaab9a cautophagy_codes/01_expr/Rplots.pdf
+git checkout 3b71338 cautophagy_codes/01_expr/Rplots.pdf
+git checkout HEAD cautophagy_codes/01_expr/Rplots.pdf
+git status
+git log --oneline
+git status

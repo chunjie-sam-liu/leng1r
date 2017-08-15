@@ -55,3 +55,22 @@ top
 ps xf
 top
 ll
+l
+ll
+ps xf
+git log --oneline
+git reset aaab9ac
+git status
+git push origin master
+git log --oneline
+git commit -m "re commit"
+git push origin master
+git checkout  master
+git push origin master
+git pull
+git pull -f
+git log --oneline
+git status
+git push origin master
+git push -f origin master
+git status
