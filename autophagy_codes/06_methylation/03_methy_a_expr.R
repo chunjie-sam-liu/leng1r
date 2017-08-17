@@ -31,7 +31,7 @@ fun_tn_type <- function(.b){
 fn_transform <- function(.d){
   # .d <- te$filter_methy[[1]]
   .d %>% 
-    # dplyr::select(-2) %>% 
+    # dplyr::select(-2) %>%
     tidyr::gather(key = barcode, value = value, -symbol) %>% 
     dplyr::mutate(type = fun_tn_type(barcode)) %>% 
     dplyr::filter(type != "11") %>% 
@@ -119,7 +119,7 @@ df_expr_cnv_methy_cor %>%
 
 
 
-
+save.image(file = file.path(methy_path, ".rda_meth_a_expr.rda"))
 
 
 

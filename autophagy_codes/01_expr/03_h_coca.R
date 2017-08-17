@@ -221,4 +221,3 @@ ggsave(filename = "coca_snf.tif", plot = p, device = "tiff", path = expr_path_a,
 #
 save.image(file = file.path(expr_path_a, ".rda_03_h_coca.rda"))
 load(file = file.path(expr_path_a, ".rda_03_h_coca.rda"))
-
