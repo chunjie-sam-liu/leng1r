@@ -730,3 +730,49 @@ git checkout HEAD cautophagy_codes/01_expr/Rplots.pdf
 git status
 git log --oneline
 git status
+git add -A
+git status
+git commit -m "coca + corr"
+git push origin master
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+cd
+ls
+ll
+cd testCode/
+l
+ll
+cd testCode/
+l
+cd ../
+ls
+cd autophagy_codes/
+l
+cd ../
+ls
+git stauts
+git status
+git add autophagy_codes/01_expr/03_h_coca.R autophagy_codes/01_expr/03_h_coca_cc.R autophagy_codes/06_methylation/03_methy_a_expr.R
+git commit -m 'meth and coca_cc'
+git push origin master
+ls
+ll
+ls
+ll
+ls
+cd autophagy_codes/
+ls
+ll
+ll autophagy_codes/
+cd autophagy_codes/
+l
+git status
+git add -A
+ll
+cd autophagy_codes/
+l
+git status

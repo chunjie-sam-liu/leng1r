@@ -300,3 +300,42 @@ cd 01_expr/
 ls
 ll
 cd 01_expr/
+l
+ps xf
+top
+ls
+ll
+cd 01_expr/
+ls
+cd 01_expr/
+ls
+ll
+cd 01_expr/
+l
+cd ../
+ls
+cd ../
+ls
+ll
+cd synapse/
+l
+ll
+cd
+ls
+ll
+cp ye_circadian_code/C5.biased.mRNA.GSEA.run.r 01_expr/.
+ll
+cp ye_circadian_code/GSEA.1.0.r 01_expr/.
+cd 01_expr/
+l
+cd ../
+ls
+ll
+cd synapse/
+l
+cd synapse/
+l
+mv synapse/ /home/cliu18/liucj/projects/6.autophagy/
+l
+ll
+cd ../

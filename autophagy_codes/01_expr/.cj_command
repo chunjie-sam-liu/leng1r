@@ -299,3 +299,44 @@ top
 ps xf
 ll
 cd coca_clust_trial/
+l
+cd ../
+ls
+cd coca_clust_trial/
+ls
+cd coca_clust_trial/
+;s
+ls
+ll
+cd ConsensusClusterplus/
+l
+cat nohup.out 
+R
+l
+cat nohup.out 
+ps xf
+ll
+cd coca_clust_trial
+ls
+cd ../
+ls
+ll
+rm C5.biased.mRNA.GSEA.run.r 
+ll
+rm nohup.*
+ll
+ll coca_clust_trial/
+ll ConsensusClusterplus/
+rm ConsensusClusterplus/
+ls
+ll
+rm Rplots.pdf 
+ls
+ll
+R
+ll
+rm rppa_protein_name.rds 
+ll
+rm coca_clust_trial/
+ll
+cd ../
