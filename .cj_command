@@ -776,3 +776,17 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git status
+git commit -m "gsea"
+git push origin master
+git status
+l
+cd /home/cliu18/liucj/projects/6.autophagy/
+ls
+cd autophagy_codes/
+l
+cd autophagy_codes/
+l
+git status
+git add

@@ -610,23 +610,10 @@ GSEA.ReadClsFile <- function(file = "NULL") {
       cls.cont <- readLines(file)
       num.lines <- length(cls.cont)
       class.list <- unlist(strsplit(cls.cont[[3]], " "))
-      s <- length(class.list)
-      t <- table(class.list)
-      l <- length(t)
-      phen <- vector(length=l, mode="character")
-      phen.label <- vector(length=l, mode="numeric")
-      class.v <- vector(length=s, mode="numeric")
-      for (i in 1:l) {
-         phen[i] <- noquote(names(t)[i])
-         phen.label[i] <- i - 1
-      }
-      for (i in 1:s) {
-         for (j in 1:l) {
-             if (class.list[i] == phen[j]) {
-                class.v[i] <- phen.label[j]
-             }
-         }
-      }
+      unique(class.list) -> phen
+      phen.label <- 1:length(phen)-1
+      names(phen.label) <- phen
+      class.v <- as.numeric(plyr::revalue(class.list, replace = phen.label))
       return(list(phen = phen, class.v = class.v))
 }
 
@@ -1827,7 +1814,7 @@ if (output.directory != "")  {
          C <- rbind(B[1:100,], rep(0, Ns), rep(0, Ns), B[(floor(N/2) - 50 + 1):(floor(N/2) + 50),], rep(0, Ns), rep(0, Ns), B[(N - 100 + 1):N,])
       }
       rm(B)
-      GSEA.HeatMapPlot(V = C, col.labels = class.labels, col.classes = class.phen, main = "Heat Map for Genes in Dataset")
+      # GSEA.HeatMapPlot(V = C, col.labels = class.labels, col.classes = class.phen, main = "Heat Map for Genes in Dataset")
 
 # p-vals plot
       nom.p.vals <- p.vals[Obs.ES.index,1]

@@ -115,7 +115,7 @@ gene_list_gsva_fc %>%
   geom_point()
 
 fn_diff <- function(.gsva){
-  .gsva <- .te$gsva[[1]]
+  # .gsva <- .te$gsva[[1]]
   
   .samples <-
     tibble::tibble(barcode = colnames(.gsva)[-1]) %>% 
@@ -158,5 +158,38 @@ fn_diff <- function(.gsva){
   
 }
 gene_list_gsva %>%
-  dplyr::filter(cancer_types == "KIRC") -> .te
-  
+  dplyr::mutate(gsva_diff = purrr::map(.x = gsva, .f = fn_diff)) -> gene_list_gsva_diff
+
+# no expression difference between tumor and normal
+gene_list_gsva_diff %>% 
+  dplyr::filter(! purrr::map_lgl(.x = gsva_diff, .f= is.null)) %>% 
+  tidyr::unnest(gsva_diff) %>% 
+  dplyr::filter(fdr < 0.05) %>% 
+  ggplot(aes(x = cancer_types, y = set)) +
+  geom_point(aes(size = -log10(fdr)))
+
+# autophagy gene and lysosome gene are negative correlated
+gene_list_gsva %>% 
+  dplyr::filter(cancer_types == "THCA") %>% 
+  dplyr::pull(gsva) %>% 
+  .[[1]] %>% 
+  tidyr::gather(key = barcode, value = gsva, - set) %>% 
+  tidyr::spread(key = set, value = gsva) %>% 
+  dplyr::filter(stringr::str_sub(barcode, start = 14, end = 15) == "01") %>% 
+  dplyr::select(- barcode) %>% 
+  cor() -> .te_cor
+ggcorrplot::ggcorrplot(corr = .te_cor)
+
+gene_list_gsva %>% 
+  dplyr::filter(cancer_types == "PRAD") %>% 
+  dplyr::pull(gsva) %>% 
+  .[[1]] %>% 
+  tidyr::gather(key = barcode, value = gsva, - set) %>% 
+  tidyr::spread(key = set, value = gsva) %>% 
+  dplyr::filter(stringr::str_sub(barcode, start = 14, end = 15) == "01") %>% 
+  ggplot(aes(x = reorder(barcode, atg_core), y = atg_core)) +
+  geom_point()
+
+save.image(file = file.path(expr_path_a, ".rda_03_i_gsva.rda"))
+load(file = file.path(expr_path_a, ".rda_03_i_gsva.rda"))
+

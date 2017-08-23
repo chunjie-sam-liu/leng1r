@@ -340,3 +340,31 @@ ll
 rm coca_clust_trial/
 ll
 cd ../
+ls
+ll
+les /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/same.samples.to.PSM/BLCA.mRNA.expression.gct
+les /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/c5.all.v5.2.symbols.gmt
+ll  /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/
+ll  /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/*gmt
+cp /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/*gmt /home/cliu18/liucj/projects/6.autophagy/GSEA
+ll /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/
+ll /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/oncogenic.signatures/
+les  /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/oncogenic.signatures/significant.oncogene.gsea.in.hypoxic.normoxic.tumor.csv
+cd /extraspace/yye1/analysis/Hypoxia/PSM/mRNA/GSEA/oncogenic.signatures/
+ls
+nohup Rscript 03_j_gsea.R &
+les nohup.out 
+R
+rm nohup.out 
+nohup Rscript 03_j_gsea.R &
+les nohup.out 
+rm nohup.out 
+nohup Rscript 03_j_gsea.R &
+les nohup.out 
+ps xf
+ll
+les nohup.out 
+l
+ps xf
+les nohup.out 
+cd "/extraspace/liucj/projects/6.autophagy/02_autophagy_expr/03_a_gene_expr"

@@ -339,3 +339,7 @@ mv synapse/ /home/cliu18/liucj/projects/6.autophagy/
 l
 ll
 cd ../
+ls
+cd 01_expr/
+ls
+cd 01_expr/
