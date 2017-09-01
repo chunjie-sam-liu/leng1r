@@ -5,6 +5,7 @@ expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 expr_path_a <- file.path(expr_path, "03_a_gene_expr")
 
 #
+expr <- readr::read_rds(file.path(tcga_path, "pancan33_expr.rds.gz"))
 gene_list_expr <- readr::read_rds(file.path(expr_path_a, ".rds_03_a_gene_list_expr.rds.gz"))
 gene_list_fc_pvalue_simplified <- readr::read_rds(path = file.path(expr_path_a, ".rds_03_a_atg_lys_fc_pvalue_simplified.rds.gz"))
 
@@ -34,16 +35,19 @@ fn_gsva <- function(.x, .y, gene_sets = gene_sets){
   .d_mat <- as.matrix(.d[,-1])
   rownames(.d_mat) <- .d$symbol
   
-  .es_dif <- gsva(.d_mat, gene_sets, method = "ssgsea", mx.diff=TRUE, verbose=FALSE, parallel.sz=1)
+  .es_dif <- gsva(.d_mat, gene_sets, method = "gsva", mx.diff=TRUE, verbose=FALSE, parallel.sz=1)
   
-  .es_dif %>% 
+  .es_dif$es.obs %>% 
     as.data.frame() %>% 
     tibble::as_tibble() %>% 
-    tibble::add_column(set = rownames(.es_dif), .before = 1) -> .d_es
+    tibble::add_column(set = rownames(.es_dif$es.obs), .before = 1) -> .d_es
 }
 
-gene_list_expr %>% 
-  dplyr::mutate(gsva = purrr::map2(.x = cancer_types, .y = filter_expr, .f = fn_gsva, gene_sets = gene_sets)) -> gene_list_gsva
+expr %>% 
+  dplyr::mutate(gsva = purrr::map2(.x = cancer_types, .y = expr, .f = fn_gsva, gene_sets = gene_sets)) %>% 
+  dplyr::select(-expr) -> gene_list_gsva
+
+readr::write_rds(x = gene_list_gsva, path = file.path(expr_path_a, ".rds_03_i_gsva_gene_list_gsva.rds.gz"), compress = "gz")
 
 calculate_fc_pvalue <- function(.x, .y) {
   .y %>% tibble::add_column(cancer_types = .x, .before = 1) -> df
@@ -104,6 +108,7 @@ calculate_fc_pvalue <- function(.x, .y) {
     dplyr::mutate(n_normal = sample_type_summary[1], n_tumor = sample_type_summary[2]) -> res
   return(res)
 }
+
 purrr::map2(.x = gene_list_gsva$cancer_types,
             .y = gene_list_gsva$gsva,
             .f = calculate_fc_pvalue) -> gene_list_gsva_fc

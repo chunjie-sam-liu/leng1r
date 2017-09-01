@@ -790,3 +790,29 @@ cd autophagy_codes/
 l
 git status
 git add
+git add -A
+git status
+git commit -m "gsva gsea"
+git push origin master
+ls
+ll
+l
+cd expr_matrix/
+l
+rm expr_matrix/
+l
+ll
+cd goodRCode/
+l
+ll
+cd testCode/
+l
+ll
+l
+cd ../
+ls
+ll
+cd autophagy_codes/
+l
+git status
+ll autophagy_codes/11_cancer_stem_cell/

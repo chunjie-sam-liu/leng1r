@@ -343,3 +343,6 @@ ls
 cd 01_expr/
 ls
 cd 01_expr/
+ls
+ll
+exit
