@@ -81,6 +81,8 @@ scores_gsva_sci %>%
   scores_gsva_sci_cor
 readr::write_rds(x = scores_gsva_sci_cor, path = file.path(csc_dir, ".rds_04_stemness_index_scores_gsva_sci_cor.rds.gz"), compress = "gz")
 
+scores_gsva_sci_cor <- readr::read_rds(path = file.path(csc_dir, ".rds_04_stemness_index_scores_gsva_sci_cor.rds.gz"))
+
 scores_gsva_sci_cor %>% 
   tidyr::unnest(pathway_diff) %>% 
   dplyr::filter(cor_pval < 0.05) %>% 

@@ -816,3 +816,13 @@ cd autophagy_codes/
 l
 git status
 ll autophagy_codes/11_cancer_stem_cell/
+git add -A 
+git commit -m "delete consensus matrix and update stem cel"
+git push origin master
+ps xf
+l
+top
+l
+cd liucj
+cd
+git status
