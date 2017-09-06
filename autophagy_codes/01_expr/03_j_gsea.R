@@ -178,9 +178,10 @@ cancers %>%
   purrr::map(.f = fn_load_es, .path = gsea_result_path) %>% 
   dplyr::bind_rows() -> cancers_es
 
+readr::write_rds(cancers_es, path = file.path(expr_path_a, ".rds_02_i_gsea_cancer_es.rds.gz"), compress = "gz")
 library(ggplot2)
 cancers_es %>% 
-  dplyr::filter(q_val < 0.1) %>%
+  dplyr::filter(q_val < 0.05) %>%
   ggplot(aes(x = cancer_types, y = GS)) +
   geom_point(aes(size = -log10(q_val), color = NES)) +
   scale_color_gradient2(low = 'blue', high = 'red', mid = 'white')

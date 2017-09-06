@@ -826,3 +826,14 @@ l
 cd liucj
 cd
 git status
+git add -A
+git commit -m 'gsva'
+git push origin master
+ll
+ls
+ps xf
+liucj
+find . -name .Rprofile
+cd  "/extraspace/liucj/projects/4.SNORic/database"
+ls
+git status

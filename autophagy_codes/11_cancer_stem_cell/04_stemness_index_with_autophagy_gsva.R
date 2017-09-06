@@ -16,7 +16,7 @@ fn_tn <- function(.s){
 }
 
 fn_test_corr <- function(.p, .d){
-  .p <- "atg_core"
+  # .p <- "atg_core"
   .v <- rlang::sym(.p)
   
   .dd <- .d %>% dplyr::filter(high_low %in% c("high", "low"))
@@ -39,6 +39,7 @@ fn_test_corr <- function(.p, .d){
   
   tibble::tibble(
     pathway = .p, 
+    t_diff = ifelse(tibble::has_name(.t_test, "estimate"), .t_test$estimate, 0), # diff is high - low
     t_pval = ifelse(tibble::has_name(.t_test, "p.value"), .t_test$p.value, 1), 
     cor_coef = .cor_test$estimate, 
     cor_pval = .cor_test$p.value
@@ -46,8 +47,8 @@ fn_test_corr <- function(.p, .d){
 }
 
 fn_cor_gsva_sci <- function(.gsva, .sci){
-  .gsva <- .te$gsva[[1]]
-  .sci <- .te$sci[[1]]
+  # .gsva <- .te$gsva[[1]]
+  # .sci <- .te$sci[[1]]
   
   # use 1.5 sigma as cutoff
   .sigma <- c(mean(.sci$score) - 1 * sd(.sci$score), mean(.sci$score) + 1.5 * sd(.sci$score))
@@ -62,7 +63,7 @@ fn_cor_gsva_sci <- function(.gsva, .sci){
     # dplyr::mutate(high_low = dplyr::case_when(
     #   csi >= .sigma[2] ~ "high",
     #   csi <= .sigma[1] ~ "low",
-    #   TRUE ~ "mid")) -> .d
+  #   TRUE ~ "mid")) -> .d
     dplyr::mutate(high_low = dplyr::case_when(
       csi >= mean(csi) ~ "high",
       TRUE ~ "low")) -> .d
@@ -76,20 +77,34 @@ fn_cor_gsva_sci <- function(.gsva, .sci){
 }
 
 scores_gsva_sci %>%
-  dplyr::filter(cancer_types == "BRCA") -> .te
+  # dplyr::filter(cancer_types == "BRCA") %>% 
   dplyr::mutate(pathway_diff = purrr::map2(.x = gsva, .y = sci, .f = fn_cor_gsva_sci)) ->
   scores_gsva_sci_cor
+
 readr::write_rds(x = scores_gsva_sci_cor, path = file.path(csc_dir, ".rds_04_stemness_index_scores_gsva_sci_cor.rds.gz"), compress = "gz")
 
+
+save.image(file = file.path(csc_dir, '.rds_04_stemness_index.rda'))
+
+#-----------------------------------------------------------
 scores_gsva_sci_cor <- readr::read_rds(path = file.path(csc_dir, ".rds_04_stemness_index_scores_gsva_sci_cor.rds.gz"))
 
 scores_gsva_sci_cor %>% 
   tidyr::unnest(pathway_diff) %>% 
-  dplyr::filter(cor_pval < 0.05) %>% 
+  dplyr::filter(cor_pval < 0.05) %>%
   ggplot(aes(cancer_types, y = pathway)) +
   geom_point(aes(size = -log10(cor_pval), color = cor_coef)) +
   scale_color_gradient2(high = "red", mid = "white", low = "blue") +
   theme(
     axis.text.x = element_text(angle = 90)
   )
-  
+
+scores_gsva_sci_cor %>% 
+  tidyr::unnest(pathway_diff) %>% 
+  dplyr::filter(t_pval < 0.05) %>%
+  ggplot(aes(cancer_types, y = pathway)) +
+  geom_point(aes(size = -log10(t_pval), color = t_diff)) +
+  scale_color_gradient2(high = "red", mid = "white", low = "blue") +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
