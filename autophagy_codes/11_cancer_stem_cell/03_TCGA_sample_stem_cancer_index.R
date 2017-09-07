@@ -56,9 +56,10 @@ expr_sci_rd %>%
   expr_sci_score
 
 readr::write_rds(expr_sci_score, path = file.path(csc_dir, ".rds_03_sample_score_expr_sci_score.rds.gz"), compress = "gz")
+
 expr_sci_score %>% 
   dplyr::mutate(percent = purrr::map_dbl(sci, .f = function(.s){sum(.s$score > 0)/ length(.s$score)}) ) %>% 
-  print(n =Inf)
+  print(n = Inf)
 #
 save.image(file = file.path(csc_dir, ".rda_03_TCGA_sample_stem_cancer_index.rda"))
 

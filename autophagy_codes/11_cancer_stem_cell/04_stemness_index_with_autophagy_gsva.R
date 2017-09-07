@@ -31,7 +31,7 @@ fn_test_corr <- function(.p, .d){
     cor.test(
     x = .d %>% dplyr::pull(csi) , 
     y = .d %>% dplyr::pull(rlang::eval_bare(.v)), 
-    method = "pearson"
+    method = "spearman"
     ),
     error = function(e){1}, warning = function(e){1}
     ) %>% 
@@ -65,7 +65,7 @@ fn_cor_gsva_sci <- function(.gsva, .sci){
     #   csi <= .sigma[1] ~ "low",
   #   TRUE ~ "mid")) -> .d
     dplyr::mutate(high_low = dplyr::case_when(
-      csi >= mean(csi) ~ "high",
+      csi >= 0 ~ "high",
       TRUE ~ "low")) -> .d
   
   # .dt %>% dplyr::count(high_low) %>% print()
@@ -85,6 +85,7 @@ readr::write_rds(x = scores_gsva_sci_cor, path = file.path(csc_dir, ".rds_04_ste
 
 
 save.image(file = file.path(csc_dir, '.rds_04_stemness_index.rda'))
+load(file = file.path(csc_dir, '.rds_04_stemness_index.rda'))
 
 #-----------------------------------------------------------
 scores_gsva_sci_cor <- readr::read_rds(path = file.path(csc_dir, ".rds_04_stemness_index_scores_gsva_sci_cor.rds.gz"))

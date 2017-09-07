@@ -70,7 +70,7 @@ gene_order_tibble %>%
   dplyr::mutate(out = purrr::map(.x = gene, .f = fn_interaction, .ppi = ppi, .gene = gene_order)) %>%
   dplyr::collect() %>%
   dplyr::ungroup() %>%
-  dplyr::select(-gene, - PARTITION_ID) -> inter_matrix_tibble
+  dplyr::select(-gene, -PARTITION_ID) -> inter_matrix_tibble
 parallel::stopCluster(cluster)
 
 inter_matrix_tibble %>% 
@@ -101,4 +101,5 @@ hist(.s2)
 res_model <- list(gene_order = gene_order, model = model)
 readr::write_rds(res_model, path = file.path(pcbc_dir, "02_OCLR_res_model.rds.gz"), compress = "gz")
 
-save.image(file = file.path(pcbc_dir, "02_OCLR_rda"))
+save.image(file = file.path(pcbc_dir, "02_OCLR.rda"))
+load(file.path(pcbc_dir, "02_OCLR.rda"))

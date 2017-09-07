@@ -15,7 +15,7 @@ cnv_expr <-
   dplyr::inner_join(gene_list_expr, by = "cancer_types")
 
 fn_merge_cnv_expr <- function(.x, .y){
-  .x <- te$filter_cnv[[1]]
+  #.x <- te$filter_cnv[[1]]
   .x %>% 
     tidyr::gather(key = barcode, value = cnv, -symbol) %>% 
     dplyr::mutate(sample = stringr::str_sub(barcode, start = 1, end = 16)) %>% 
@@ -25,7 +25,7 @@ fn_merge_cnv_expr <- function(.x, .y){
     dplyr::filter(type %in% c("01A")) %>% 
     dplyr::select(-type) ->
     .x_cnv
-  .y <- te$filter_expr[[1]]
+  #.y <- te$filter_expr[[1]]
   .y %>% 
     dplyr::select(-entrez_id) %>% 
     tidyr::gather(key = barcode, value = expr, -symbol) %>% 

@@ -837,3 +837,11 @@ find . -name .Rprofile
 cd  "/extraspace/liucj/projects/4.SNORic/database"
 ls
 git status
+git add -A
+git commit -m "05_stemness"
+git push origin master
+top
+ll
+top
+l
+git status
