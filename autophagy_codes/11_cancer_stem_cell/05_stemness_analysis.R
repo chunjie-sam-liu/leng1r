@@ -565,20 +565,42 @@ plot_ready %>%
 
 ggsave(filename = "fig_08_gsva_stage.pdf", plot = gsva_stage_p, device = "pdf", path = csc_dir, width = 6, height = 4)
 
-# gsva score survival--------------------
+# gsva score survival-------------------------------
 clinical <- readr::read_rds(path = file.path(tcga_path,"pancan34_clinical.rds.gz"))
+fn_fit <- function(.z, .d){
+  # .z <- "atg"
+  .d %>% dplyr::filter(set == .z) -> .df
+  survival::survdiff(survival::Surv(time, status) ~ group, data = .df) -> .d_diff
+  
+  kmp <- 1 - pchisq(.d_diff$chisq, df = length(levels(as.factor(.d$group))) - 1)
+  
+  .fit_x <- survival::survfit(survival::Surv(time, status) ~ group, data = .df , na.action = na.exclude)
+  
+  survminer::ggsurvplot(.fit_x, data = .df, pval = T, pval.method = T) -> .p
+  
+  tibble::tibble(kmp = kmp, p = list(.p$plot))
+}
 fn_survival <- function(.x, .y){
-  .x <- .te$gsva[[1]]
-  .y <- .te$clinical[[1]]
+  # .x <- .te$gsva[[1]]
+  # .y <- .te$clinical[[1]]
   
   .y <- .y %>% dplyr::rename(sample = barcode)
+  
   .x %>% 
     tidyr::gather(key = barcode, value = gsva, -set) %>% 
     fn_tn_pair() %>% 
+    dplyr::filter(type == "Tumor") %>% 
     dplyr::select(set, gsva, sample) %>% 
     dplyr::distinct(set, sample, .keep_all = T) %>% 
     dplyr::inner_join(.y, by = "sample") %>% 
-    dplyr::select(set, gsva, sample, os_status, os_days) -> .d
+    dplyr::select(set, gsva, sample, status = os_status, time = os_days) %>% 
+    dplyr::mutate(status = plyr::revalue(status, replace = c("Alive" = 0, "Dead" = 1))) %>% 
+    dplyr::mutate(status = as.numeric(status)) %>% 
+    tidyr::drop_na() %>% 
+    dplyr::group_by(set) %>% 
+    dplyr::mutate(group = as.factor(ifelse(gsva <= median(gsva),"Low", "High"))) %>% 
+    dplyr::ungroup() -> .d
+
   
   .d %>% 
     dplyr::group_by(set) %>% 
@@ -590,12 +612,31 @@ fn_survival <- function(.x, .y){
           warning = function(e){1})
       )
     ) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>% 
+    dplyr::mutate(hazard_ratio = exp(estimate)) -> .dp
+  
+  .dp %>% 
+    dplyr::mutate(out = purrr::map(.x = set, .f = fn_fit, .d)) %>% 
+    tidyr::unnest() %>% 
+    dplyr::select(set, estimate, coxp = p.value, kmp, p) 
 }
 
 gsva %>% 
   dplyr::inner_join(clinical, by = "cancer_types") %>% 
-  head(1) -> .te
+  # dplyr::filter(cancer_types == "LGG") %>% 
+  dplyr::mutate(out = purrr::map2(.x = gsva, .y = clinical, .f = fn_survival)) %>% 
+  tidyr::unnest(out) -> gsva_survival
+
+gsva_survival %>% 
+  dplyr::filter(kmp < 0.05) %>% 
+  # dplyr::slice(10) %>% .$p
+  dplyr::mutate(direction = ifelse(estimate > 0, "High_Worse", "Low_Worse")) %>% 
+  ggplot(aes(x = cancer_types, y = set, size = -log10(coxp), color = direction)) +
+  geom_point() +
+  theme(
+    axis.text.x = element_text(angle = 90)
+  )
+
 
 # save----------------------------------------------------------------------
 save.image(file = file.path(csc_dir, ".rda_05_stemness_analysis.rda"))

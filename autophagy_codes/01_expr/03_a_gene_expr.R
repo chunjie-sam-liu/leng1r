@@ -8,11 +8,11 @@ expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 expr_path_a <- file.path(expr_path, "03_a_gene_expr")
 # Read gene list
 # Gene list was compress as rds
-expr <- readr::read_rds(file.path(tcga_path, "pancan_expr_20160513.rds.gz"))
+expr <- readr::read_rds(file.path(tcga_path, "pancan33_expr.rds.gz"))
 gene_list <- readr::read_rds(file.path(expr_path_a, "rds_03_a_atg_lys_gene_list.rds.gz"))
 
 #######################
-# filter out genes
+# filter out genes ---------------
 #######################
 filter_gene_list <- function(.x, gene_list) {
   gene_list %>%
@@ -108,7 +108,7 @@ readr::write_tsv(
   path = file.path(expr_path_a, "tsv_03_a_atg_lys_fc_pvalue_simplified.tsv")
 )
 
-# check autophagy gene expression distribution
+# check autophagy gene expression distribution-----------------------------
 gene_list_fc_pvalue_simplified %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
   tidyr::drop_na(Tumor, Normal) %>% 
@@ -137,7 +137,7 @@ gene_list_fc_pvalue_simplified %>%
 
 
 
-#-------------------------------------------------------------------------
+# draw picture------------------------------------------------------------------------
 gene_list_fc_pvalue_simplified %>% 
   dplyr::left_join(gene_list, by = "symbol") -> gene_fc_pvalue
 
@@ -318,27 +318,68 @@ gene_fc_pvalue %>% get_pattern() -> gene_fc_pvalue_pattern
 # Cancer and gene rank
 gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
 
+gene_rank$process %>% unique() -> process
+factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T) -> process
+setNames(ggthemes::gdocs_pal()(12), process) -> rcb_color
+
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
-  dplyr::filter(status == "l" ) %>%  # exclude "lysosome"
-  dplyr::filter(up+down > 2) %>% # at least two cancer types.
-  # dplyr::mutate(color = plyr::revalue(status, replace = c('a' = "#e41a1c", "l" = "#377eb8", "i" = "#4daf4a", "p" = "#984ea3"))) %>%
-  dplyr::mutate(color = plyr::revalue(color, c("#990099" = "red", "#109618" = "black"))) %>% 
-  dplyr::arrange(color, rank) -> gene_rank
+  dplyr::mutate(color = plyr::revalue(process, rcb_color)) %>% 
+  dplyr::mutate(process = factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T)) %>% 
+  dplyr::arrange(dplyr::desc(process), rank) %>% 
+  dplyr::filter(status != "l") -> gene_rank
 
 # raw data
-p <- plot_fc_pval_pattern(gene_fc_pvalue_filter, gene_rank = gene_rank, cancer_types_rank = cancer_rank) + 
-  theme(axis.text.y = element_text(color = gene_rank$color))
+gene_fc_pvalue_filter %>% 
+  ggplot(aes(x = cancer_types, y = symbol)) +
+  geom_point(aes(size = fdr, col = log2(fc))) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "white",
+    high = "red",
+    midpoint = 0,
+    na.value = "white",
+    breaks = seq(-3, 3, length.out = 5),
+    labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
+    name = "log2 FC"
+  ) +
+  scale_size_continuous(
+    limit = c(-log10(0.05), 15),
+    range = c(1, 6),
+    breaks = c(-log10(0.05), 5, 10, 15),
+    labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$")),
+    name = "FDR"
+  ) +
+  scale_y_discrete(limit = gene_rank$symbol) +
+  scale_x_discrete(limit = cancer_rank$cancer_types) +
+  theme(
+    panel.background = element_rect(colour = "black", fill = "white"),
+    panel.grid = element_line(colour = "grey", linetype = "dashed"),
+    panel.grid.major = element_line(
+      colour = "grey",
+      linetype = "dashed",
+      size = 0.2
+    ),
+    axis.title = element_blank(),
+    axis.ticks = element_line(color = "black"),
+    axis.text.y = element_text(color = gene_rank$color),
+    
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.key = element_rect(fill = "white", colour = "black")
+  ) -> p
+  
+
 ggsave(
-  filename = "new_fig_03_a_atg_lys_fc_pval_all_exclude_l_2.pdf",
+  filename = "fig_process_01_atg_lys.pdf",
   plot = p,
   device = "pdf",
   width = 8,
-  height = 10,
+  height = 20,
   path = expr_path_a
 )
-
+# not use any more--------------
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
   dplyr::left_join(gene_list, by = "symbol") %>% 
@@ -382,7 +423,7 @@ ggsave(
 
 
 #----------------------------------------------
-# Autophagy
+# Autophagy----
 #-----------------------------------------------
 gene_fc_pvalue_autophagy <- 
   gene_fc_pvalue %>% 
@@ -445,7 +486,7 @@ ggsave(
 # )
 
 #--------------------------------------------
-#Lysosome
+#Lysosome----
 #---------------------------------------------
 gene_fc_pvalue_lysosome <- 
   gene_fc_pvalue %>% 
@@ -543,6 +584,6 @@ ggsave(
   path = expr_path
 )
 
-
+# save ----
 save.image(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))
 load(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))

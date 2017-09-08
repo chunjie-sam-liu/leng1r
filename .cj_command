@@ -845,3 +845,12 @@ ll
 top
 l
 git status
+git add -A
+git commit -m "stemness"
+git push origin master
+ps xf
+top
+cd autophagy_codes/
+ls
+git status
+git push -m "new gene list category"
