@@ -854,3 +854,14 @@ cd autophagy_codes/
 ls
 git status
 git push -m "new gene list category"
+git add -A
+git push -m "new gene list category"
+git commit  -m "new gene list category"
+git push origin master
+ll
+l
+cd autophagy_codes/
+l
+git status
+git commit -m "gene expr"
+git add A

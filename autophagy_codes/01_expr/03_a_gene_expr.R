@@ -9,7 +9,8 @@ expr_path_a <- file.path(expr_path, "03_a_gene_expr")
 # Read gene list
 # Gene list was compress as rds
 expr <- readr::read_rds(file.path(tcga_path, "pancan33_expr.rds.gz"))
-gene_list <- readr::read_rds(file.path(expr_path_a, "rds_03_a_atg_lys_gene_list.rds.gz"))
+gene_list <- readr::read_rds(file.path(expr_path_a, "rds_03_a_atg_lys_gene_list.rds.gz")) 
+
 
 #######################
 # filter out genes ---------------
@@ -153,7 +154,7 @@ filter_fc_pval <- function(.x){
     dplyr::mutate(fc = ifelse(fc < 1/8, 1/8, ifelse(fc > 8, 8, fc)))
 }
 
-# filter_pattern based on
+# filter_pattern based on ----
 filter_pattern <- function(fc, fdr) {
   if ((fc > 3/ 2) && (fdr < 0.05)) {
     return(1)
@@ -164,7 +165,7 @@ filter_pattern <- function(fc, fdr) {
   }
 }
 
-# get up down pattern
+# get up down pattern ----
 get_pattern <- function(.x){
   .x %>% 
     # dplyr::filter(Normal > 10 & Tumor > 10) %>%
@@ -176,7 +177,7 @@ get_pattern <- function(.x){
     
 }
 
-# gene rank by up and down
+# gene rank by up and down ----
 get_gene_rank <- function(pattern){
   pattern %>% 
     dplyr::rowwise() %>%
@@ -192,7 +193,7 @@ get_gene_rank <- function(pattern){
     dplyr::arrange(rank)
 }
 
-# cancer types rank by gene
+# cancer types rank by gene ----
 get_cancer_types_rank <- function(pattern){
   pattern %>% 
     dplyr::summarise_if(.predicate = is.numeric, dplyr::funs(sum(abs(.)))) %>%
@@ -200,7 +201,7 @@ get_cancer_types_rank <- function(pattern){
     dplyr::arrange(dplyr::desc(rank))
 }
 
-# point plot
+# point plot ----
 plot_fc_pval_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
   ggplot(.x_filter, aes(x = cancer_types, y = symbol)) +
     geom_point(aes(size = fdr, col = log2(fc))) +
@@ -242,7 +243,7 @@ plot_fc_pval_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
 }
 
 
-# rect plot
+# rect plot ----
 plot_rect_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
   ggplot(.x_filter, aes(x = cancer_types, y = symbol, fill = log2(fc))) +
     geom_tile(color = "black") +
@@ -270,7 +271,7 @@ plot_rect_pattern <- function(.x_filter, gene_rank, cancer_types_rank){
   print(p)
   return(p)
 }
-# cancer count
+# cancer count ----
 plot_cancer_count <- function(.x_filter, gene_rank, cancer_types_rank){
   ggplot(
     dplyr::mutate(
@@ -310,15 +311,15 @@ plot_cancer_count <- function(.x_filter, gene_rank, cancer_types_rank){
 }
 
 #------------------------------------
-# Autophagy and Lysosome combined
-#-----------------------------------------
+
+# Autophagy and Lysosome combined plot----
+
 gene_fc_pvalue %>% filter_fc_pval() -> gene_fc_pvalue_filter
 gene_fc_pvalue %>% get_pattern() -> gene_fc_pvalue_pattern
 
-# Cancer and gene rank
 gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
 
-gene_rank$process %>% unique() -> process
+gene_list$process %>% unique() -> process
 factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T) -> process
 setNames(ggthemes::gdocs_pal()(12), process) -> rcb_color
 
@@ -327,17 +328,17 @@ gene_fc_pvalue_pattern %>%
   dplyr::left_join(gene_list, by = "symbol") %>% 
   dplyr::mutate(color = plyr::revalue(process, rcb_color)) %>% 
   dplyr::mutate(process = factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T)) %>% 
-  dplyr::arrange(dplyr::desc(process), rank) %>% 
-  dplyr::filter(status != "l") -> gene_rank
+  dplyr::arrange(dplyr::desc(process), rank) -> gene_rank
 
-# raw data
+CPCOLS <- c("#000080", "#F8F8FF", "#CD0000")
+
 gene_fc_pvalue_filter %>% 
   ggplot(aes(x = cancer_types, y = symbol)) +
   geom_point(aes(size = fdr, col = log2(fc))) +
   scale_color_gradient2(
-    low = "blue",
-    mid = "white",
-    high = "red",
+    low = CPCOLS[1],
+    mid = CPCOLS[2],
+    high = CPCOLS[3],
     midpoint = 0,
     na.value = "white",
     breaks = seq(-3, 3, length.out = 5),
@@ -364,21 +365,166 @@ gene_fc_pvalue_filter %>%
     axis.title = element_blank(),
     axis.ticks = element_line(color = "black"),
     axis.text.y = element_text(color = gene_rank$color),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 14),
     legend.key = element_rect(fill = "white", colour = "black")
-  ) -> p
-  
+  ) +
+  labs(subtitle = "All Autophagy & Lysosome genes differential expression in Tumor vs. Normal ") -> p
 
 ggsave(
   filename = "fig_process_01_atg_lys.pdf",
   plot = p,
   device = "pdf",
-  width = 8,
+  width = 6,
+  height = 35,
+  path = expr_path_a
+)
+
+# autophagy related -------------------------------------------------------
+
+gene_fc_pvalue %>% 
+  get_pattern() %>% 
+  dplyr::filter(symbol %in% dplyr::pull(dplyr::filter(gene_list, status != "l"), "symbol")) -> gene_fc_pvalue_pattern
+
+# Cancer and gene rank
+gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
+
+gene_fc_pvalue_pattern %>% 
+  get_gene_rank() %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(process, rcb_color)) %>% 
+  dplyr::mutate(process = factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T)) %>% 
+  dplyr::arrange(dplyr::desc(process), rank) -> gene_rank
+
+CPCOLS <- c("#000080", "#F8F8FF", "#CD0000")
+
+gene_fc_pvalue_filter %>% 
+  ggplot(aes(x = cancer_types, y = symbol)) +
+  geom_point(aes(size = fdr, col = log2(fc))) +
+  scale_color_gradient2(
+    low = CPCOLS[1],
+    mid = CPCOLS[2],
+    high = CPCOLS[3],
+    midpoint = 0,
+    na.value = "white",
+    breaks = seq(-3, 3, length.out = 5),
+    labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
+    name = "log2 FC"
+  ) +
+  scale_size_continuous(
+    limit = c(-log10(0.05), 15),
+    range = c(1, 6),
+    breaks = c(-log10(0.05), 5, 10, 15),
+    labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$")),
+    name = "FDR"
+  ) +
+  scale_y_discrete(limit = gene_rank$symbol) +
+  scale_x_discrete(limit = cancer_rank$cancer_types) +
+  theme(
+    panel.background = element_rect(colour = "black", fill = "white"),
+    panel.grid = element_line(colour = "grey", linetype = "dashed"),
+    panel.grid.major = element_line(
+      colour = "grey",
+      linetype = "dashed",
+      size = 0.2
+    ),
+    axis.title = element_blank(),
+    axis.ticks = element_line(color = "black"),
+    axis.text.y = element_text(color = gene_rank$color),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.key = element_rect(fill = "white", colour = "black")
+  ) +
+  labs(subtitle = "All Autophagy related genes differential expression in Tumor vs. Normal ") -> p
+
+ggsave(
+  filename = "fig_process_02_atg.pdf",
+  plot = p,
+  device = "pdf",
+  width = 6,
   height = 20,
   path = expr_path_a
 )
+
+# lysosome ----------------------------------------------------------------
+gene_fc_pvalue %>% 
+  get_pattern() %>% 
+  dplyr::filter(symbol %in% dplyr::pull(dplyr::filter(gene_list, status == "l"), "symbol")) -> gene_fc_pvalue_pattern
+
+
+gene_fc_pvalue_pattern %>% get_cancer_types_rank() -> cancer_rank
+
+gene_fc_pvalue_pattern %>% 
+  get_gene_rank() %>% 
+  dplyr::left_join(gene_list, by = "symbol") %>% 
+  dplyr::mutate(color = plyr::revalue(process, rcb_color)) %>% 
+  dplyr::mutate(process = factor(process, levels = c("ULK-complex", "PI3K-III-complex", "ATG5-ATG12-ATG16", "ATG9-cycling-system", "LC3", "TRAPP", "Membrane-delivery", "Mitophagy", "Positive", "Negative", "Lys_comp", "Lys_deg"), ordered = T)) %>% 
+  dplyr::arrange(dplyr::desc(process), rank) -> gene_rank
+
+CPCOLS <- c("#000080", "#F8F8FF", "#CD0000")
+
+gene_fc_pvalue_filter %>% 
+  ggplot(aes(x = cancer_types, y = symbol)) +
+  geom_point(aes(size = fdr, col = log2(fc))) +
+  scale_color_gradient2(
+    low = CPCOLS[1],
+    mid = CPCOLS[2],
+    high = CPCOLS[3],
+    midpoint = 0,
+    na.value = "white",
+    breaks = seq(-3, 3, length.out = 5),
+    labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
+    name = "log2 FC"
+  ) +
+  scale_size_continuous(
+    limit = c(-log10(0.05), 15),
+    range = c(1, 6),
+    breaks = c(-log10(0.05), 5, 10, 15),
+    labels = c("0.05", latex2exp::TeX("$10^{-5}$"), latex2exp::TeX("$10^{-10}$"), latex2exp::TeX("$< 10^{-15}$")),
+    name = "FDR"
+  ) +
+  scale_y_discrete(limit = gene_rank$symbol) +
+  scale_x_discrete(limit = cancer_rank$cancer_types) +
+  theme(
+    panel.background = element_rect(colour = "black", fill = "white"),
+    panel.grid = element_line(colour = "grey", linetype = "dashed"),
+    panel.grid.major = element_line(
+      colour = "grey",
+      linetype = "dashed",
+      size = 0.2
+    ),
+    axis.title = element_blank(),
+    axis.ticks = element_line(color = "black"),
+    axis.text.y = element_text(color = gene_rank$color),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.key = element_rect(fill = "white", colour = "black")
+  ) +
+  labs(subtitle = "All Lysosome related genes differential expression in Tumor vs. Normal ") -> p
+
+ggsave(
+  filename = "fig_process_03_lys.pdf",
+  plot = p,
+  device = "pdf",
+  width = 6,
+  height = 18,
+  path = expr_path_a
+)
+
+
+# save ----
+save.image(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))
+load(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))
+
+
+
+
 # not use any more--------------
 gene_fc_pvalue_pattern %>% 
   get_gene_rank() %>% 
@@ -583,7 +729,3 @@ ggsave(
   height = 22,
   path = expr_path
 )
-
-# save ----
-save.image(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))
-load(file = file.path(expr_path_a, ".rda_03_a_gene_expr.rda"))

@@ -347,3 +347,7 @@ ls
 ll
 exit
 cd
+ls
+mkdir 12_merge_summary
+l
+ll
