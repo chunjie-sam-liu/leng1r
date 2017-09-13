@@ -865,3 +865,21 @@ l
 git status
 git commit -m "gene expr"
 git add A
+git add -A
+git commit -m "summary"
+git push origin master
+ll
+git status
+l
+cd ../
+ls
+cd autophagy_codes/
+l
+find . -name "*R"
+find . -name "*R"|xargs grep cowplot
+find . -name "*R"|xargs 
+find . -name "*R"|xargs grep cowplot
+find . -name "*R"|xargs grep library
+find . -name "*R"|xargs grep cowplot
+ls
+git status

@@ -9,7 +9,6 @@ rppa_path <- file.path(expr_path, "03_e_rppa")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
 expr_path <- file.path(expr_path, "03_a_gene_expr")
 
-
 # load data ---------------------------------------------------------------
 rppa_expr <- readr::read_rds(file.path(tcga_path, "pancan32_rppa_expr.rds.gz"))
 rppa_name <- readr::read_rds(file.path(tcga_path, "rppa_name_symbol.rds.gz"))
@@ -104,3 +103,5 @@ p62 %>%
   theme_bw() -> pval_coef
 
 ggsave(filename = file.path(rppa_path, "pval_coef.pdf"), plot = pval_coef, device = "pdf")
+
+
