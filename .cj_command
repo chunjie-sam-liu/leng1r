@@ -891,3 +891,13 @@ ll
 liucj
 ls
 git status
+git add -A
+git commit -m "gsva other pathway"
+git push origin master
+ls
+ps xf
+top
+ps xf
+ps xf|awk '$3=="R"'
+git status
+git commit -m "gsva othter pathway"

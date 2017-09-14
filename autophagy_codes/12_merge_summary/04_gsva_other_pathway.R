@@ -146,7 +146,7 @@ atg_msig %>%
 parallel::stopCluster(cluster)
 readr::write_rds(x = atg_msig_corr, path = file.path(expr_path_a, ".rda_04_gsva_atg_msig_corr.rds.gz"), compress = "gz")
 
-
+atg_msig_corr <- readr::read_rds(path = file.path(expr_path_a, ".rda_04_gsva_atg_msig_corr.rds.gz"))
 # Filter significante and plot --------------------------------------------
 atg_msig_corr %>% 
   tidyr::unnest(corr) %>% 
@@ -177,9 +177,11 @@ plot_ready %>%
   dplyr::mutate(s = glue::glue("neg: {n}, pos: {p}")) %>% 
   ggplot(aes(x = set, y = geneset)) +
   geom_tile(aes(fill = t)) +
-  geom_text(aes(label = s)) +
+  # geom_text(aes(label = s)) +
   scale_y_discrete(limits = geneset_rank) +
+  scale_x_discrete(label = c("ATG", "LYS")) +
   scale_fill_gradient2(
+    name = "# of Cancer types",
     low = CPCOLS[1],
     mid = CPCOLS[2],
     high = CPCOLS[3]
