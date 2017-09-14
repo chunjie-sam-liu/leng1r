@@ -55,7 +55,7 @@ fn_geneset <- function(.g){
 }
 human %>% dplyr::filter(collection %in% c("c2", "c5","c6", "c7", "hallmark")) -> human_sets
 human_sets %>% fn_geneset() -> gene_sets
-human_sets %>% dplyr::select(collection = name, geneset) -> cg
+human_sets %>% dplyr::select(collection = name, geneset) %>% dplyr::distinct() -> cg
 fn_gsva <- function(.x, .y, gene_sets, cg){
   # .x <- .te$cancer_types
   # .y <- .te$expr[[1]]
@@ -77,8 +77,7 @@ fn_gsva <- function(.x, .y, gene_sets, cg){
     tibble::as_tibble() %>% 
     tibble::add_column(geneset = rownames(.es_dif$es.obs), .before = 1) -> .d_es
   
-  cg %>% 
-    dplyr::inner_join(.d_es, by = "geneset")
+  cg %>% dplyr::inner_join(.d_es, by = "geneset")
 }
 
 # multidplyr
@@ -96,9 +95,100 @@ expr %>%
   dplyr::ungroup() %>%
   dplyr::select(-PARTITION_ID) -> MSigDB_GSVA_score
 parallel::stopCluster(cluster)
-readr::write_rds(x = MSigDB_GSVA_score, path = file.path(tcga, "pancan33_MSigDB_GSVA_score.rds.gz"), compress = "gz")
 
+readr::write_rds(x = MSigDB_GSVA_score, path = file.path(tcga_path, "pancan33_MSigDB_GSVA_score.rds.gz"), compress = "gz")
 
 # MSigDB set gsva correlate with autophagy --------------------------------
-
 gene_list_gsva <- readr::read_rds(path = file.path(expr_path_a, ".rds_03_i_gsva_gene_list_gsva.rds.gz"))
+
+gene_list_gsva %>%
+  dplyr::inner_join(MSigDB_GSVA_score, by = "cancer_types") %>% 
+  dplyr::rename(atg = gsva.x, msig = gsva.y) -> atg_msig
+
+fn_cor <- function(.x, .y){
+  # .x <- .te$atg[[1]]
+  # .y <- .te$msig[[1]]
+  
+  .x %>% tidyr::gather(key = "barcode", value = "atg_gsva", -c(set)) -> .dx
+  .y %>% tidyr::gather(key = "barcode", value = "msig_gsva", -c(collection, geneset)) -> .dy
+  .dy %>% 
+    dplyr::inner_join(.dx, by = "barcode") %>% 
+    dplyr::filter(stringr::str_sub(barcode, 14, 15) != "11") -> .d
+  
+  .d %>%
+    # dplyr::filter(collection == "HALLMARK") %>% 
+    dplyr::group_by(collection, geneset, set) %>% 
+    dplyr::do(
+      broom::tidy(
+        tryCatch(
+          cor.test(~msig_gsva + atg_gsva, data = ., method = "spearman"),
+          error = function(e){1}
+        )
+      )
+    ) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::select(collection, geneset, set, coef = estimate, pval = p.value) %>% 
+    dplyr::mutate(fdr = p.adjust(pval, method = "fdr")) -> .d_corr
+  
+  .d_corr
+}
+
+cluster <- multidplyr::create_cluster(nrow(expr))
+atg_msig %>% 
+  multidplyr::partition(cluster = cluster) %>%
+  multidplyr::cluster_library("magrittr") %>%
+  multidplyr::cluster_library("GSVA") %>%
+  multidplyr::cluster_assign_value("fn_cor", fn_cor)  %>%
+  dplyr::mutate(corr = purrr::map2(.x = atg, .y = msig, .f = fn_cor)) %>% 
+  dplyr::collect() %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-PARTITION_ID) -> atg_msig_corr
+parallel::stopCluster(cluster)
+readr::write_rds(x = atg_msig_corr, path = file.path(expr_path_a, ".rda_04_gsva_atg_msig_corr.rds.gz"), compress = "gz")
+
+
+# Filter significante and plot --------------------------------------------
+atg_msig_corr %>% 
+  tidyr::unnest(corr) %>% 
+  dplyr::filter(fdr < 0.05, abs(coef) > 0.3) -> atg_msig_corr_un_sig
+
+atg_msig_corr_un_sig %>% 
+  dplyr::filter(collection %in% c("HALLMARK")) %>%
+  # dplyr::filter(stringr::str_detect(geneset, stringr::coll("MYC", ignore_case = T))) %>%
+  dplyr::filter(set %in% c("atg", "lys")) %>%
+  dplyr::select(1,2, 3, 4, 5,7) %>% 
+  dplyr::mutate(direction = ifelse(coef > 0, "p", "n")) %>%
+  dplyr::group_by(geneset, set, direction) %>% 
+  dplyr::count() %>% 
+  dplyr::ungroup() %>% 
+  tidyr::spread(key = direction, value = n, fill = 0) %>% 
+  dplyr::mutate(t = p - n) %>% 
+  dplyr::arrange(-t, -p, -n) %>% 
+  dplyr::filter(n + p > 5) -> plot_ready
+
+plot_ready %>% 
+  dplyr::group_by(geneset) %>% 
+  dplyr::summarise(m = mean(t)) %>% 
+  dplyr::arrange(-m) %>% 
+  dplyr::pull(geneset) -> geneset_rank
+
+CPCOLS <- c("#000080", "#F5F5F5", "#CD0000")
+plot_ready %>% 
+  dplyr::mutate(s = glue::glue("neg: {n}, pos: {p}")) %>% 
+  ggplot(aes(x = set, y = geneset)) +
+  geom_tile(aes(fill = t)) +
+  geom_text(aes(label = s)) +
+  scale_y_discrete(limits = geneset_rank) +
+  scale_fill_gradient2(
+    low = CPCOLS[1],
+    mid = CPCOLS[2],
+    high = CPCOLS[3]
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+  ) +
+  theme_bw()
+
+# save the result ---------------------------------------------------------
+
+save.image(file.path(expr_path_a, ".rda_04_gsva_other_pathway.rda"))

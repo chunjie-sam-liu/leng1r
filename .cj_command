@@ -883,3 +883,11 @@ find . -name "*R"|xargs grep library
 find . -name "*R"|xargs grep cowplot
 ls
 git status
+git add -A
+git commit -m "gsva other pathway"
+git push origin master
+ps xf
+ll
+liucj
+ls
+git status
