@@ -901,3 +901,9 @@ ps xf
 ps xf|awk '$3=="R"'
 git status
 git commit -m "gsva othter pathway"
+git add -A
+git commit -m "gsva othter pathway"
+git push origin master
+ll
+liucj
+git status
