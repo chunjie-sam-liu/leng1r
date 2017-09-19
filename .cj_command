@@ -907,3 +907,13 @@ git push origin master
 ll
 liucj
 git status
+git add -A
+git commit -m "gsva other pahtway"
+git push origin master
+git status
+cd /extraspace/liucj/projects/6.autophagy/03_cnv/mutual_exclusive
+ls
+cd autophagy_codes/
+ls
+cd ../
+git status

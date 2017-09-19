@@ -1,0 +1,14 @@
+# Autophagy flux TAE.
+
+## Use TCGA RPPA data.
+
+- Use p62 RPPA data to categorize patient sample.
+- Use BECN1 to categorize patient samples.
+- Use the ration of p62 / becn1, as p62 increase and becn1 decrease represent the low autophagy flux.
+- Intersect the result of three method, whether they have a high overlaps.
+
+
+## Use mRNA expression data 
+
+1. The Guideline paper (Klionsky, Autophagy, 2016) list some of marker genes. Use this marker genes as the score index.
+2. Try use upstream genes TOR/MTOR, AMPK phosphoralation data.

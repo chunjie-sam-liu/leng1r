@@ -355,3 +355,10 @@ ls
 mv ye_circadian_code/ /home/cliu18/liucj/github/
 ll
 cd ../
+ls
+ll
+mkdir try_error
+ll
+mv try_error/ 00_try_error
+l
+cd 00_try_error/
