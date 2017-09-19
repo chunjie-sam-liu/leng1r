@@ -34,7 +34,6 @@ fn_select_marker <- function(.x, sym_func){
 rppa_expr %>% 
   dplyr::mutate(protein_expr = purrr::map(.x = protein_expr, .f = fn_select_marker, sym_func)) -> atg_rppa_expr
 
-
 # p62 vs. beclin1 ratio test---------------------------------------------------------------------
 
 fn_class <- function(.x, .y, .gene){

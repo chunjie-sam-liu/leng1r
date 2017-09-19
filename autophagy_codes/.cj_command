@@ -362,3 +362,11 @@ ll
 mv try_error/ 00_try_error
 l
 cd 00_try_error/
+ls
+ll
+mkdir 13_afh_vs_afl
+l
+ll
+cd 13_afh_vs_afl/
+l
+cd ../

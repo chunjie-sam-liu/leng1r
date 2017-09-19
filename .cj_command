@@ -917,3 +917,11 @@ cd autophagy_codes/
 ls
 cd ../
 git status
+git add -A
+git commit -m 'try error'
+git push origin master
+cd
+ls
+ll
+cd autophagy_codes/
+l
