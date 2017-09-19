@@ -925,3 +925,6 @@ ls
 ll
 cd autophagy_codes/
 l
+git add -A
+git commit -m "mv to afh vs afl"
+git push origin master

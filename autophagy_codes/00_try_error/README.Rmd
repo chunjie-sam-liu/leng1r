@@ -19,4 +19,4 @@ The paper Bjørkøy, Methods in Enzymology, 2009 put the p62 alone can be indica
 
 The whole project from Tumor vs. Normal moved to the AFH (Autophagy Flux High) vs. AFL patient samples. 
 
-All new scripts are in the `[13_afh_vs_afl](../13_afh_vs_afl)`.
+All new scripts are in the [`13_afh_vs_afl`](../13_afh_vs_afl).
