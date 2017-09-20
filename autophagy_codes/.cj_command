@@ -370,3 +370,13 @@ ll
 cd 13_afh_vs_afl/
 l
 cd ../
+ls
+c d13
+ls
+cd 13_afh_vs_afl/
+ls
+cd 01_expr/
+sl
+ls
+ll
+cd ../

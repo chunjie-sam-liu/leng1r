@@ -368,3 +368,12 @@ l
 ps xf
 les nohup.out 
 cd "/extraspace/liucj/projects/6.autophagy/02_autophagy_expr/03_a_gene_expr"
+ls
+ll
+rm nohup.out 
+l
+nohup Rscript 01_b_rppa_expr_l4_rds.R &
+ps xf
+top
+l
+gitr

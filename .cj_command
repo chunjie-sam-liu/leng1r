@@ -928,3 +928,17 @@ l
 git add -A
 git commit -m "mv to afh vs afl"
 git push origin master
+git add -A
+git commit -m "mv to afh vs afl"
+git push origin master
+l
+cd autophagy_codes/
+ls
+c dau
+ls
+cd autophagy_codes/
+ls
+ll
+cd autophagy_codes/
+l
+git status

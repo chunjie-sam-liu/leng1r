@@ -1,7 +1,21 @@
-Error in file(filename, "r", encoding = encoding) : 
-  invalid 'description' argument
-Calls: source -> file
-In addition: Warning message:
-In if (file == "") { :
-  the condition has length > 1 and only the first element will be used
-Execution halted
+Parsed with column specification:
+cols(
+  .default = col_double(),
+  Sample_ID = col_character(),
+  Cancer_Type = col_character(),
+  Sample_Type = col_character(),
+  SetID = col_integer()
+)
+See spec(...) for full column specifications.
+# A tibble: 1 x 3
+            names cancer_types        protein_expr
+            <chr>        <chr>              <list>
+1 TCGA-ACC-L4.csv          ACC <tibble [208 x 48]>
+Warning message:
+In .doLoadActions(where, attach) :
+  trying to execute load actions without 'methods' package
+Initialising 40 core cluster.
+Error in summary.connection(connection) : invalid connection
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+Error in summary.connection(connection) : invalid connection
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection

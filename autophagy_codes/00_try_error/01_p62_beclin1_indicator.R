@@ -213,40 +213,6 @@ atg_rppa_expr_plot %>%
   knitr::kable()
 
 
-# use p62 and ratio to classify patient samples ---------------------------
-fn_classify_tumor <- function(.x, .y){
-  # .x <- atg_rppa_expr$protein_expr[[3]]
-  # .y <- te$clinical[[3]]
-  
-  .x %>% 
-    dplyr::filter(symbol %in% .gene) %>%
-    dplyr::select(-protein, -process) %>% 
-    tidyr::gather(key = barcode, value = rppa, -symbol) %>% 
-    tidyr::spread(key = symbol, value = rppa) %>% 
-    tidyr::drop_na() %>% 
-    dplyr::mutate(beclin1 = exp(BECN1), p62 = exp(SQSTM1)) %>% 
-    dplyr::mutate(ratio =  p62 / beclin1) %>% 
-    dplyr::mutate(pg = ifelse(p62 < median(p62), "H", "L")) %>% 
-    dplyr::mutate(rg = ifelse(ratio < median(ratio), "H", "L")) %>% 
-    dplyr::mutate(blob = (p62 + ratio) / 2) %>% 
-    dplyr::mutate(pr = dplyr::case_when(
-      pg == "H" & rg == "H" ~ "H",
-      pg == "L" & rg == "L" ~ "L",
-      TRUE ~ "MISC"
-    )) %>% 
-    dplyr::select(barcode, pg, rg, pr) %>% 
-    dplyr::mutate(barcode = stringr::str_sub(barcode, start = 1, end = 12)) %>% 
-    dplyr::distinct(barcode, .keep_all = T) %>% 
-    dplyr::inner_join(.y, by = "barcode") %>% 
-    dplyr::select(barcode, pg, rg, pr, time = os_days, status = os_status) %>% 
-    dplyr::mutate(status = plyr::revalue(replace = c("")))
-}
-
-clinical <- readr::read_rds(file.path(tcga_path, "pancan34_clinical.rds.gz"))
-atg_rppa_expr %>% 
-  dplyr::inner_join(clinical, by = "cancer_types") -> te
-  
-
 
 
 
