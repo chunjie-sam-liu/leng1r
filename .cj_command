@@ -942,3 +942,15 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "afhl"
+git push origin master
+l
+cd ./
+l
+cd ../
+ls
+ll
+cd autophagy_codes/
+l
+cd ../

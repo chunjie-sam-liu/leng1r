@@ -13,12 +13,13 @@ expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/03_a_gen
 
 # load data ---------------------------------------------------------------
 
-rppa_expr <- readr::read_rds(file.path(tcga_path, "pancan32_rppa_expr.rds.gz"))
+rppa_expr <- readr::read_rds(file.path(tcga_path, "pancan33_rppa_expr_l4.rds.gz"))
 rppa_name <- readr::read_rds(file.path(tcga_path, "rppa_name_symbol.rds.gz"))
 gene_list <- readr::read_rds(file.path(expr_path, "rds_03_a_atg_lys_gene_list.rds.gz"))
 rppa_name %>% dplyr::semi_join(gene_list, by = "symbol") -> atg_rppa
 
-PI3K_AKT <- "pS473|pT308|pS9|pT246|pT1462"
+PI3K_AKT <- "pS473|pT308|pS9|pS21S9|pT246|pT1462" # AKT pS473, AKT pT308, GSK3 pS9,  GSK3 pS21-pS9, PRAS40 pT246 TSC2 pT1462
+mTOR <- "pS2448|pT1135|pS65|pT37T46|pT70|pT389|pS235S236|pS240S244"
 
 
 atg_rppa %>% 
@@ -27,15 +28,15 @@ atg_rppa %>%
   dplyr::arrange(process) -> sym_func
 knitr::kable(sym_func)
 
-# atg involved rppa ---------------------------------------------------------
+# atg involved rppa ---------------------------- -----------------------------
 fn_select_marker <- function(.x, sym_func){
   # rppa_expr$protein_expr[[1]] -> .x
+  .x
   sym_func %>% dplyr::inner_join(.x, by = c("protein", "symbol"))
 }
 
 rppa_expr %>% 
   dplyr::mutate(protein_expr = purrr::map(.x = protein_expr, .f = fn_select_marker, sym_func)) -> atg_rppa_expr
-
 
 # p62 correlation with known proteins -------------------------------------
 
