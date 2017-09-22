@@ -958,3 +958,19 @@ ls
 cd autophagy_codes/
 l
 git status 
+git add -A
+git commit -m "new other pathway"
+git push origin master
+git push -f origin master
+ll autophagy_codes/01_expr/nohup.out
+git status
+ll
+du -sh *
+cd mutationInPromoter
+l
+ls
+cd ../
+ls
+la
+cd autophagy_codes/
+git status

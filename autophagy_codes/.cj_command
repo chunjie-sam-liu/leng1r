@@ -391,3 +391,7 @@ find . -type f -name "*R"|xargs grep rlang
 find . -type f -name "*R"|xargs grep grid
 find . -type f -name "*R"|xargs grep -i latex
 cd ..
+ls
+la
+rm .ftpconfig
+cd ../
