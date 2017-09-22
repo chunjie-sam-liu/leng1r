@@ -383,3 +383,11 @@ cd ../
 ls
 ll
 cd ../
+ls
+cd 01_expr/
+l
+find . -type f -name "*R"
+find . -type f -name "*R"|xargs grep rlang
+find . -type f -name "*R"|xargs grep grid
+find . -type f -name "*R"|xargs grep -i latex
+cd ..

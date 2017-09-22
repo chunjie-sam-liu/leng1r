@@ -377,3 +377,22 @@ ps xf
 top
 l
 gitr
+ls
+ll
+cat nohup.out 
+ll
+rm nohup.out 
+l
+nohup Rscript 01_b_rppa_expr_l4_rds.R &
+p xf
+ps xf
+top
+ps xf
+ll
+cat nohup.out 
+ll
+ps xf
+l
+grep expand *
+ll
+cd ../

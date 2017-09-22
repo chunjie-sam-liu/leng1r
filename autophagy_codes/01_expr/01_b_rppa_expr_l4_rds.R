@@ -1,4 +1,5 @@
 library(magrittr)
+library(methods)
 path <- "/extraspace/TCGA/TCGA_protein_TCPA_L4"
 files.names <- list.files("/extraspace/TCGA/TCGA_protein_TCPA_L4", pattern = "*-L4.csv")
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
@@ -13,9 +14,9 @@ cancers_names <- tibble::tibble(names = files.names, cancer_types = cancer_types
 
 fn_rppa_expr <- function(.x){
   path <- "/extraspace/TCGA/TCGA_protein_TCPA_L4"
-
+  
   readr::read_csv(file = file.path(path, .x), progress = F) %>% 
-    dplyr::select(- dplyr::starts_with("X")) %>% 
+    # dplyr::select(- dplyr::starts_with("X")) %>%
     dplyr::select(-c(Cancer_Type, Sample_Type, SetID)) %>% 
     dplyr::rename(barcode = Sample_ID) %>% 
     tidyr::gather(key = protein, value = rppa, -barcode) %>% 

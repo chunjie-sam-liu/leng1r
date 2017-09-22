@@ -10,12 +10,5 @@ See spec(...) for full column specifications.
 # A tibble: 1 x 3
             names cancer_types        protein_expr
             <chr>        <chr>              <list>
-1 TCGA-ACC-L4.csv          ACC <tibble [208 x 48]>
-Warning message:
-In .doLoadActions(where, attach) :
-  trying to execute load actions without 'methods' package
+1 TCGA-ACC-L4.csv          ACC <tibble [218 x 48]>
 Initialising 40 core cluster.
-Error in summary.connection(connection) : invalid connection
-Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
-Error in summary.connection(connection) : invalid connection
-Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection

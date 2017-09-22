@@ -954,3 +954,7 @@ ll
 cd autophagy_codes/
 l
 cd ../
+ls
+cd autophagy_codes/
+l
+git status 

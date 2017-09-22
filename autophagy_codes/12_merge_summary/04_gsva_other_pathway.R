@@ -3,8 +3,45 @@
 library(magrittr)
 library(ggplot2)
 library(GSVA)
-library(msigdf)
+# library(msigdf)
 library(biomaRt)
+
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_H_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c1_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c2_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c3_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c4_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c6_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c5_v5p2.rdata"))
+load(url("http://bioinf.wehi.edu.au/software/MSigDB/human_c7_v5p2.rdata"))
+# mouse data
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c1_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c3_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c4_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c6_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c5_v5p2.rdata"))
+# load(url("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c7_v5p2.rdata"))
+msigdf <- list()
+for (i in ls(pattern = "^Hs\\.|^Mm\\.")) {
+  message(i)
+  msigdf[[i]] <- 
+    eval(parse(text = i)) %>%
+    head(100) %>% 
+    plyr::ldply(function(x) dplyr::data_frame(entrez = x), .id = "geneset") %>%
+    dplyr::filter(entrez != "-") %>%
+    dplyr::mutate(entrez = as.integer(entrez), geneset = as.character(geneset)) %>%
+    dplyr::tbl_df()
+}; rm(i)
+
+msigdf <- 
+  msigdf %>%
+  dplyr::bind_rows(.id = "x") %>%
+  tidyr::separate(x, into = c("org", "collection")) %>%
+  dplyr::mutate(org = dplyr::recode(org, Hs = "human", Mm = "mouse")) %>%
+  dplyr::mutate(collection = gsub("H", "hallmark", collection))
+msigdf.human <- msigdf %>% dplyr::filter(org == "human") %>% dplyr::select(-org)
 
 # path --------------------------------------------------------------------
 tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
