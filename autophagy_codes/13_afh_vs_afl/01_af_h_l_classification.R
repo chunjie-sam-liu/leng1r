@@ -46,7 +46,7 @@ unp_ampk <- c("AMPKALPHA")
 sym_names <- c("BECLIN" = "BECN1", "MTOR_pS2448" = "MTOR", "P62LCKLIGAND" = "SQSTM1",  "AMPKALPHA" = "PRKAA1", "AMPKALPHA_pT172" = "PRKAA1")
 .names <- c("AMPKALPHA" = "PRKAA1", "AMPKALPHA_pT172" = "PRKAA1 pT172", "BECLIN" = "BECN1", "MTOR_pS2448" = "MTOR pS2448", "P62LCKLIGAND" = "p62", "MTOR" = "MTOR", "BCL2" = "BCL2", "RAPTOR" = "RAPTOR")
 
-# mTOR and P62, BECN1 and BCL2---------------------------- -----------------------------
+# mTOR and P62, BECN1 and BCL2---------------------------------------------------------
 fn_one_corr <- function(.z, .d){
   .d %>% dplyr::select(.z) -> .dd
   cor.test(.dd[[1]], .dd[[2]]) %>% broom::tidy() -> .corr
@@ -180,25 +180,35 @@ fn_corr_protein <- function(.x, .y){
     tidyr::unnest() %>% 
     dplyr::select(name, coef = estimate, pval = p.value) -> .d_corr
   
+  .lm_dir <- file.path(.corr_path, "01_linear_regression")
+  if (!dir.exists(.lm_dir)) dir.create(.lm_dir)
+  
   .d_corr %>% 
-    dplyr::filter(abs(coef) > 0.3, pval < 0.05) %>% 
-    purrr::pmap(.f = function(name, coef, pval) {
-      .xy <- stringr::str_split(name, "_vs_", simplify = T) %>% as.vector()
-      
-      .d %>% 
-        ggplot(aes(x = rlang::eval_bare(rlang::sym(.xy[1])), y = rlang::eval_bare(rlang::sym(.xy[2])))) + 
-        geom_point() + 
-        annotate("text", x = 0, y = 0, 
-                 label = glue::glue("R = {coef}
-                                    p-value = {pval}")) +
-        geom_smooth(se = F, method = "lm") +
-        ggthemes::theme_gdocs() +
-        labs(x = .xy[1], y = .xy[2]) 
+    dplyr::filter(abs(coef) > 0.3, pval < 0.05) %>%
+    dplyr::mutate(coef = signif(coef, digits = 4), pval = signif(pval, digits = 4)) %>% 
+    purrr::pmap(
+      .f = function(name, coef, pval) {
         
-    })
-  
-  
-  
+        .xy <- stringr::str_split(name, "_vs_", simplify = T) %>% 
+          as.vector() %>% 
+          stringr::str_replace("_", " ")
+        
+        .d %>% 
+          ggplot(aes(x = rlang::eval_bare(rlang::sym(.xy[1])), y = rlang::eval_bare(rlang::sym(.xy[2])))) + 
+          geom_point() + 
+          annotate("text", x = 0, y = 0, 
+                   label = glue::glue("R = {coef}
+                                      p-value = {pval}")) +
+          geom_smooth(se = F, method = "lm") +
+          ggthemes::theme_gdocs() +
+          labs(x = .xy[1], y = .xy[2]) -> .p
+        
+        ggsave(
+            filename = glue::glue("{.y}_{paste0(.xy, collapse = '_')}_{coef}_{pval}.pdf"),
+            plot = .p, device = "pdf", path = .lm_dir, 
+            width = 5, height = 5)
+    }) # draw linear plot
+
   .d_corr
 }
 
@@ -206,19 +216,147 @@ atg_rppa_expr %>%
   dplyr::mutate(corr = purrr::map2(.y = cancer_types, .x = protein_expr, .f = fn_corr_protein)) ->
   atg_rppa_expr
 
+
 atg_rppa_expr %>% 
   tidyr::unnest(corr) %>% 
+  dplyr::mutate(
+    coef = 
+      dplyr::case_when(
+        coef < -0.4 ~ -0.4,
+        coef > 0.5 ~ 0.5,
+        TRUE ~ coef
+      )) %>% 
+  dplyr::mutate(sig = ifelse(pval < 0.05, "*", "")) %>%
+  dplyr::mutate(h_corr = ifelse(abs(coef) > 0.3, "H", "L")) -> 
+  corr_plot_ready
+
+cancer_rank <- 
+  corr_plot_ready %>% 
+  dplyr::group_by(cancer_types) %>% 
+  dplyr::summarise(s = sum(coef)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::arrange(s) %>% 
+  dplyr::pull(cancer_types)
+
+pair_rank <- 
+  corr_plot_ready %>% 
+  dplyr::group_by(name) %>% 
+  dplyr::summarise(s = sum(coef)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::arrange(s) %>% 
+  dplyr::pull(name)
+
+CPCOLS <- c("#00008B", "#FCFCFC", "#CD0000")
+
+corr_plot_ready %>% 
   ggplot(aes(x = cancer_types, y = name, fill = coef)) +
-  geom_tile() +
+  geom_tile(aes(color = h_corr), width = 0.85, height = 0.95, size = 1) +
+  geom_text(aes(label = sig), color = "white") + 
+  scale_color_manual(values = "black", guide = F) +
   scale_fill_gradient2(
-    low = "blue",
-    mid = "white",
-    high = "red"
-  )
+    low = CPCOLS[1],
+    mid = CPCOLS[2],
+    high = CPCOLS[3],
+    limit = c(-0.4, 0.5),
+    breaks = c(-0.4, -0.2, 0, 0.3, 0.5)
+  ) +
+  scale_x_discrete(limit = cancer_rank) +
+  scale_y_discrete(limit = pair_rank, labels = stringr::str_replace_all(
+    pair_rank, "_vs_", " vs "
+  )) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    
+    panel.background = element_rect(fill = "white"),
+    
+    legend.position = "bottom"
+  ) +
+  guides(fill = guide_legend(
+    title = "Coef", 
+    title.position = "left",
+    title.vjust = 0.2,
+    title.hjust = 0.5,
+    
+    keywidth = 1,
+    keyheight = 0.8,
+    label.position = "top",
+    label.hjust = 1,
+    direction = "horizontal")) +
+  labs(x = "", y = "") -> corr_tile_plot
+ggsave(filename = "fig_01_corr_tile_plot.pdf", plot = corr_tile_plot, device = "pdf", path = afhl_class, height = 4, width = 8)
 
+# p62 rppa and mrna correlation -------------------------------------------
+mrna_expr <- readr::read_rds(file.path(tcga_path, "pancan33_expr.rds.gz")) 
 
+mrna_expr %>% 
+  dplyr::mutate(expr = purrr::map(
+  .x = expr,
+  .f = function(.x) {
+    .x %>% dplyr::filter(symbol == "SQSTM1")
+  }
+)) -> SQSTM1_mrna
+  
+atg_rppa_expr %>% 
+  dplyr::select(-corr) %>% 
+  dplyr::mutate(protein_expr = purrr::map(
+    .x = protein_expr,
+    .f = function(.x) {
+      .x %>% dplyr::filter(protein == "p62")
+    }
+  )) %>% 
+  dplyr::inner_join(SQSTM1_mrna, by = "cancer_types") ->  p62_rppa_expr
 
+fn_corr_mrna_protein_p62 <- function(.x, .y){
+  .y %>% 
+    dplyr::select(-entrez_id) %>% 
+    dplyr::filter(symbol == "SQSTM1") %>% 
+    tidyr::gather(key = barcode, value = expr, -symbol) %>% 
+    dplyr::mutate(sample = stringr::str_sub(barcode, start = 1, end = 16)) %>% 
+    dplyr::select(symbol, sample, expr) %>% 
+    dplyr::distinct(sample, .keep_all = T) %>% 
+    dplyr::mutate(expr = log2(expr + 0.1)) -> .my
+  
+  .x %>% 
+    dplyr::filter(protein == "p62") %>% 
+    tidyr::gather(key = barcode, value = rppa, -protein) %>% 
+    dplyr::mutate(sample = stringr::str_sub(barcode, start = 1, end = 16)) %>% 
+    dplyr::select(protein, sample, rppa) %>% 
+    dplyr::distinct(sample, .keep_all = T) -> .px
+  
+  .px %>% 
+    dplyr::inner_join(.my, by = "sample") %>% 
+    tidyr::drop_na() %>% 
+    cor.test(~rppa + expr, data = ., method = "spearman") %>% 
+    broom::tidy() %>% 
+    dplyr::select(coef = estimate, pval = p.value)
+}
 
+p62_rppa_expr %>% 
+  dplyr::mutate(
+    mp_p62 = purrr::map2(
+    .x = protein_expr,
+    .y = expr,
+    .f = fn_corr_mrna_protein_p62
+  )) %>% 
+  dplyr::select(-protein_expr, -expr) %>% 
+  tidyr::unnest(mp_p62) -> p62_corr_rppa_expr
+
+CPCOLS <- c("#000080", "#FF4040")
+
+p62_corr_rppa_expr %>% 
+  dplyr::mutate(pval = -log10(pval)) %>% 
+  dplyr::mutate(pval = ifelse(pval > 50, 50, pval)) %>% 
+  dplyr::mutate(sig = ifelse(pval > -log10(0.05) & abs(coef) > 0.3, "sig", "non-sig")) %>% 
+  ggplot(aes(x = coef, y = pval)) +
+  geom_point(aes(color = sig)) +
+  ggrepel::geom_label_repel(aes(label = cancer_types)) +
+  scale_color_manual(values = CPCOLS) +
+  ggthemes::theme_gdocs() +
+  labs(x = "Coefficient", y = "P-value") -> p62_mrna_rppa_coef
+  
 
 
 

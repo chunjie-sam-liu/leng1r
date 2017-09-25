@@ -395,3 +395,11 @@ ls
 la
 rm .ftpconfig
 cd ../
+l
+cat .cj_command 
+find . -type f -name "*R"|xargs grep -i guides
+find . -type f -name "*R"|xargs grep -i start
+find . -type f -name "*R"|xargs grep -i *
+find . -type f -name "*R"|xargs grep -i "*"
+ls
+ll

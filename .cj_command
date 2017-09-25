@@ -974,3 +974,10 @@ ls
 la
 cd autophagy_codes/
 git status
+git add -A
+git commit -m "rm ftpconfig"
+git push origin master
+l
+cd autophagy_codes/
+ls
+git status
