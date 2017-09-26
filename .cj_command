@@ -1004,3 +1004,8 @@ find .  -type f -name "*R"|xargs grep -i scale_color_gradient2
 les ./autophagy_codes/01_expr/03_a_gene_expr.R
 find .  -type f -name "*R"|xargs grep -i ratio
 git status
+git add -A
+git commit -m 'afhl;
+git commit -m 'afhl'
+git push origin master
+git status

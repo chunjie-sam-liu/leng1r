@@ -230,7 +230,8 @@ p62_corr %>%
   ) +
   labs(x = "Cancer Types", y = "Proteins") -> p62_corr_protein
 
-ggsave(filename = )
+ggsave(filename = "fig_01_p62_corr_proteins.pdf",
+       plot = p62)
 
 p62_corr %>% 
   dplyr::filter(vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>% 
@@ -584,16 +585,27 @@ p62_corr_rppa_expr %>%
   dplyr::mutate(pval = ifelse(pval > 50, 50, pval)) %>% 
   dplyr::mutate(sig = ifelse(pval > -log10(0.05) & abs(coef) > 0.3, "sig", "non-sig")) %>% 
   ggplot(aes(x = coef, y = pval)) +
-  geom_point(aes(color = sig)) +
-  ggrepel::geom_label_repel(aes(label = cancer_types)) +
-  scale_color_manual(values = CPCOLS) +
-  ggthemes::theme_gdocs() +
+  geom_point(aes(color = sig), size = 1) +
+  ggrepel::geom_text_repel(aes(label = cancer_types), size = 3) +
+  scale_color_manual(values = CPCOLS, name = "Significance") +
+  theme_classic() +
   labs(x = "Coefficient", y = "P-value") -> p62_mrna_rppa_coef
   
+ggsave(
+  filename = "fig_01_p62_mrna_rppa_corr.pdf",
+  plot = p62_mrna_rppa_coef,
+  device = "pdf",
+  path = afhl_class,
+  width = 6,
+  height = 5
+)
 
-
-
-
+# clinical data and classify
+p62_rppa_expr %>% 
+  dplyr::select(-expr) %>% 
+  dplyr::mutate(
+    p62
+  )
 
 
 
