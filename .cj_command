@@ -981,3 +981,26 @@ l
 cd autophagy_codes/
 ls
 git status
+git add -A
+git commit -m "afhl"
+git push origin master
+ftp ftp://ftp.ccb.jhu.edu/pub/
+lftp ftp://ftp.ccb.jhu.edu/pub/
+gitr
+ls
+find . -name "*.R"
+ps xf
+top
+ps xf
+find . -name "*.R"
+find . -name "*.R" -type f
+ll
+find .  -type f
+find .  -type f -name "*R"
+find .  -type f -name "*R"|grep -i rlang
+find .  -type f -name "*R"|xargs grep -i rlang
+find .  -type f -name "*R"|xargs grep -i cor.test
+find .  -type f -name "*R"|xargs grep -i scale_color_gradient2
+les ./autophagy_codes/01_expr/03_a_gene_expr.R
+find .  -type f -name "*R"|xargs grep -i ratio
+git status
