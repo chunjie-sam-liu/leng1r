@@ -139,20 +139,6 @@ fn_dist <- function(.s){
          height = 3)
 }
 
-fn_p62_corr <- function(.s) {
-  p62_mtor_pi3k_score %>% 
-    # dplyr::mutate(ratio = exp(P62LCKLIGAND) / exp(BECLIN)) %>% 
-    dplyr::select(1,2, .s, p62 = P62LCKLIGAND) %>% 
-    dplyr::group_by(cancer_types) %>% 
-    dplyr::do(
-      cor.test(dplyr::pull(., p62), dplyr::pull(., .s), method = "spearman") %>% 
-        broom::tidy()
-    ) %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(cancer_types, coef = estimate, pval = p.value) %>% 
-    tibble::add_column(vs_type = glue::glue("p62_vs_{.s}"), .before = 2)
-}
-
 fn_p62_corr_all <- function(.s) {
   p62_mtor_pi3k_score %>% 
     dplyr::select(1,2, .s, p62 = P62LCKLIGAND) %>% 
@@ -184,22 +170,38 @@ ref_proteins %>%
          width = 7,
          height = 6)
 
+fn_p62_corr <- function(.s) {
+    p62_mtor_pi3k_score %>% 
+      # dplyr::mutate(ratio = exp(BECLIN) / exp(P62LCKLIGAND)) %>%
+      dplyr::select(1,2, .s, p62 = P62LCKLIGAND) %>% 
+      dplyr::group_by(cancer_types) %>% 
+      dplyr::do(
+        cor.test(dplyr::pull(., p62), dplyr::pull(., .s), method = "spearman") %>% 
+          broom::tidy()
+      ) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::select(cancer_types, coef = estimate, pval = p.value) %>% 
+      tibble::add_column(vs_type = glue::glue("p62_vs_{.s}"), .before = 2)
+  }
+  
 ref_proteins %>% purrr::map(.f = fn_p62_corr) %>% dplyr::bind_rows() -> p62_corr
+
 p62_corr %>% 
-  dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>% 
+  dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>%
   dplyr::group_by(cancer_types) %>% 
   dplyr::summarise(m = mean(coef)) %>% 
   dplyr::arrange(m) %>% 
   dplyr::pull(cancer_types) -> cancer_rank
+
 p62_corr %>% 
-  dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>% 
+  dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>%
   dplyr::group_by(vs_type) %>% 
   dplyr::summarise(m = mean(coef)) %>% 
   dplyr::arrange(m) %>% 
   dplyr::pull(vs_type) -> vs_type_rank
 
 p62_corr %>% 
-  dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>% 
+  # dplyr::filter(!vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>%
   dplyr::filter(pval < 0.05) %>% 
   dplyr::mutate(pval = -log10(pval)) %>% 
   dplyr::mutate(pval = ifelse(pval > 30, 30, pval)) %>% 
@@ -220,10 +222,15 @@ p62_corr %>%
   ) +
   scale_size(name = "P-value") +
   scale_x_discrete(limit = cancer_rank) +
-  scale_y_discrete(limit = vs_type_rank,
-    labels = vs_type_rank %>% 
+  scale_y_discrete(limit = c(vs_type_rank, "", "p62_vs_mtor_score", "p62_vs_pik_score"),
+    labels = c(vs_type_rank %>% 
       stringr::str_replace( pattern = "p62_vs_", "") %>% 
-      stringr::str_replace(pattern = "_", replacement = " ")) +
+      stringr::str_replace(pattern = "_", replacement = " ") %>% 
+        stringr::str_replace(pattern = "ALPHA", "") %>% 
+        stringr::str_replace(pattern = "BETA", "") %>% 
+        stringr::str_replace(pattern = "X", ""),
+      "","mTOR score", "PI3K/AKT score"),
+    expand = c(0.05,0.05)) +
   ggthemes::theme_gdocs() +
   theme(
     axis.text.x = element_text(angle = 90)
@@ -231,37 +238,12 @@ p62_corr %>%
   labs(x = "Cancer Types", y = "Proteins") -> p62_corr_protein
 
 ggsave(filename = "fig_01_p62_corr_proteins.pdf",
-       plot = p62)
+       plot = p62_corr_protein, 
+       path = afhl_class,
+       device = "pdf", 
+       width = 9,
+       height = 6)
 
-p62_corr %>% 
-  dplyr::filter(vs_type %in% c("p62_vs_mtor_score", "p62_vs_pik_score")) %>% 
-  dplyr::filter(pval < 0.05) %>% 
-  dplyr::mutate(pval = -log10(pval)) %>% 
-  dplyr::mutate(pval = ifelse(pval > 30, 30, pval)) %>% 
-  dplyr::mutate(coef = dplyr::case_when(
-    coef > 0.5 ~ 0.5,
-    coef < -0.5 ~ -0.5,
-    TRUE ~ coef
-  )) %>%
-  ggplot(aes(x = cancer_types, y = vs_type)) +
-  geom_point(aes(color = coef, size = pval)) +
-  scale_color_gradient2(
-    name = "Coef",
-    high = "red",
-    mid = "white",
-    low = "blue",
-    breaks = seq(-0.5,0.5,length.out = 5),
-    labels = c("=<-0.5", "-0.25", "0", "0.25", ">=0.5")
-  ) +
-  scale_size(name = "P-value") +
-  scale_x_discrete(limit = cancer_rank) +
-  ggthemes::theme_gdocs() +
-  theme(
-    axis.text.x = element_text(angle = 90)
-  ) +
-  labs(x = "Cancer Types", y = "Proteins")
-
-  
 # mTORC1 complex MTOR, RPTOR, MLST8, DEPTOR -----
 # phosphorylated (actiavated)
 p_mTOR <- c("MTOR_pS2448")
@@ -600,17 +582,28 @@ ggsave(
   height = 5
 )
 
-# clinical data and classify
+# clinical data and classify ----------------------------------------------
+clinical <- readr::read_rds(file.path(tcga_path, "pancan34_clinical.rds.gz"))
 p62_rppa_expr %>% 
   dplyr::select(-expr) %>% 
   dplyr::mutate(
-    p62
-  )
+    p62 = purrr::map(
+      .x = protein_expr,
+      .f = function(.x){
+        .x %>% 
+          tidyr::gather(key = barcode, value = rppa, -protein) %>% 
+          dplyr::mutate(sample = stringr::str_sub(barcode, start = 1, end = 12)) %>% 
+          dplyr::distinct(sample, .keep_all = T) %>% 
+          dplyr::mutate(type = ifelse(rppa > median(rppa), "H", "L"))
+      }
+    )
+  ) %>% 
+  tidyr::unnest(p62) -> p62_sample_classification
 
 
+p62_sample_classification %>% readr::write_rds(path = file.path(afhl_class, '.rds_01_p62_sample_classification.rds.gz'), compress = "gz")
 
-
-
+save.image(file.path(afhl_class, ".rda_01_af_h_l_classification.rda.gz"))
 
 
 

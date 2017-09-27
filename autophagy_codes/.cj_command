@@ -403,3 +403,6 @@ find . -type f -name "*R"|xargs grep -i *
 find . -type f -name "*R"|xargs grep -i "*"
 ls
 ll
+l
+ls
+cd 13_afh_vs_afl/

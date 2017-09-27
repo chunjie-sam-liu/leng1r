@@ -1009,3 +1009,17 @@ git commit -m 'afhl;
 git commit -m 'afhl'
 git push origin master
 git status
+git add -A
+git commit -m 'afhl'
+git push origin master
+l
+find .  -type f -name "*R"|xargs grep -i expand
+les ./autophagy_codes/04_ccle/02_ccle_a_drug.R
+find .  -type f -name "*R"|xargs grep -i hazard
+les ./autophagy_codes/11_cancer_stem_cell/05_stemness_analysis.R
+find .  -type f -name "*R"|xargs grep -i survminer
+les ./autophagy_codes/12_merge_summary/02_expr_gsva_score.R
+find .  -type f -name "*R"|xargs grep -i kmp
+les ./autophagy_codes/11_cancer_stem_cell/05_stemness_analysis.R
+find .  -type f -name "*R"|xargs grep -i "gridExtra::arrangeGrob"
+les ./autophagy_codes/13_afh_vs_afl/01_af_h_l_classification.R
