@@ -6,3 +6,23 @@ ll
 cd
 ls
 ll
+ls
+ll
+l
+ll
+mkdir yy_code
+ls
+cd yy_code/
+l
+cd ../
+ls
+ll
+mv PSM.* yy_code/
+ls
+ll
+mv check_balance.r cal.r yy_code/
+ls
+ll
+cd yy_code/
+l
+cd ../

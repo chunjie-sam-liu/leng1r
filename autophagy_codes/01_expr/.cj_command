@@ -396,3 +396,6 @@ l
 grep expand *
 ll
 cd ../
+ls
+ll
+cd ../

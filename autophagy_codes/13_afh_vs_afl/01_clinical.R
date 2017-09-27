@@ -107,8 +107,8 @@ p62_clinical_nest %>%
         dplyr::mutate(time = ifelse(time > 60, 60, time)) %>% 
         dplyr::mutate(
           group = dplyr::case_when(
-            rppa > quantile(rppa, 0.6) ~ "H",
-            rppa < quantile(rppa, 0.4) ~ "L",
+            rppa > quantile(rppa, 0.6) ~ "L",
+            rppa < quantile(rppa, 0.4) ~ "H",
             TRUE ~ "M"
           )
         ) -> .dd

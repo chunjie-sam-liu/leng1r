@@ -1023,3 +1023,24 @@ find .  -type f -name "*R"|xargs grep -i kmp
 les ./autophagy_codes/11_cancer_stem_cell/05_stemness_analysis.R
 find .  -type f -name "*R"|xargs grep -i "gridExtra::arrangeGrob"
 les ./autophagy_codes/13_afh_vs_afl/01_af_h_l_classification.R
+ls
+cd autophagy_codes/
+l
+ll
+cd autophagy_codes/
+l
+ll
+cd testCode/
+l
+ll
+cd autophagy_codes/
+l
+ll
+cd testCode/
+l
+cd autophagy_codes/
+l
+vim .gitignore 
+ll
+git status
+ggit add -A
