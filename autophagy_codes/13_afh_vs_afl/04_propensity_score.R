@@ -4,7 +4,6 @@
 library(ggplot2)
 library(magrittr)
 
-
 # path --------------------------------------------------------------------
 
 tcga_path <- "/home/cliu18/liucj/projects/6.autophagy/TCGA"
@@ -12,10 +11,10 @@ afhl_path <- "/home/cliu18/liucj/projects/6.autophagy/09_afh_vs_afl"
 afhl_class <- file.path(afhl_path, "01_af_h_l_classification")
 props_path <- file.path(afhl_path, "04_props")
 
-
 # load data ---------------------------------------------------------------
 library(dummies)
 source("/home/cliu18/liucj/github/RstudioWithGit/autophagy_codes/13_afh_vs_afl/yy_code/cal.r")
+
 clinical <- readr::read_rds(file.path(tcga_path, "pancan34_clinical.rds.gz"))
 p62_sample_classification <- readr::read_rds(path = file.path(afhl_class, '.rds_01_p62_sample_classification.rds.gz')) %>% 
   dplyr::select(-barcode) %>% 
@@ -40,7 +39,11 @@ expr %>%
       colnames(mRNAseq.pri) <- as.vector(mRNAseq[,1])
       mRNAseq.pri <- rm.zero.col(mRNAseq.pri)
     }
-  )) -> expr_dum
+  )) %>% 
+  dplyr::filter(purrr::map_lgl(expr, Negate(is.null))) -> expr_dum
+
+readr::write_rds(expr_dum, file.path(props_path, ".rds_01_expr_dum.rds.gz"), compress = "gz")
+expr_dum <- readr::read_rds(file.path(props_path, ".rds_01_expr_dum.rds.gz"))
 
 clinical %>% 
   dplyr::inner_join(expr_dum, by = "cancer_types") %>% 
@@ -54,7 +57,7 @@ clinical %>%
           dplyr::select(barcode, age_at_initial_pathologic_diagnosis,gender,race) %>% 
           dplyr::filter(!race %in% c("ASIAN", NA_character_)) %>% 
           dplyr::mutate(race = as.factor(race)) %>% 
-          dplyr::rename(sample = barcode) 
+          dplyr::rename(sample = barcode)
       }
     )
   ) %>%
@@ -75,10 +78,11 @@ clinical %>%
       .x = merge, 
       .y = expr,
       .z = cancer_types
-    )
+    ) %>% 
     .f = function(.x, .y){
       data <- .x %>% as.data.frame()
       mRNAseq.pri <- .y
+      cancer <- .z
       
       dummy.feature <- setdiff(colnames(.x),c("Z","age_at_initial_pathologic_diagnosis"))
       data.dum <- dummy.data.frame(data, names = dummy.feature)
@@ -94,9 +98,12 @@ clinical %>%
       colnames(data.dum) <- gsub(" ", ".", colnames(data.dum))
       form <- as.formula(paste("Z~",paste(colnames(data.dum)[-exclude.col],collapse="+"),sep=""))
       
+      .path <- file.path(props_path, cancer)
+      if (!file.exists(.path)) dir.create(.path)
+      
       mRNAseq.result <- weight.test(
         data.dum, form, mRNAseq.pri, is.continuous=TRUE,
         weight="MW", mirror.plot=FALSE, cancer, data.type = "mRNAseq", 
-        outdir = paste(scripts.dir, "/",cancer,"_",analysis,sep=""), perm=FALSE)
+        outdir = .path, perm=FALSE)
     }
   ))

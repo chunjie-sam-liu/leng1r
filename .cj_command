@@ -1055,3 +1055,22 @@ l
 cd autophagy_codes/
 ls
 git status
+git add -A
+git commit -m "proensity score"
+git push origin master
+ps xf
+kill -9 30865
+ps xf
+kill -9 30865
+cd
+ls
+cd autophagy_codes/
+l
+cat RstudioWithGit.Rproj 
+ls -al 
+cd .Rproj.user/
+ls
+ll
+l
+la
+cd .Rproj.user/
