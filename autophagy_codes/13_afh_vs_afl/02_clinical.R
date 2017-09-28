@@ -157,8 +157,98 @@ gridExtra::arrangeGrob(grobs = p62_survival_quantile40$p, nrow = 2) %>%
          height = 6,
          path = clinical_path)
 
+# p62 stage -------------------------------------------------------------
+
+clinical_stage <- readr::read_rds(file.path(tcga_path, "pancan34_clinical_stage.rds.gz")) %>% 
+  dplyr::filter(n >= 40) %>% 
+  dplyr::select(-n)
+
+p62_sample_classification %>% 
+  dplyr::inner_join(clinical_stage, by = "cancer_types") %>% 
+  dplyr::mutate(pval = purrr::map2(
+    .x = data,
+    .y = stage,
+    .f = function(.x, .y){
+      .y %>% 
+        dplyr::mutate(stage = ifelse(stage == "Stage II", "Stage I", stage)) %>%
+        dplyr::mutate(stage = ifelse(stage == "Stage III", "Stage IV", stage)) %>%
+        dplyr::rename(sample = barcode) %>%
+        dplyr::inner_join(.x, by = "sample") -> .d
+      
+      t.test(rppa ~ stage, data = .d) %>% broom::glance() %>%  .$p.value -> pval
+      
+      if (pval < 0.05) {
+        
+        CPCOLS <- c("#191970", "#CD0000")
+        .d %>%
+          ggplot(aes(x = stage, y = rppa, color = stage)) +
+          geom_boxplot(outlier.colour = NA, width = 0.5) +
+          # stat_boxplot(geom = 'errorbar', width = 0.2) +
+          scale_x_discrete(limit = c("Stage I", "Stage IV"), labels = c("Stage I & II", "Stage III & IV")) +
+          scale_color_manual(values = CPCOLS) +
+          annotate("text", label = glue::glue("p = {signif(pval, 3)}"), x = 1.5, y = 2) +
+          theme_bw() +
+          labs(x = "Stage", y = "RPPA score") +
+          theme(
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.direction = "horizontal"
+          )
+        
+      }
+    }
+  )) %>% 
+  dplyr::filter(purrr::map_lgl(pval, Negate(is.null))) %>% 
+  dplyr::select(cancer_types, pval) %>% 
+  purrrlyr::by_row(..f = function(.d) {
+    ggsave(filename = glue::glue("fig_02_stage_diff_{.d$cancer_types}.pdf"), plot = .d$pval[[1]], path = clinical_path, width = 3, height = 4)
+  })
 
 # p62 subtype -------------------------------------------------------------
 
+clinical_subtype <- 
+  readr::read_rds(path = file.path(tcga_path,"pancan34_clinical_subtype.rds.gz")) %>% 
+  dplyr::select(-n)
 
+p62_sample_classification %>% 
+  dplyr::inner_join(clinical_subtype, by = "cancer_types") %>% 
+  dplyr::mutate(pval = purrr::pmap(
+    .l = list(
+      .x = data,
+      .y = subtype,
+      .z = cancer_types),
+    .f = function(.x, .y, .z){
+      .y %>% 
+        dplyr::rename(sample = barcode) %>%
+        dplyr::inner_join(.x, by = "sample") -> .d
+
+      aov(rppa ~ subtype, data = .d) %>% broom::glance() %>% .$p.value -> pval
+      
+      if (pval < 0.05) {
+        .label <- glue::glue("{.z}
+                             ANOVA p = {signif(pval, 3)}")
+        .d %>%
+          ggplot(aes(x = reorder(subtype, rppa, median), y = rppa, 
+                     color = reorder(subtype, rppa, median))) +
+          geom_boxplot(outlier.size = NA) +
+          ggthemes::scale_color_gdocs(name = "Subtype") +
+          theme_bw() +
+          labs(x = "Subtype", y = "RPPA score") +
+          theme(
+            panel.grid = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)
+          ) +
+          annotate("text", label = .label, x = 1.5, y = 1.5)
+      }
+    }
+  )) %>% 
+  dplyr::filter(purrr::map_lgl(pval, Negate(is.null))) %>% 
+  dplyr::pull(pval) %>% 
+  gridExtra::arrangeGrob(grobs = ., nrow = 3) %>% 
+  ggsave(filename = "fig_03_subtype_all.pdf",
+         plot = .,
+         device = "pdf", 
+         width = 10,
+         height = 8,
+         path = clinical_path)
 

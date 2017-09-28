@@ -26,3 +26,18 @@ ll
 cd yy_code/
 l
 cd ../
+ls
+ll
+ls
+l
+mv 01_clinical.R 
+l
+mv 01_clinical.R 02_clinical.R
+ls
+ll
+l
+ll
+ls
+ls
+cd yy_code/
+cd yy_code/

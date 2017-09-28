@@ -1044,3 +1044,14 @@ vim .gitignore
 ll
 git status
 ggit add -A
+git add -A
+git commit -m "clinical" 
+git push origin master
+ll
+cd autophagy_codes/
+ls
+cd autophagy_codes/
+l
+cd autophagy_codes/
+ls
+git status
