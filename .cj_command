@@ -1074,3 +1074,7 @@ ll
 l
 la
 cd .Rproj.user/
+ls
+cd autophagy_codes/
+l
+cd ../

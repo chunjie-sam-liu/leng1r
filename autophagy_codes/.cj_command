@@ -435,3 +435,18 @@ ls
 cd 13_afh_vs_afl/
 ls
 cd ../
+ls
+ll
+cd 13_afh_vs_afl/
+l
+find . -name "*R"
+find . -name "*R" -type f
+find . -name "*R" -type f|xargs grep -i expand
+find . -name "*R" -type f|xargs grep -i expand -A 2
+find . -name "*R" -type f|xargs grep -i expand -B 2
+find . -name "*R" -type f|xargs grep -i expand -B 5
+find . -name "*R" -type f|xargs grep -i expand -B 7
+find . -name "*R" -type f|xargs grep -i expand -B 10
+l
+ll
+cd 13_afh_vs_afl/

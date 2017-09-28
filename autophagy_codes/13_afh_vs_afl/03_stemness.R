@@ -32,7 +32,9 @@ csc %>%
     .x = sci,
     .y = data,
     .f = function(.x, .y) {
-      .x %>% dplyr::inner_join(.y, by = "sample") 
+      .y %>% 
+        dplyr::mutate(type = ifelse(rppa > median(rppa), "L", "H")) %>% 
+        dplyr::inner_join(.x, by = "sample")
     }
   )) %>% 
   dplyr::select(cancer_types, merge) -> p62_csc
@@ -58,7 +60,7 @@ p62_csc %>%
   tidyr::unnest(pval) %>% 
   dplyr::mutate(cancer_types = reorder(cancer_types, estimate, sort)) -> p62_csc_pval 
 
-CPCOLS <- c( "#CD0000","#000080")
+CPCOLS <- c("#CD0000","#000080")
 
 p62_csc_pval$cancer_types %>% levels() -> levs
 
@@ -83,8 +85,6 @@ p62_csc_pval %>%
   theme_bw() +
   theme(
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-    legend.position = "top",
-    legend.direction = "horizontal",
     panel.grid = element_blank()
   ) +
   labs(x = "Cancer Types", y = "Stemness score")  +
@@ -108,7 +108,7 @@ expr %>%
     .x = expr,
     .f = function(.x) {
       .x %>% 
-        # dplyr::filter(symbol %in% stemness_genes) %>% 
+        dplyr::filter(symbol %in% stemness_genes) %>%
         dplyr::select(-entrez_id) %>% 
         tidyr::drop_na() %>% 
         dplyr::filter(symbol != "?") %>% 
@@ -124,6 +124,7 @@ expr %>%
     .y = data,
     .f = function(.x, .y) {
       .y %>% 
+        dplyr::mutate(type = ifelse(rppa > median(rppa), "L", "H")) %>% 
         dplyr::select(sample, type) %>% 
         dplyr::inner_join(.x, by = "sample")
     }
@@ -148,18 +149,51 @@ p62_expr_merge %>%
         dplyr::ungroup()
     }
   )) %>% 
-  tidyr::unnest(pval) -> te
+  tidyr::unnest(pval) %>% 
+  dplyr::filter(pval < 0.05, abs(fc) > log2(1.1)) %>% 
+  dplyr::mutate(fc = ifelse(fc < -2, -2, fc)) %>% 
+  dplyr::mutate(fc = ifelse(fc > 2, 2, fc)) -> plot_ready
 
-te %>% 
-  dplyr::filter(pval < 0.001, abs(fc) > log2(10)) %>% 
+plot_ready %>% 
+  dplyr::group_by(cancer_types) %>% 
+  dplyr::summarise(m = mean(fc)) %>% 
+  dplyr::arrange(m) %>% 
+  dplyr::pull(cancer_types) -> cancer_rank
+
+plot_ready %>% 
+  dplyr::group_by(symbol) %>% 
+  dplyr::summarise(m = mean(fc)) %>% 
+  dplyr::arrange(m) %>% 
+  dplyr::pull(symbol) -> gene_rank
+
+plot_ready %>% 
   ggplot(aes(x = cancer_types, y = symbol)) +
-  geom_point(aes(color = fc, size = pval)) +
+  geom_point(aes(color = fc, size = -log10(pval))) +
   scale_color_gradient2(
     high = "red",
     mid = "white", 
-    low = "blue"
+    low = "blue",
+    name = "log2(FC)",
+    guide = F
   ) +
+  scale_x_discrete(limit = levs) +
+  scale_y_discrete(limit = gene_rank) +
+  scale_size(name = "p-value", guide = F) +
+  theme_bw() +
   theme(
-    axis.text.x = element_text(angle = 90)
-  )
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y = element_text(color = c("red", "red", "red", "red", "red", "black", "black","black", "black","black", "red", "red")),
+    legend.position = "bottom"
+  ) +
+  labs(x = "Cancer Types", y = "Symbol") -> p
+
+ggsave(filename = "fig_02_csc_signature_gene_diff.pdf", 
+       plot = p, 
+       width = 8,
+       height = 2.5, 
+       path = stemness_path)
+
+# save --------------------------------------------------------------------
+
+
 save.image(file.path(stemness_path, ".rda_03_stemness.rda"))
