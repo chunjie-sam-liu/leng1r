@@ -450,3 +450,19 @@ find . -name "*R" -type f|xargs grep -i expand -B 10
 l
 ll
 cd 13_afh_vs_afl/
+l
+cd ../l
+ll
+cd 13_afh_vs_afl/
+ls
+ll
+cd ../
+l
+find . -name "*R" -type f | xargs grep -i ggrepel 
+find . -name "*R" -type f | xargs grep -i ggrepel  -A 10
+ls
+l
+find . -name "*R" -type f |xargs grep -i reorder
+les ./13_afh_vs_afl/03_stemness.R
+ls
+ll

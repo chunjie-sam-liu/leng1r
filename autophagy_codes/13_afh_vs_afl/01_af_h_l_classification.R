@@ -222,18 +222,21 @@ p62_corr %>%
   ) +
   scale_size(name = "P-value") +
   scale_x_discrete(limit = cancer_rank) +
-  scale_y_discrete(limit = c(vs_type_rank, "", "p62_vs_mtor_score", "p62_vs_pik_score"),
+  scale_y_discrete(limit = c(vs_type_rank),
     labels = c(vs_type_rank %>% 
       stringr::str_replace( pattern = "p62_vs_", "") %>% 
       stringr::str_replace(pattern = "_", replacement = " ") %>% 
         stringr::str_replace(pattern = "ALPHA", "") %>% 
         stringr::str_replace(pattern = "BETA", "") %>% 
-        stringr::str_replace(pattern = "X", ""),
+        stringr::str_replace(pattern = "^X", ""),
       "","mTOR score", "PI3K/AKT score"),
     expand = c(0.05,0.05)) +
   ggthemes::theme_gdocs() +
   theme(
-    axis.text.x = element_text(angle = 90)
+    axis.text.x = element_text(angle = 90),
+    axis.text.y = element_text(
+      
+    )
   ) +
   labs(x = "Cancer Types", y = "Proteins") -> p62_corr_protein
 
@@ -243,6 +246,70 @@ ggsave(filename = "fig_01_p62_corr_proteins.pdf",
        device = "pdf", 
        width = 9,
        height = 6)
+
+p62_mtor_pi3k_score %>% 
+  dplyr::select(cancer_types, P62LCKLIGAND, BECLIN) %>% 
+  dplyr::left_join(coef_pval, by = "cancer_types") -> p62_mtor_pi3k_score_mid
+p62_mtor_pi3k_score_mid %>% 
+  dplyr::group_by(cancer_types) %>% 
+  dplyr::summarise(m = mean(coef)) %>% 
+  dplyr::arrange(m) %>% 
+  dplyr::pull(cancer_types) -> levs
+
+p62_mtor_pi3k_score_mid %>% 
+  dplyr::mutate(cancer_types = factor(cancer_types, levels = levs)) %>% 
+  dplyr::mutate(coef = paste("coef", signif(coef, 3), sep = " = ")) %>% 
+  dplyr::mutate(pval = paste("p",signif(pval, 3), sep = " = ") ) %>% 
+  ggplot(aes(x = rank(P62LCKLIGAND), y = rank(BECLIN))) +
+  geom_point() +
+  geom_smooth(se = F, method = "lm") +
+  facet_wrap(~cancer_types + coef + pval, nrow = 5) +
+  labs(x = "p62", y = "BECLIN") +
+  theme(
+    strip.background = element_rect(fill = 'white', color = "black"),
+    panel.grid = element_blank(),
+    panel.background = element_rect(fill = "white", color = "black")
+  ) -> p
+ggsave(filename = "fig_02_lm_rppa_p62_becn1.pdf", 
+       plot = p,
+       device = "pdf",
+       width = 20, 
+       height = 20,
+       path = afhl_class)
+
+
+p62_mtor_pi3k_score %>% 
+  dplyr::group_by(cancer_types) %>% 
+  purrrlyr::by_slice(
+    ..f = function(.d){
+      tryCatch(
+      cor.test(~P62LCKLIGAND + BECLIN, data = .d) %>% 
+        broom::tidy() %>% 
+        dplyr::select(coef = estimate, pval = p.value) -> .pval,
+      error = function(e) return(NULL))
+      .cancer <- .d$cancer_types
+      glue::glue("rppa spearman correlation in {.cancer}") -> .title
+      glue::glue("Rs = {signif(.pval$coef, 3)} 
+                 p = {signif(.pval$pval,3)}") -> .label
+      print(.d$cancer_types)
+      .d %>% 
+        ggplot(aes(x = rank(P62LCKLIGAND), y = rank(BECLIN))) +
+        geom_point() +
+        geom_smooth(se = F, method = "lm") +
+        ggthemes::theme_gdocs() +
+        annotate(geom = "text", label = .label, x = 2, y = 2) +
+        labs(x = "p62", y = "BECLIN") -> .p
+      tibble::tibble(coef = .pval$coef, pval = .pval$pval, plot = list(.p))
+    }
+  ) -> p62_becn_plot
+p62_becn_plot %>% tidyr::unnest() %>% dplyr::select(-plot) -> coef_pval
+gridExtra::arrangeGrob(grobs = p62_becn_plot$.out, ncol = 5) %>% 
+  ggsave(filename = "fig_02_lm_rppa_p62_becn1.pdf", 
+         plot = .,
+         device = "pdf",
+         width = 20, 
+         height = 25,
+         path = afhl_class)
 
 # mTORC1 complex MTOR, RPTOR, MLST8, DEPTOR -----
 # phosphorylated (actiavated)
@@ -605,7 +672,7 @@ p62_sample_classification %>% readr::write_rds(path = file.path(afhl_class, '.rd
 
 save.image(file.path(afhl_class, ".rda_01_af_h_l_classification.rda.gz"))
 
-
+load(file.path(afhl_class, ".rda_01_af_h_l_classification.rda.gz"))
 
 
 

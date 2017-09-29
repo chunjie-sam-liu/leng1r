@@ -158,3 +158,15 @@ cat nohup.out
 ll
 les nohup.out
 cd
+ls
+ll
+cd ../
+ls
+ll
+l
+ll
+l
+cd ../
+ls
+ll
+cd
