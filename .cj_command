@@ -1083,3 +1083,25 @@ cd autophagy_codes/
 l
 ls
 cd autophagy_codes/
+ls
+ll
+rm fig_02_lm_rppa_p62_becn1.pdf 
+l
+ll
+rm CESC_mRNAseq_samples.txt 
+l
+ll
+cd ../
+ls
+ll
+la
+vim .gitignore 
+ls
+ll
+ls
+ll
+ps 
+ps xf
+l
+ls
+cd

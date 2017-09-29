@@ -107,15 +107,15 @@ p62_clinical_nest %>%
         dplyr::mutate(time = ifelse(time > 60, 60, time)) %>% 
         dplyr::mutate(
           group = dplyr::case_when(
-            rppa > quantile(rppa, 0.6) ~ "L",
-            rppa < quantile(rppa, 0.4) ~ "H",
+            rppa > quantile(rppa, 0.5) ~ "L",
+            rppa < quantile(rppa, 0.5) ~ "H",
             TRUE ~ "M"
           )
         ) -> .dd
       
       .dd %>% dplyr::filter(group != "M") -> .d
       
-      survival::coxph(survival::Surv(time, status) ~ rppa, data = .dd) %>% 
+      survival::coxph(survival::Surv(time, status) ~ rppa, data = .d) -> .cox
         broom::tidy() %>% 
         dplyr::mutate(hazard_ratio = exp(estimate)) %>% 
         dplyr::select(hazard_ratio, coxp = p.value) -> .hazard_coxp
@@ -146,8 +146,13 @@ p62_clinical_nest %>%
     }
   )) %>% 
   dplyr::select(-data) %>% 
-  tidyr::unnest() %>% 
-  dplyr::filter(coxp < 0.05, kmp < 0.05) -> p62_survival_quantile40
+  tidyr::unnest() -> p62_survival_quantile40
+
+p62_survival_quantile40 %>% 
+  dplyr::mutate(cancer_types = reorder(cancer_types, hazard_ratio, sort)) %>% 
+  ggplot(aes(x = hazard_ratio, y = cancer_types)) + 
+  geom_point(aes(size = -log10(coxp))) +
+  geom_vline(xintercept = 1)
 
 gridExtra::arrangeGrob(grobs = p62_survival_quantile40$p, nrow = 2) %>% 
   ggsave(filename = "fig_01_p62_survival.pdf",
@@ -157,6 +162,60 @@ gridExtra::arrangeGrob(grobs = p62_survival_quantile40$p, nrow = 2) %>%
          height = 6,
          path = clinical_path)
 
+# for harzard ratio
+p62_clinical_nest %>% 
+  dplyr::mutate(hazard_ratio = purrr::map2(
+    .x = data,
+    .y = cancer_types,
+    .f = function(.x, .y){
+      .x %>% 
+        dplyr::mutate(time = time / 30) %>% 
+        dplyr::mutate(time = ifelse(time > 60, 60, time)) %>% 
+        dplyr::mutate(group = dplyr::case_when(
+          rppa > quantile(rppa, 0.6) ~ "L",
+          rppa < quantile(rppa, 0.4) ~ "H",
+          TRUE ~ "M"
+        )) -> .d
+        .d %>% dplyr::filter(group != "M") -> .dd
+    
+      survival::coxph(survival::Surv(time, status) ~ rppa, data = .d) -> .cox
+      summary(.cox) -> .z
+      survival::survdiff(survival::Surv(time, status) ~ group, data = .d) -> .d_diff
+      kmp <- 1 - pchisq(.d_diff$chisq, df = length(levels(as.factor(.d$group))) - 1)
+      
+      tibble::tibble(
+        n = .z$n,
+        hr = .z$conf.int[1],
+        hr_l = .z$conf.int[3],
+        hr_h = .z$conf.int[4],
+        coxp = .z$waldtest[3],
+        kmp = kmp)
+      
+    }
+  )) %>% 
+  dplyr::select(-data) %>% 
+  tidyr::unnest()  -> p62_hazard_ratio
+
+p62_hazard_ratio %>% 
+  dplyr::mutate(coxp = -log10(coxp)) %>% 
+  dplyr::mutate(cancer_types = glue::glue("{cancer_types} ({n})")) %>% 
+  dplyr::mutate(cancer_types = reorder(cancer_types, hr, sort)) -> plot_ready
+
+plot_ready %>% 
+  ggplot(aes(y = hr, x = cancer_types)) +
+  geom_point(aes(size = coxp)) +
+  geom_hline(aes(yintercept = 1)) +
+  scale_size(name = "p-value") +
+  coord_flip() +
+  ggthemes::theme_gdocs() +
+  labs(y = "Hazard Ratio", x = "Cancer Types") -> p
+ggsave(filename = 'fig_01_hazard_ratio.pdf', plot = p, device = 'pdf', path = clinical_path)
+knitr::kable(plot_ready %>% 
+               dplyr::rename(`hazard ratio` = hr) %>% 
+               dplyr::mutate(coxp = 10^-coxp) %>% 
+               dplyr::arrange(-`hazard ratio`) %>% 
+               dplyr::mutate(hr_l = signif(hr_l, 3), hr_h = signif(hr_h,3)) %>% 
+               tidyr::unite(`95%CI`, hr_l, hr_h, sep = "-"))
 # p62 stage -------------------------------------------------------------
 
 clinical_stage <- readr::read_rds(file.path(tcga_path, "pancan34_clinical_stage.rds.gz")) %>% 
@@ -169,16 +228,13 @@ p62_sample_classification %>%
     .x = data,
     .y = stage,
     .f = function(.x, .y){
-      .y %>% 
-        dplyr::mutate(stage = ifelse(stage == "Stage II", "Stage I", stage)) %>%
-        dplyr::mutate(stage = ifelse(stage == "Stage III", "Stage IV", stage)) %>%
+      .y %>%
         dplyr::rename(sample = barcode) %>%
-        dplyr::inner_join(.x, by = "sample") -> .d
-      
-      t.test(rppa ~ stage, data = .d) %>% broom::glance() %>%  .$p.value -> pval
+        dplyr::inner_join(.x, by = "sample") %>% 
+        dplyr::mutate(stage = factor(stage, levels = c("Stage I", "Stage II", "Stage III", "Stage IV")))-> .d
       
       if (pval < 0.05) {
-        
+
         CPCOLS <- c("#191970", "#CD0000")
         .d %>%
           ggplot(aes(x = stage, y = rppa, color = stage)) +
@@ -194,7 +250,7 @@ p62_sample_classification %>%
             legend.position = "bottom",
             legend.direction = "horizontal"
           )
-        
+
       }
     }
   )) %>% 
@@ -203,6 +259,48 @@ p62_sample_classification %>%
   purrrlyr::by_row(..f = function(.d) {
     ggsave(filename = glue::glue("fig_02_stage_diff_{.d$cancer_types}.pdf"), plot = .d$pval[[1]], path = clinical_path, width = 3, height = 4)
   })
+
+p62_sample_classification %>% 
+  dplyr::inner_join(clinical_stage, by = "cancer_types") %>% 
+  dplyr::mutate(pval = purrr::pmap(
+    .l = list(
+    .x = data,
+    .y = stage,
+    .z = cancer_types
+    ),
+    .f = function(.x, .y, .z){
+      .y %>%
+        dplyr::rename(sample = barcode) %>%
+        dplyr::inner_join(.x, by = "sample") %>% 
+        dplyr::mutate(stage = factor(stage, levels = c("Stage I", "Stage II", "Stage III", "Stage IV"))) -> .d
+      
+      comp_list <- list(c("Stage I", "Stage II"), c("Stage II", "Stage III"), c("Stage III", "Stage IV"))
+      aov(rppa ~ stage, .d) %>% broom::glance() %>% .$p.value -> anova_p
+      .d %>% 
+        ggpubr::ggboxplot(x = "stage", y = "rppa",  color = "stage", pallete = "jco"  ) +
+        ggpubr::stat_compare_means(comparisons = comp_list, method = "t.test") + 
+        ggpubr::stat_compare_means(method = "anova") +
+        labs(x = .z, y = "") +
+        theme(
+          legend.position = 'none',
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()
+        ) +
+        ggthemes::scale_color_gdocs() -> p
+      
+      tibble::tibble(anova_p = signif(anova_p, 3), p = list(p))
+    }
+  )) %>% 
+  tidyr::unnest(pval) %>% 
+  dplyr::select(-data, -stage) -> plot_ready
+  
+plot_ready %>% dplyr::arrange(anova_p) %>% dplyr::select(-anova_p) %>% tibble::deframe() -> p
+gridExtra::arrangeGrob(grobs = p, nrow = 3,
+                       left = grid::textGrob("p62 rppa score", rot = 90, vjust = 1)) -> grob
+
+ggsave(filename = 'fig_02_all_stage.pdf', 
+       plot = grob, device = 'pdf', 
+       path = clinical_path, width = 15, height = 10)
 
 # p62 subtype -------------------------------------------------------------
 

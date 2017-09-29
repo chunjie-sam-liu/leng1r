@@ -39,6 +39,8 @@ csc %>%
   )) %>% 
   dplyr::select(cancer_types, merge) -> p62_csc
 
+
+
 p62_csc %>% 
   dplyr::mutate(pval = purrr::map(
     .x = merge,
@@ -95,6 +97,38 @@ ggsave(filename = "fig_01_stemness_pattern.pdf",
        width = 8,
        height = 6, 
        path = stemness_path)
+# correlation -------------------------------------------------------------
+
+p62_csc %>% 
+  dplyr::mutate(corr = purrr::map2(
+    .x = cancer_types,
+    .y = merge,
+    .f = function(.x, .y) {
+      cor.test(.y$rppa, .y$score, method = 'spearman') %>% 
+        broom::tidy() %>% 
+        dplyr::select(ceof = estimate, pval = p.value) -> .corr
+      .label <- glue::glue("Rs = {signif(.corr[[1]], 3)}
+                           p = {signif(.corr[[2]],3)}")
+      .y %>% 
+        ggplot(aes(x = rank(rppa), y = rank(score))) +
+        geom_point() + 
+        geom_smooth(se = F, method = "lm") +
+        annotate(geom = "text",  x = 10, y = 10, label = .label) +
+        ggthemes::theme_gdocs() +
+        labs(title = .x, x = "", y = "") +
+        theme(plot.title = element_text(hjust = 0.5)) -> .p
+      tibble::tibble(
+        coef = signif(.corr[[1]],3), 
+        pval = signif(.corr[[2]],4), 
+        p = list(.p))
+    }
+  )) %>% 
+  dplyr::select(-merge) %>% 
+  tidyr::unnest(corr) %>% 
+  dplyr::arrange(coef) -> p62_csc_corr
+
+p62_csc_corr %>% dplyr::select(-p) %>% dplyr::arrange(-coef) %>% knitr::kable()
+  
 
 # stemness marker genes ---------------------------------------------------
 # cd44+, cd24-, cd133+, cd90+, aldh1a1+, FLOT2+, abcb5+, EpCAM+,OCT4, NANOG, and SOX2,FOXO1, FOXO3, FOXO4, and FOXO6
