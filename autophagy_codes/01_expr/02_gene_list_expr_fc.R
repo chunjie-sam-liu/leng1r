@@ -218,7 +218,7 @@ ggplot(gene_list_fc_pvalue_simplified_filter,
     na.value = "white",
     breaks = seq(-3, 3, length.out = 5),
     labels = c("<= -3", "-1.5", "0", "1.5", ">= 3"),
-    name = "Fold change"
+    name = "log2(FC)"
   ) +
   scale_size_continuous(
     limit = c(-log10(0.05), 15),
