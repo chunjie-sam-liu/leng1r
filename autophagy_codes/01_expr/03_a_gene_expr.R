@@ -2,7 +2,7 @@ library(magrittr)
 library(ggplot2)
 # processed path
 
-tcga_path = "/home/cliu18/liucj/projects/6.autophagy/TCGA"
+tcga_path = "/home/liucj/project/projects/6.autophagy/TCGA"
 #output path
 expr_path <- "/home/cliu18/liucj/projects/6.autophagy/02_autophagy_expr/"
 expr_path_a <- file.path(expr_path, "03_a_gene_expr")
