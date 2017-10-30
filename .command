@@ -47,3 +47,15 @@ ls
 cd autophagy_codes/
 ls
 git status
+git add -A
+git staus
+git status
+git commit -m "nature paper gsea"
+git status
+git push origin master
+git status
+ps xf
+ls
+cd 
+ls
+git status

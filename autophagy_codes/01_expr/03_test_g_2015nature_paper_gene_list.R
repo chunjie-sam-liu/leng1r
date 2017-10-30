@@ -41,10 +41,7 @@ expr %>%
         dplyr::mutate(type = dplyr::recode(type, "01A" = "Tumor", "11A" = "Normal"))
         
     }
-  )) -> gene_list_expr
-
-# autophagy lysosome epxresion tumor normal heat map
-gene_list_expr %>% 
+  ))  %>% 
   dplyr::filter(purrr::map_lgl(expr, .f = function(.x){nrow(.x) != 0})) %>% 
   dplyr::mutate(plot = purrr::map2(
     .x = cancer_types,
@@ -112,6 +109,15 @@ gene_list_expr %>%
   )) %>% 
   dplyr::select(-expr) -> gene_heatmap
 
+expr %>% 
+  dplyr::mutate(expr = purrr::map(
+    .x = expr,
+    .f = function(.x) {
+      .x %>% 
+        dplyr::filter(symbol %in% gene_list)
+    }
+  )) -> gene_list_expr
+
 # Compare autophagy lysosome signature using GSEA
 gene_sets <- list(atg_lys_sig = gene_list)
 gsea_path <- file.path(nature_path, "gsea")
@@ -170,7 +176,7 @@ fn_gct_cls <- function(.x, .y, .path = gsea_path){
 
 # make gct cls files
 cluster <- multidplyr::create_cluster(length(expr$cancer_types))
-expr %>% 
+gene_list_expr %>% 
   multidplyr::partition(cluster = cluster) %>%
   multidplyr::cluster_library("magrittr") %>%
   multidplyr::cluster_assign_value("fn_gct_cls", fn_gct_cls)  %>%
@@ -200,7 +206,7 @@ fn_atleast2_normal <- function(cancer_types, expr){
 }
 cancers <- expr %>% purrr::pmap(.f = fn_atleast2_normal) %>% unlist()
 
-fn_gsea <- function(.ds, .cls, .db, .output, .doc){
+fn_gsea <- function(.ds, .cls, .db, .output, .doc){3
   # .ds is the gct format file
   # .cls is the phenotype format
   # .db is the gmt file format
@@ -240,7 +246,7 @@ fn_run_gsea <- function(.x, .path = gsea_path, script_path = script_path){
   .gmt <- file.path(.path, "atg_lys_pathway.gmt")
   .output_dir <- file.path(.path, "gsea_result/")
   .doc <- paste(.x, "GSEA.analysis", sep = ".")
-  if(!file.exists(.output_dir)){ dir.create(.output_dir)}
+  if (!file.exists(.output_dir)){ dir.create(.output_dir)}
   
   source(file.path(script_path, "GSEA.1.0.r"))
   fn_gsea(.ds = .gct, .cls = .cls, .db = .gmt, .output = .output_dir, .doc = .doc)
@@ -264,3 +270,6 @@ parallel::stopCluster(cluster)
 # save image --------------------------------------------------------------
 
 save.image(file = file.path(nature_path, '.rda_03_test_g.rda'))
+load(file = file.path(nature_path, ".rda_03_test_g.rda"))
+
+
