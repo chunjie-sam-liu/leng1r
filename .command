@@ -59,3 +59,29 @@ ls
 cd 
 ls
 git status
+git add -A
+git status
+git commit -m "2015 nature paper"
+git push origin master
+ls
+ls
+ll
+ll
+ls
+ll
+ps xf
+ll
+ps xf
+ls
+ll
+ps xf
+ll
+cd testCode/
+l
+cd /home/liucj/project/projects/6.autophagy//02_autophagy_expr/03_test_g_2015nature_paper_gene_list/gsea
+ls
+cd /home/liucj/project/projects/6.autophagy//02_autophagy_expr/03_test_g_2015nature_paper_gene_list/gsea
+ls
+git statu
+git staus
+git status

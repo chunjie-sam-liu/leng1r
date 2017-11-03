@@ -30,7 +30,7 @@ nature_gene_list %>%
 expr %>%
   dplyr::mutate(expr = purrr::map(
     .x = expr,
-    .f = function(.x){
+    .f = function(.x){ 
       .x %>% 
         dplyr::select(-entrez_id) %>% 
         dplyr::filter(symbol %in% gene_list) %>% 
@@ -48,7 +48,7 @@ expr %>%
     .y = expr,
     .f = function(.x, .y){
       print(.x)
-      
+        
       .y %>% 
         dplyr::arrange(type) %>% 
         dplyr::distinct(barcode, type) %>% 
@@ -124,11 +124,17 @@ gsea_path <- file.path(nature_path, "gsea")
 if (!dir.exists(gsea_path)) dir.create(gsea_path)
 
 fn_gmt <- function(.x, .path = gsea_path){
-  .file_name <- file.path(.path,"atg_lys_pathway.gmt")
+  .file_name <- file.path(.path, "atg_lys_pathway.gmt")
   .x %>% purrr::map_int(length) %>% unlist() %>% max() -> .max_length
   
   .x %>% 
-    purrr::map(.f = function(x, .m){.y <- c(x, rep(NA, .m - length(x))); names(.y) <- 1:.m; .y}, .m = .max_length) %>% 
+    purrr::map(
+      .f = function(x, .m){
+          .y <- c(x, rep(NA, .m - length(x)))
+          names(.y) <- 1:.m
+          .y
+        }, 
+      .m = .max_length) %>% 
     purrr::map(.f = tibble::enframe) %>% 
     tibble::enframe() %>% 
     tidyr::unnest() %>% 
@@ -139,7 +145,6 @@ fn_gmt <- function(.x, .path = gsea_path){
   .x_write %>% readr::write_delim(path = .file_name, delim = "\t", col_names = F, na = "")
 }
 gene_sets %>% fn_gmt(.path = gsea_path)
-
 fn_gct_cls <- function(.x, .y, .path = gsea_path){
   # .x <- te$cancer_types
   # .y <- te$filter_expr[[1]]
@@ -206,7 +211,7 @@ fn_atleast2_normal <- function(cancer_types, expr){
 }
 cancers <- expr %>% purrr::pmap(.f = fn_atleast2_normal) %>% unlist()
 
-fn_gsea <- function(.ds, .cls, .db, .output, .doc){3
+fn_gsea <- function(.ds, .cls, .db, .output, .doc){
   # .ds is the gct format file
   # .cls is the phenotype format
   # .db is the gmt file format
@@ -255,6 +260,7 @@ fn_run_gsea <- function(.x, .path = gsea_path, script_path = script_path){
 tibble::tibble(cancer_types = cancers) %>% 
   head(1) %>% 
   dplyr::mutate(res = purrr::walk(.x = cancer_types, .f = fn_run_gsea, .path = gsea_path, script_path = script_path))
+fn_run_gsea("THCA", .path = gsea_path, script_path = script_path)
 
 cluster <- multidplyr::create_cluster(length(cancers))
 tibble::tibble(cancer_types = cancers) %>% 

@@ -310,7 +310,7 @@ GSEA.EnrichmentScore <- function(gene.list, gene.set, weighted.score.type = 1, c
    RES <- cumsum(tag.indicator * correl.vector * norm.tag - no.tag.indicator * norm.no.tag)
    max.ES <- max(RES)
    min.ES <- min(RES)
-   if (max.ES > - min.ES) {
+   if (max.ES > -min.ES) {
 #      ES <- max.ES
       ES <- signif(max.ES, digits = 5)
       arg.ES <- which.max(RES)
@@ -1094,10 +1094,8 @@ write(paste("replace =", replace, sep=" "), file=filename, append=T)
      all.gs.descs <- as.character(temp[locs, "SOURCE"])
      rm(temp)
   } else if (gs.ann == "") {
-     for (i in 1:Ng) {
         all.gs.descs[i] <- gs.desc[i]
-     }
-  } else {
+     }else {
      temp <- read.delim(gs.ann, header=T, sep="\t", comment.char="", as.is=T)
      a.size <- length(temp[,1])
      print(c("Number of gene set annotation file entries:", a.size))
