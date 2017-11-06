@@ -15,7 +15,14 @@ expr_path <- file.path(root_path, "02_autophagy_expr")
 nature_path <- file.path(expr_path, "03_test_g_2015nature_paper_gene_list")
 script_path <- "/home/liucj/github/R_Leng_1/autophagy_codes/01_expr"
 
-nature_gene_list <- readxl::read_xls(path = file.path(nature_path, 'nature14587-s1.xls'), skip = 3, sheet = 1) %>% 
+
+# load data ---------------------------------------------------------------
+nature_gene_list <-
+  readxl::read_xls(
+    path = file.path(nature_path, 'nature14587-s1.xls'),
+    skip = 3,
+    sheet = 1
+  ) %>%
   dplyr::select(symbol = `Gene symbol`, desc = `Description (disease relevance)`)
 
 tcga_gene_symbol <- readr::read_rds(file.path(tcga_path, 'tcga_gene_symbol.rds.gz'))
@@ -123,6 +130,7 @@ gene_sets <- list(atg_lys_sig = gene_list)
 gsea_path <- file.path(nature_path, "gsea")
 if (!dir.exists(gsea_path)) dir.create(gsea_path)
 
+
 fn_gmt <- function(.x, .path = gsea_path){
   .file_name <- file.path(.path, "atg_lys_pathway.gmt")
   .x %>% purrr::map_int(length) %>% unlist() %>% max() -> .max_length
@@ -145,15 +153,27 @@ fn_gmt <- function(.x, .path = gsea_path){
   .x_write %>% readr::write_delim(path = .file_name, delim = "\t", col_names = F, na = "")
 }
 gene_sets %>% fn_gmt(.path = gsea_path)
+
+# generate gct and cls files ----------------------------------------------
 fn_gct_cls <- function(.x, .y, .path = gsea_path){
   # .x <- te$cancer_types
   # .y <- te$filter_expr[[1]]
   .y %>% tidyr::drop_na() -> .y
   
+  # use matched normal and tumor data.
+  
   tibble::tibble(
     barcode = names(.y)[-c(1,2)], 
-    type = stringr::str_sub(names(.y)[-c(1,2)], start = 14, 15)) %>% 
-    dplyr::filter(type %in% c("01", "11")) %>% 
+    type = stringr::str_sub(names(.y)[-c(1,2)], start = 14, 15)
+    ) %>% 
+    dplyr::filter(type %in% c("01", "11")) -> .d
+  if (length(unique(.d$type)) != 2) return(NULL)
+  .d %>%   
+    dplyr::mutate(sample = stringr::str_sub(barcode, 1, 12)) %>% 
+    dplyr::distinct(type, sample, .keep_all = T) %>% 
+    tidyr::spread(key = type, value = barcode) %>% 
+    tidyr::drop_na() %>% 
+    tidyr::gather(key = type, value = barcode, -sample) %>% 
     dplyr::arrange(type) %>% 
     dplyr::pull(barcode) -> .names
   
@@ -198,6 +218,7 @@ parallel::stopCluster(cluster)
 
 # run gsea ----------------------------------------------------------------
 
+# filter cancer type with at least 2 normal
 fn_atleast2_normal <- function(cancer_types, expr){
   filter_expr <- expr
   names(filter_expr)[-c(1,2)] -> .barcode
@@ -212,6 +233,7 @@ fn_atleast2_normal <- function(cancer_types, expr){
 }
 cancers <- expr %>% purrr::pmap(.f = fn_atleast2_normal) %>% unlist()
 
+# Generate GSEA function --------------------------------------------------
 fn_gsea <- function(.ds, .cls, .db, .output, .doc){
   # .ds is the gct format file
   # .cls is the phenotype format
@@ -258,25 +280,123 @@ fn_run_gsea <- function(.x, .path = gsea_path, script_path = script_path){
   fn_gsea(.ds = .gct, .cls = .cls, .db = .gmt, .output = .output_dir, .doc = .doc)
 }
 
-tibble::tibble(cancer_types = cancers) %>% 
-  head(1) %>% 
-  dplyr::mutate(res = purrr::walk(.x = cancer_types, .f = fn_run_gsea, .path = gsea_path, script_path = script_path))
-fn_run_gsea("THCA", .path = gsea_path, script_path = script_path)
+# for test one cancer type
+# tibble::tibble(cancer_types = cancers) %>%
+#   head(1) %>%
+#   dplyr::mutate(
+#     res = purrr::walk(
+#       .x = cancer_types,
+#       .f = fn_run_gsea,
+#       .path = gsea_path,
+#       script_path = script_path
+#     )
+#   )
 
+
+# parallel run the gsea ---------------------------------------------------
 cluster <- multidplyr::create_cluster(length(cancers))
-tibble::tibble(cancer_types = cancers) %>% 
+tibble::tibble(cancer_types = cancers) %>%
   multidplyr::partition(cluster = cluster) %>%
   multidplyr::cluster_library("magrittr") %>%
   multidplyr::cluster_assign_value("fn_run_gsea", fn_run_gsea)  %>%
   multidplyr::cluster_assign_value("fn_gsea", fn_gsea)  %>%
   multidplyr::cluster_assign_value("gsea_path", gsea_path)  %>%
   multidplyr::cluster_assign_value("script_path", script_path)  %>%
-  dplyr::mutate(res = purrr::walk(.x = cancer_types, .f = fn_run_gsea, .path = gsea_path, script_path = script_path)) %>% 
+  dplyr::mutate(
+    res = purrr::walk(
+      .x = cancer_types,
+      .f = fn_run_gsea,
+      .path = gsea_path,
+      script_path = script_path
+    )
+  ) %>%
   dplyr::collect()
 parallel::stopCluster(cluster)
+
+
+# posterior analysis ------------------------------------------------------
+
+clses <- list.files(path = gsea_path, pattern = "cls") %>%
+  purrr::map_chr(
+    .f = function(.x) {
+      stringr::str_split(string = .x,
+                         pattern = "_",
+                         simplify = T)[1, 1] -> .c
+      ifelse(.c %in% cancers, .x, NA)
+    }
+  ) %>%
+  na.omit() %>%
+  as.vector()
+
+clses %>% 
+  purrr::map(
+    .f = function(.x){
+    .f <- file.path(gsea_path, .x)
+    
+    stringr::str_split(string = .x,
+                       pattern = "_",
+                       simplify = T)[1, 1] -> .c
+    
+    readr::read_delim(.f, delim = " ", skip = 2, col_names = F) %>% 
+      unlist(use.names = F) %>% 
+      table() %>% 
+      as.vector() -> .v
+    
+    names(.v) <- c("Normal", "Tumor")
+    
+    .t <-
+      file.path(
+        gsea_path,
+        "gsea_result",
+        paste(.c, "GSEA.analysis.SUMMARY.RESULTS.REPORT.T.txt", sep = ".")
+      ) %>%
+      readr::read_tsv() %>% 
+      dplyr::select(NES, norm_p_val = `NOM p-val`, fdr_q_val = `FDR q-val`) %>% 
+      dplyr::mutate(type = "T")
+    
+    .n_f <- file.path(
+      gsea_path,
+      "gsea_result",
+      paste(.c, "GSEA.analysis.SUMMARY.RESULTS.REPORT.N.txt", sep = ".")
+    )
+    
+    .n <- if (file.exists(.n_f)) {
+      .n_f %>% 
+        readr::read_tsv() %>% 
+        dplyr::select(NES, norm_p_val = `NOM p-val`, fdr_q_val = `FDR q-val`) %>% 
+        dplyr::mutate(type = "N")
+    }
+    
+    .sum <- if (is.na(.t$NES)) .n else .t
+    
+    .sum %<>% 
+      dplyr::mutate(
+        NES = signif(NES, digits = 3),
+        norm_p_val = signif(norm_p_val, digits = 3),
+        fdr_q_val = signif(fdr_q_val, digits = 3)
+      )
+    
+    tibble::enframe(.v) %>% 
+      tidyr::spread(key = name, value = value) %>% 
+      tibble::add_column(Cancer = .c, .before = 1) %>% 
+      dplyr::bind_cols(.sum)
+    
+  } # load summary data
+  ) %>% 
+  dplyr::bind_rows() -> clses_gsea
+
+clses_gsea %>% 
+  dplyr::rename(shift = type) %>% 
+  dplyr::arrange(NES) %>% 
+  dplyr::mutate(
+    sig = ifelse(norm_p_val < 0.1, "Sig", "Non-sig")
+  ) -> clses_gsea_out
+clses_gsea_out %>% writexl::write_xlsx(path = "gsea_result.xlsx")
+
+
 # save image --------------------------------------------------------------
 
-save.image(file = file.path(nature_path, '.rda_03_test_g.rda'))
+ save.image(file = file.path(nature_path, '.rda_03_test_g.rda'))
 # load(file = file.path(nature_path, ".rda_03_test_g.rda"))
 
 

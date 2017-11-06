@@ -108,3 +108,19 @@ ll
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "gsea completed"
+git push origin master
+ls
+git status
+ls
+cat .command 
+ls
+cd "/project/liucj/projects/6.autophagy/02_autophagy_expr/03_test_g_2015nature_paper_gene_list/gsea/gsea_result"
+exit
+ls
+ll
+cd autophagy_codes/
+ls
+ll
+git status

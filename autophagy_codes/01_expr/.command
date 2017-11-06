@@ -81,3 +81,35 @@ ps xf
 ll
 ls
 cd ../../
+ls
+ll
+lsd
+ps xf
+top
+ls
+rm nohup.out 
+nohup Rscript 03_test_g_2015nature_paper_gene_list.R &
+ps xf
+topps xf
+ps xf
+top
+top 
+ps xf
+ll
+ps xf
+tail nohup.out 
+ps xf
+ps xxf
+ps xf
+top
+ps xf
+top
+ll
+ps xf
+tail nohup.out 
+top
+tail nohup.out 
+ls
+ll
+ls
+cd ./../../

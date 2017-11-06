@@ -40,101 +40,47 @@ Shards: 33 [1--1 rows]
 # S3: party_df
    cancer_types                    expr PARTITION_ID   out
           <chr>                  <list>        <dbl> <chr>
- 1          UCS  <tibble [20,531 x 59]>            1   UCS
- 2          ACC  <tibble [20,531 x 81]>            2   ACC
- 3         KIRC <tibble [20,531 x 608]>            3  KIRC
- 4         CHOL  <tibble [20,531 x 47]>            4  CHOL
- 5         CESC <tibble [20,531 x 312]>            5  CESC
- 6           OV <tibble [20,531 x 311]>            6    OV
- 7         COAD <tibble [20,531 x 331]>            7  COAD
- 8         TGCT <tibble [20,531 x 158]>            8  TGCT
- 9         READ <tibble [20,531 x 107]>            9  READ
-10         PAAD <tibble [20,531 x 185]>           10  PAAD
+ 1         BLCA <tibble [20,531 x 429]>            1  BLCA
+ 2         MESO  <tibble [20,531 x 89]>            2  MESO
+ 3         PAAD <tibble [20,531 x 185]>            3  PAAD
+ 4         KIRP <tibble [20,531 x 325]>            4  KIRP
+ 5          UCS  <tibble [20,531 x 59]>            5   UCS
+ 6         PCPG <tibble [20,531 x 189]>            6  PCPG
+ 7         KICH  <tibble [20,531 x 93]>            7  KICH
+ 8         PRAD <tibble [20,531 x 552]>            8  PRAD
+ 9         LUAD <tibble [20,531 x 578]>            9  LUAD
+10         LUSC <tibble [20,531 x 556]>           10  LUSC
 # ... with 23 more rows
-[1] " *** Running GSEA Analysis..."
-Error in summary.connection(connection) : 
-  no function to return from, jumping to top level
-Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
-Error in summary.connection(connection) : 
-  no function to return from, jumping to top level
-Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
-[1] "Number of genes:" "20501"           
-[1] "Number of Gene Sets:" "1"                   
-[1] "Number of samples:" "564"               
-[1] "Original number of Gene Sets:" "1"                            
-[1] "Maximum gene set size:" "133"                   
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  1 -- 100"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  101 -- 200"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  201 -- 300"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  301 -- 400"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  401 -- 500"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  501 -- 600"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  601 -- 700"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  701 -- 800"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  801 -- 900"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  901 -- 1000"
-[1] "Computing observed enrichment for gene set: 1 atg_lys_sig"
-[1] "Computing nominal p-values..."
-[1] "Computing rescaling normalization for each gene set null..."
-[1] "Computing FWER p-values..."
-[1] "Computing FDR q-values..."
-[1] "Producing result tables and plots..."
-# A tibble: 1 x 2
-  cancer_types   res
-         <chr> <chr>
-1         THCA  THCA
-[1] " *** Running GSEA Analysis..."
-[1] "Number of genes:" "20501"           
-[1] "Number of Gene Sets:" "1"                   
-[1] "Number of samples:" "564"               
-[1] "Original number of Gene Sets:" "1"                            
-[1] "Maximum gene set size:" "133"                   
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  1 -- 100"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  101 -- 200"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  201 -- 300"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  301 -- 400"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  401 -- 500"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  501 -- 600"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  601 -- 700"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  701 -- 800"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  801 -- 900"
-[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  901 -- 1000"
-[1] "Computing observed enrichment for gene set: 1 atg_lys_sig"
-[1] "Computing nominal p-values..."
-[1] "Computing rescaling normalization for each gene set null..."
-[1] "Computing FWER p-values..."
-[1] "Computing FDR q-values..."
-[1] "Producing result tables and plots..."
-$report1
-           GS SIZE SOURCE      ES    NES NOM p-val FDR q-val FWER p-val Tag %
-1 atg_lys_sig  133        0.40105 1.7731         0         0          0 0.459
-  Gene % Signal FDR (median) glob.p.val
-1  0.221  0.359            0          0
-
-$report2
-           GS SIZE SOURCE      ES    NES NOM p-val FDR q-val FWER p-val Tag %
-1 atg_lys_sig  133        0.40105 1.7731         0         0          0 0.459
-  Gene % Signal FDR (median) glob.p.val
-1  0.221  0.359            0          0
-
 Initialising 16 core cluster.
+Error in summary.connection(connection) : 
+  no function to return from, jumping to top level
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+Error in summary.connection(connection) : 
+  no function to return from, jumping to top level
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+Error in summary.connection(connection) : 
+  no function to return from, jumping to top level
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
 # A tibble: 16 x 3
 # Groups:   PARTITION_ID [16]
    cancer_types PARTITION_ID   res
           <chr>        <dbl> <chr>
- 1         BRCA            1  BRCA
- 2         STAD            2  STAD
- 3         UCEC            3  UCEC
- 4         READ            4  READ
- 5         COAD            5  COAD
- 6         LUSC            6  LUSC
- 7         BLCA            7  BLCA
- 8         ESCA            8  ESCA
- 9         KICH            9  KICH
-10         LIHC           10  LIHC
-11         HNSC           11  HNSC
-12         PRAD           12  PRAD
-13         KIRC           13  KIRC
-14         THCA           14  THCA
-15         KIRP           15  KIRP
-16         LUAD           16  LUAD
+ 1         PRAD            1  PRAD
+ 2         KICH            2  KICH
+ 3         THCA            3  THCA
+ 4         KIRP            4  KIRP
+ 5         ESCA            5  ESCA
+ 6         STAD            6  STAD
+ 7         BRCA            7  BRCA
+ 8         BLCA            8  BLCA
+ 9         LUSC            9  LUSC
+10         LUAD           10  LUAD
+11         READ           11  READ
+12         LIHC           12  LIHC
+13         HNSC           13  HNSC
+14         COAD           14  COAD
+15         UCEC           15  UCEC
+16         KIRC           16  KIRC
+Error in summary.connection(connection) : invalid connection
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+Execution halted
