@@ -160,6 +160,7 @@ fn_gct_cls <- function(.x, .y, .path = gsea_path){
   .y %>% 
     dplyr::select(1,2, .names) %>% 
     dplyr::filter(symbol != "?") %>% 
+    dplyr::distinct(symbol, .keep_all = T) %>% 
     dplyr::rename(NAME = symbol, DESCRIPTION = entrez_id) -> .y_gct
   
   .gct_filename <- file.path(.path, paste(.x,'mRNA_expression.gct', sep = "_"))
@@ -181,7 +182,7 @@ fn_gct_cls <- function(.x, .y, .path = gsea_path){
 
 # make gct cls files
 cluster <- multidplyr::create_cluster(length(expr$cancer_types))
-gene_list_expr %>% 
+expr %>% 
   multidplyr::partition(cluster = cluster) %>%
   multidplyr::cluster_library("magrittr") %>%
   multidplyr::cluster_assign_value("fn_gct_cls", fn_gct_cls)  %>%
@@ -276,6 +277,6 @@ parallel::stopCluster(cluster)
 # save image --------------------------------------------------------------
 
 save.image(file = file.path(nature_path, '.rda_03_test_g.rda'))
-load(file = file.path(nature_path, ".rda_03_test_g.rda"))
+# load(file = file.path(nature_path, ".rda_03_test_g.rda"))
 
 

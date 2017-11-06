@@ -85,3 +85,17 @@ ls
 git statu
 git staus
 git status
+git add -A
+git commit -m "GSEA for samples"
+git push origin master
+ls
+ll
+cd autophagy_codes/
+ls
+cd ../
+ls
+lcd
+ls
+cd autophagy_codes/
+l
+git status

@@ -1,14 +1,120 @@
-Parsed with column specification:
-cols(
-  .default = col_double(),
-  Sample_ID = col_character(),
-  Cancer_Type = col_character(),
-  Sample_Type = col_character(),
-  SetID = col_integer()
-)
-See spec(...) for full column specifications.
-# A tibble: 1 x 3
-            names cancer_types        protein_expr
-            <chr>        <chr>              <list>
-1 TCGA-ACC-L4.csv          ACC <tibble [218 x 48]>
-Initialising 40 core cluster.
+Loading required package: methods
+Loading required package: grid
+[1] "PCPG"
+[1] "THCA"
+[1] "KIRP"
+[1] "BLCA"
+[1] "PAAD"
+[1] "LIHC"
+[1] "HNSC"
+[1] "BRCA"
+[1] "GBM"
+[1] "LUAD"
+[1] "UCS"
+[1] "ACC"
+[1] "CESC"
+[1] "UVM"
+[1] "PRAD"
+[1] "ESCA"
+[1] "THYM"
+[1] "SKCM"
+[1] "KICH"
+[1] "LUSC"
+[1] "SARC"
+[1] "KIRC"
+[1] "OV"
+[1] "UCEC"
+[1] "LGG"
+[1] "MESO"
+[1] "CHOL"
+[1] "STAD"
+[1] "COAD"
+[1] "TGCT"
+[1] "DLBC"
+[1] "READ"
+Initialising 33 core cluster.
+Source: party_df [33 x 4]
+Groups: PARTITION_ID
+Shards: 33 [1--1 rows]
+
+# S3: party_df
+   cancer_types                    expr PARTITION_ID   out
+          <chr>                  <list>        <dbl> <chr>
+ 1          UCS  <tibble [20,531 x 59]>            1   UCS
+ 2          ACC  <tibble [20,531 x 81]>            2   ACC
+ 3         KIRC <tibble [20,531 x 608]>            3  KIRC
+ 4         CHOL  <tibble [20,531 x 47]>            4  CHOL
+ 5         CESC <tibble [20,531 x 312]>            5  CESC
+ 6           OV <tibble [20,531 x 311]>            6    OV
+ 7         COAD <tibble [20,531 x 331]>            7  COAD
+ 8         TGCT <tibble [20,531 x 158]>            8  TGCT
+ 9         READ <tibble [20,531 x 107]>            9  READ
+10         PAAD <tibble [20,531 x 185]>           10  PAAD
+# ... with 23 more rows
+[1] " *** Running GSEA Analysis..."
+Error in summary.connection(connection) : 
+  no function to return from, jumping to top level
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+Error in summary.connection(connection) : 
+  no function to return from, jumping to top level
+Calls: <Anonymous> ... sendData.SOCKnode -> serialize -> summary -> summary.connection
+[1] "Number of genes:" "20501"           
+[1] "Number of Gene Sets:" "1"                   
+[1] "Number of samples:" "564"               
+[1] "Original number of Gene Sets:" "1"                            
+[1] "Maximum gene set size:" "133"                   
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  1 -- 100"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  101 -- 200"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  201 -- 300"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  301 -- 400"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  401 -- 500"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  501 -- 600"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  601 -- 700"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  701 -- 800"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  801 -- 900"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  901 -- 1000"
+[1] "Computing observed enrichment for gene set: 1 atg_lys_sig"
+[1] "Computing nominal p-values..."
+[1] "Computing rescaling normalization for each gene set null..."
+[1] "Computing FWER p-values..."
+[1] "Computing FDR q-values..."
+[1] "Producing result tables and plots..."
+# A tibble: 1 x 2
+  cancer_types   res
+         <chr> <chr>
+1         THCA  THCA
+[1] " *** Running GSEA Analysis..."
+[1] "Number of genes:" "20501"           
+[1] "Number of Gene Sets:" "1"                   
+[1] "Number of samples:" "564"               
+[1] "Original number of Gene Sets:" "1"                            
+[1] "Maximum gene set size:" "133"                   
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  1 -- 100"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  101 -- 200"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  201 -- 300"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  301 -- 400"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  401 -- 500"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  501 -- 600"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  601 -- 700"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  701 -- 800"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  801 -- 900"
+[1] "Computing ranked list for actual and permuted phenotypes.......permutations:  901 -- 1000"
+[1] "Computing observed enrichment for gene set: 1 atg_lys_sig"
+[1] "Computing nominal p-values..."
+[1] "Computing rescaling normalization for each gene set null..."
+[1] "Computing FWER p-values..."
+[1] "Computing FDR q-values..."
+[1] "Producing result tables and plots..."
+$report1
+           GS SIZE SOURCE      ES    NES NOM p-val FDR q-val FWER p-val Tag %
+1 atg_lys_sig  133        0.40105 1.7731         0         0          0 0.459
+  Gene % Signal FDR (median) glob.p.val
+1  0.221  0.359            0          0
+
+$report2
+           GS SIZE SOURCE      ES    NES NOM p-val FDR q-val FWER p-val Tag %
+1 atg_lys_sig  133        0.40105 1.7731         0         0          0 0.459
+  Gene % Signal FDR (median) glob.p.val
+1  0.221  0.359            0          0
+
+Initialising 16 core cluster.
