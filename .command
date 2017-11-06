@@ -99,3 +99,12 @@ ls
 cd autophagy_codes/
 l
 git status
+git add -A
+git commit -m "old and new gsea"
+git push origin master
+ps xf
+ls
+ll
+cd autophagy_codes/
+l
+git status

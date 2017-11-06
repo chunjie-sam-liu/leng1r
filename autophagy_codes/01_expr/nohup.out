@@ -118,3 +118,23 @@ $report2
 1  0.221  0.359            0          0
 
 Initialising 16 core cluster.
+# A tibble: 16 x 3
+# Groups:   PARTITION_ID [16]
+   cancer_types PARTITION_ID   res
+          <chr>        <dbl> <chr>
+ 1         BRCA            1  BRCA
+ 2         STAD            2  STAD
+ 3         UCEC            3  UCEC
+ 4         READ            4  READ
+ 5         COAD            5  COAD
+ 6         LUSC            6  LUSC
+ 7         BLCA            7  BLCA
+ 8         ESCA            8  ESCA
+ 9         KICH            9  KICH
+10         LIHC           10  LIHC
+11         HNSC           11  HNSC
+12         PRAD           12  PRAD
+13         KIRC           13  KIRC
+14         THCA           14  THCA
+15         KIRP           15  KIRP
+16         LUAD           16  LUAD

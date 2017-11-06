@@ -70,3 +70,14 @@ ps xf
 top
 ls
 cd ../
+ls
+ll
+tail nohup.out 
+ps xf
+cat nohup.out 
+tail nohup.out 
+les nohup.out 
+ps xf
+ll
+ls
+cd ../../
