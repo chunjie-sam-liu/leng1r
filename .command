@@ -124,3 +124,24 @@ cd autophagy_codes/
 ls
 ll
 git status
+git add -A
+git commit -m "mathed tumor and normal gsea"
+git push origin master
+ls
+ll
+ls
+git status
+ls
+free
+tp[; ]
+tp[
+top
+rstudio-server status
+sudo rstudio-server restart
+curl http://211.67.31.244:8787/
+curl 211.67.31.244:8787
+R
+rstudio-server 
+rstudio-server status
+l
+git status
