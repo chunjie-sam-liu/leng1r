@@ -145,3 +145,8 @@ rstudio-server
 rstudio-server status
 l
 git status
+git add -A 
+git commit -m "gsea complete"
+git push origin master
+ls
+git status
