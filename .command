@@ -150,3 +150,26 @@ git commit -m "gsea complete"
 git push origin master
 ls
 git status
+git add -A
+git commit -m "save GTEx"
+git push origin master
+ps xf
+top
+free
+top
+free
+echo 1 > /proc/sys/vm/drop_caches
+sudo echo 1 > /proc/sys/vm/drop_caches
+ll /proc/sys/vm/drop_caches 
+sudo su
+ps xf
+kill 635
+ps xf
+ls
+ll
+ps xf
+top
+ll
+cd autophagy_codes/
+l
+git status
