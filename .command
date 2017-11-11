@@ -178,3 +178,17 @@ git commit -m "calculate autophagy lysosome signature across GTEx normal tissue"
 git push origin master
 ls
 git status
+git add -A
+git commit -m "mutation and autophagy"
+git push origin master
+ll
+l
+ll
+ls
+cd autophagy_codes/
+l
+ll
+cd 
+ls
+ll
+git status

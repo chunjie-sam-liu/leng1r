@@ -17,3 +17,5 @@ find . -name "*R"|xargs grep -i rowwise
 find . -name "*R"|xargs grep -i rlang
 find . -name "*R"|xargs grep -i gtools
 cd ../
+ls
+cd ../
