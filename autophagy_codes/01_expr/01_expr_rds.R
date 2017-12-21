@@ -26,7 +26,7 @@ cancers_names %>%
 cancers_names_shards %>%
   dplyr::mutate(expr = purrr::map(.x = names, process_raw_data)) %>%
   dplyr::collect() %>%
-  dplyr::as_tibble() %>%
+  tibble::as_tibble() %>%
   dplyr::ungroup() %>%
   dplyr::select(-c(names, PARTITION_ID)) -> pancan_expr
 parallel::stopCluster(cluster)
