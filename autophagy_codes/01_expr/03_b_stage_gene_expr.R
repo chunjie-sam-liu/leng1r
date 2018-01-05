@@ -108,7 +108,7 @@ expr_stage %>%
   dplyr::select(-filter_expr, -stage) %>% 
   dplyr::mutate(diff_pval = purrr::map(merged_clean, fun_stage_test)) %>% 
   dplyr::collect() %>%
-  dplyr::as_tibble() %>%
+  tibble::as_tibble() %>%
   dplyr::ungroup() %>%
   dplyr::select(-PARTITION_ID) %>% 
   tidyr::unnest(diff_pval, .drop = F) -> expr_stage_sig_pval
@@ -136,11 +136,20 @@ fun_rank_gene <- function(pattern){
     tidyr::unnest() %>%
     dplyr::arrange(rank)
 } # get gene rank
-
+get_pattern <- function(p.value) {
+  if(!is.na(p.value)){
+    if(p.value < 0.05) {
+    return(1)
+  }else{
+    return(0)
+  }}else{
+    return(0)
+  }
+}# get pattern
 
 expr_stage_sig_pval %>% 
-  dplyr::select(cancer_types, symbol) %>% 
-  dplyr::mutate(n = 1) %>% 
+  dplyr::mutate(n = mapply(get_pattern,p.value)) %>% 
+  dplyr::select(cancer_types, symbol,n) %>% 
   tidyr::spread(key = cancer_types, value = n) -> pattern
 
 cancer_rank <- pattern %>% fun_rank_cancer()
