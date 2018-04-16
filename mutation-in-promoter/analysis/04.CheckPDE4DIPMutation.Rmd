@@ -1,0 +1,54 @@
+---
+title: "CheckPDE4DIPMutation"
+author: "C.J. Liu"
+date: "1/27/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r library}
+require(tidyr)
+require(dplyr)
+require(data.table)
+```
+```{r}
+dataPath = '/extraspace/TCGA/WXS_RAW/BRCA/downloadDataList'
+
+knownMutFile = 'PDE4DIP.mutation.samples.coverage.info'
+
+normalManifestFile = 'brca.normal.manifest.tsv'
+
+knownMut <- fread(input = file.path(dataPath, knownMutFile))
+header <- c('filename', 'chrom', 'pos', 'cov','type','barcode')
+colnames(knownMut) <- header
+
+knownMut <- mutate(knownMut, case = gsub('-01A','', barcode))
+
+normalManifest <- fread(input = file.path(dataPath, normalManifestFile))
+
+normalManifest.part <- normalManifest %>% select(case = cases_0_submitter_id, barcode.normal = cases_0_samples_0_submitter_id, filename.normal = filename)
+
+
+all.info <- inner_join(knownMut, normalManifest.part, by = 'case')
+
+all.info.dedup <- all.info %>% slice(2:n())
+
+write.table(all.info.dedup, file = file.path(dataPath, 'PDE4DIP.all.sample.info'), row.names = F, col.names = T, sep = '\t', quote = F)
+```
+

@@ -1,0 +1,91 @@
+---
+title: "nearestGeneExpression2"
+author: "C.J. Liu"
+date: "1/11/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r load library}
+require(dplyr)
+require(tidyr)
+require(biomaRt)
+```
+```{r load PDE4DIP}
+ROOT='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression'
+PDE4DIP.expression <- read.table(file = file.path(ROOT, 'PDE4DIP.expression.txt'), header = T, sep = "\t" )
+
+ENST00000313431 <- read.table('/extraspace/TCGA/WXS_RAW/BRCA/Firehose/BRCA/mRNASeq/gdac.broadinstitute.org_BRCA.Merge_rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_isoforms_normalized__data.Level_3.2016012800.0.0/ENST00000313431.txt', header = T, sep = "\t")
+
+ENST00000313431 <- ENST00000313431 %>% gather(barcode, rsem, - enst)
+ENST00000313431$barcode <- substring(ENST00000313431$barcode,1,16)
+isoform.expr <- inner_join(PDE4DIP.expression, ENST00000313431, by = 'barcode')
+
+isoform.expr.mtwt <- filter(isoform.expr, type %in% c("WT", "MT"))
+isoform.expr.wtnm <- filter(isoform.expr, type %in% c("WT", "NM"))
+mtwt.wilcox.pvalue <- wilcox.test(data = isoform.expr.mtwt, rsem ~ type)$p.value
+wtnm.wilcox.pvalue <- wilcox.test(data = isoform.expr.wtnm, rsem ~ type)$p.value
+
+p <- ggplot(data = isoform.expr, aes(x = type, y = rsem)) + geom_boxplot(aes(color = type))  + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RSEM)", title = paste("NM_001002811", "expression in Tumor MT,WT and Normal samples"), subtitle = paste("MT vs. WT p-value",round(mtwt.wilcox.pvalue,3),"and WT vs. NM p-value", round(wtnm.wilcox.pvalue,3)))
+
+print(p)
+
+ggsave(paste("NM_001002811", "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+
+# use BiomaRt
+GENES = useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host = "useast.ensembl.org")
+GENES.ATTRIBUTES <- listAttributes(GENES)
+GENES.FILTERS <- listFilters(GENES)
+
+pde.transcripts <- getBM(attributes = c('ensembl_gene_id','ensembl_transcript_id','refseq_mrna','ucsc','chromosome_name','transcript_start','transcript_end'), filters = c('ensembl_gene_id'), values = list(ensembl_gene_id = PDE4DIP$ensembl_gene_id[1]), mart = GENES)
+
+pde.transcripts.separate <- pde.transcripts %>% separate(ucsc, into=c("ucsc", 'version'))
+pde.transcripts.filter <- filter(pde.transcripts, refseq_mrna != '')
+
+write.table(pde.transcripts.filter, file = file.path(ROOT,'pde4dip.transcripts.filter.txt'), quote= F, row.names = F, sep = "\t")
+write.table(pde.transcripts.separate, file = file.path(ROOT,'pde.transcripts.separate.txt'), quote= F, row.names = F, sep = "\t")
+
+
+# For all transcript expression
+PDE4DIP.transcript <- read.table('/extraspace/TCGA/WXS_RAW/BRCA/Firehose/BRCA/mRNASeq/gdac.broadinstitute.org_BRCA.Merge_rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_isoforms_normalized__data.Level_3.2016012800.0.0/pde4dip.all.transcript.expression', header = T, sep = "\t")
+
+PDE4DIP.transcript <- separate(PDE4DIP.transcript, Hybridization.REF, into = c('ucsc','version'))
+
+PDE4DIP.transcript <- PDE4DIP.transcript %>% gather(barcode, rsem, -c(ucsc, version))
+
+PDE4DIP.transcript$barcode <- substring(PDE4DIP.transcript$barcode,1,16)
+
+isoform.all.expr <-  inner_join(PDE4DIP.expression, PDE4DIP.transcript, by = 'barcode')
+
+isoform.all.expr.enst <- inner_join(isoform.all.expr, pde.transcripts.separate, by = 'ucsc')
+
+for (i in distinct(isoform.all.expr.enst,ensembl_transcript_id)$ensembl_transcript_id){
+  x <- isoform.all.expr.enst %>% filter(ensembl_transcript_id == i)
+  x.mtwt <- filter(x, type %in% c("WT", "MT"))
+  x.wtnm <- filter(x, type %in% c("WT", "NM"))
+  x.mtwt.wilcox.pvalue <- wilcox.test(data = x.mtwt, rsem ~ type)$p.value
+  x.wtnm.wilcox.pvalue <- wilcox.test(data = x.wtnm, rsem ~ type)$p.value
+
+  p <- ggplot(data = x, aes(x = type, y = rsem)) + geom_boxplot(aes(color = type)) + scale_color_brewer(palette="Dark2") + theme_minimal() + labs(x = "Type", y = "Expression (RSEM)", title = paste(i, "expression in Tumor MT,WT and Normal samples"), subtitle = paste("MT vs. WT p-value",round(x.mtwt.wilcox.pvalue,3),"and WT vs. NM p-value", round(x.wtnm.wilcox.pvalue,3)))
+  print(p)
+  ggsave(paste(i, "png", sep = "."), plot = p, device = "png", path = "/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/8.expression/", width = 15, height = 15, units = "cm")
+} 
+
+
+```
+

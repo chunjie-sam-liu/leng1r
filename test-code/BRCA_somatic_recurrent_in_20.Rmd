@@ -1,0 +1,119 @@
+---
+title: "BRCA Somatic Recurrent in 20 Samples"
+author: "C.J. Liu"
+date: "11/18/2016"
+output:
+  word_document:
+    toc: yes
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load library}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+library(biomaRt)
+```
+## Samples
+```{r samples}
+sampleHeaders = c("sample.type","file.name","file.id","submitter.id")
+normal <- as_data_frame(read.table('normalSample', header = F, sep = "\t"))
+colnames(normal) <- sampleHeaders
+kable(normal, caption = "Normal Sample Information")
+
+tumor <- as_data_frame(read.table('tumorSample', header = T, sep = "\t"))
+colnames(tumor) <- sampleHeaders
+kable(tumor, caption = "Tumor Sample Information")
+```
+
+## Somatic Mutation Calling
+
+1. Download 20 cases of BRCA WXS bam files from GDC-portal.
+2. Download Regulatory Build annotation from Ensembl.
+3. Call Regulatory element mutations by GATK (DP > 10, AD > 3 )
+4. Exclude dbSNP, avsnp147 (ANNOVAR)
+5. Find recurrent tumor and nomal respectively.
+6. Somatic tumor.recurrent - normal.recurrent.
+
+## Result
+
+```{r load data}
+resultHeaders <-c("chrom","pos","ref","alt","ensid","desc","feature","recurrent")
+chromOrder = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")
+somatic <- as_data_frame(read.table('somatic.recurrency.sortByChrom', header = F, sep = "\t"))
+colnames(somatic) <- resultHeaders
+somatic <- filter(somatic, ensid != "." & recurrent > 1) 
+somatic$chrom <- factor(somatic$chrom, levels = chromOrder)
+```
+
+### Recurrent count and feature distribution
+```{r Recurrent and feature count}
+ggplot(somatic, aes(x = factor(recurrent))) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3) + theme_minimal() + xlab("Recurrent") + ylab("Count") + ggtitle(paste("Total ",nrow(somatic)," (Recurrent > 2)"))
+```
+
+### Feature distribution on the chromosome
+```{r}
+ggplot(somatic, aes(x = chrom)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Chromosome") + ylab("Count") + ggtitle("Chromosome Distribution")
+```
+
+### Mutation type
+```{r}
+ggplot(somatic, aes(ref,alt)) + geom_bin2d() + theme_minimal() + scale_fill_gradient(low = "#00AFBB", high = "#FC3E07")
+```
+
+### Filter recurrent larger than or equal to 5
+```{r}
+somatic5 <- filter(somatic, recurrent >= 5) 
+# ggplot(somatic5, aes(x = ensid)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3) + theme_minimal() + xlab("Recurrent") + ylab("Count") + ggtitle(paste("Total ",nrow(somatic5)," (Recurrent > 2)")) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(somatic5, aes(x = chrom)) + geom_bar(aes(fill = feature)) + geom_text(stat = 'count', aes(label = ..count..), vjust = -0.3, size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab("Chromosome") + ylab("Count") + ggtitle("Chromosome Distribution")
+
+ensCount <- somatic5 %>% group_by(ensid) %>% summarise(count = n()) %>% arrange(-count)
+kable(ensCount)
+```
+
+### Annotation from BioMart
+```{r}
+ensrIDs <- as.character(ensCount$ensid)
+FUNCGEN <- useMart("ENSEMBL_MART_FUNCGEN", host = "useast.ensembl.org")
+
+FUNCGEN.dataset <- as_data_frame(listDatasets(FUNCGEN))
+FUNCGEN.dataset.hsapiens <- filter(FUNCGEN.dataset, grepl('hsapiens', dataset))
+FUNCGEN.dataset.hsapiens
+
+hsapiens.regulatory <- useDataset("hsapiens_regulatory_feature", FUNCGEN)
+hsapiens.regulatory.attributes <- listAttributes(hsapiens.regulatory)
+hsapiens.regulatory.filters <- listFilters(hsapiens.regulatory)
+
+ensrIDs.regulatory<- getBM(hsapiens.regulatory.attributes$name[-c(10,11)], filters = "regulatory_stable_id", values = ensrIDs, mart = hsapiens.regulatory)
+
+hsapiens.annotation <- useDataset("hsapiens_annotated_feature", FUNCGEN)
+hsapiens.annotation.attributes <- listAttributes(hsapiens.annotation)
+hsapiens.annotation.filters <- listFilters(hsapiens.annotation)
+
+# ensrIDs.annotation<- getBM(hsapiens.regulatory.attributes$name[-c(10,11)], filters = "regulatory_stable_id", values = ensrIDs, mart = hsapiens.regulatory)
+
+hsapiens.external <- useDataset("hsapiens_external_feature", FUNCGEN)
+hsapiens.external.attributes <- listAttributes(hsapiens.external)
+hsapiens.external.filters <- listFilters(hsapiens.external)
+
+```
+
+# Done, Find another 20 cases.
+
+
+
+
+

@@ -1,0 +1,531 @@
+ls
+ll
+ln -s "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus/2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf" .
+ln -s "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus/2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.idx" .
+l
+ll
+gzip 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.gz 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf
+l
+ls
+ll
+vim main.sh
+ls
+l
+mv main.sh noncodingMutation.sh
+l
+bash noncodingMutation.sh 
+l
+vim README.md
+ls
+rm README.md
+ls
+convert2annovar.pl 
+l
+liucj
+ll
+rm 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf 2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf.idx
+ll
+vim regulatoryFeature.py
+l
+python regulatoryFeature.py 
+lsd
+cl
+ls
+ll
+vim mutect2Call.sh
+wchi gatk
+which gatk
+gatk
+liucj
+ls
+bash mutect2Call.sh 
+export PATH=$JAVA_HOME:$PATH
+exprot JAVA_HOME=/usr/bin
+export JAVA_HOME=/usr/bin
+export PATH=$JAVA_HOME:$PATH
+java -version
+bash mutect2Call.sh 
+bg 1
+ps xf
+ll
+3
+ls
+bash 02.getSomatic.R 
+Rscript 02.getSomatic.R 
+which Rscript
+Rscript 02.getSomatic.R 
+ls
+bash 02.getSomatic.R 
+Rscript 02.getSomatic.R 
+ls
+cd ls
+liucj
+ls
+nohup bash noncodingMutation.sh &
+ps xf
+les no
+l
+les nohup.out 
+l
+rm nohup.out 
+nohup bash noncodingMutation.sh &
+ps xf
+l
+ps xf
+ll
+ps xf
+l
+les nohup.out 
+l
+ll
+rm nohup.out 
+nohup bash noncodingMutation.sh &
+ps xf
+l
+les no
+les nohup.out 
+l
+bash noncodingMutation.sh 
+l
+les nohup.out 
+l
+rm no
+rm nohup.out 
+l
+bash noncodingMutation.sh &
+ps xf
+l
+les noncodingMutation.sh 
+ps xf
+top
+ps xf
+l
+ps xf
+killparallel noncodingMutation.sh
+ps xf
+killparallel ./removedbSNP.sh
+ps xf
+killparallel /home/cliu18/liucj/pipelines/exome_pipeline/software/annovar/annotate_variation.pl
+ps xf
+l
+nohup bash noncodingMutation.sh &
+ps xf
+top
+ls
+ps xf
+l
+Rscript 02.getSomatic.R
+l
+Rscript 02.getSomatic.R 
+l
+rm nohup.out 
+l
+nohup Rscript 02.getSomatic.R &
+ps xf
+rm no
+l
+rm nohup.out 
+nohup Rscript 02.getSomatic.R &
+ps xf
+ps xf
+lsd
+ps xf
+les nohup.out 
+l
+rm nohup.out 
+l
+lsd
+l
+nohup bash noncodingMutation.sh &
+ps xf
+ll
+ls
+ll
+cat nohup.out 
+ls
+vim noncodingMutation.sh 
+ls
+ps xf
+ps xf|grep python|wc -l
+ls
+vim noncodingMutation.sh 
+ps xf
+top
+ls
+ps xf
+ps xf|les
+ps xf
+exit
+ls
+tail no
+tail nohup.out 
+ls
+cd ..
+ls
+ll
+l
+nohup Rscript 03.loadAnnoSomatic.R > nohup.out.03 &
+ps xf
+ls
+l
+les nohup.out.03 
+ls
+ps xf
+ls
+ps xf
+ps xf|grep python
+exit
+s
+ls
+liucj
+ls
+ll
+gitr
+l
+rm nohup.out 
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+les nohup.out 
+ps xfl
+tail nohup.out 
+rm nohup.out 
+tail noncodingMutation.sh 
+ps xf
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+ll
+tail nohup.out 
+l
+rm no
+rm nohup.out 
+l
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+l
+ll
+ps xf
+l
+les nohup.out 
+rm nohup.out 
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+tail no
+tail nohup.out 
+ls
+rm nohup.out 
+nohup Rscript 03.loadAnnoSomatic.R &
+ps xf
+les nohup.out 
+l
+ll
+mv README.Rmd technicalREADME.Rmd
+l
+ll
+vim storyREADME.Rmd
+ll
+rm README.html
+ll
+rm nohup.out 
+l
+ll
+l
+ls
+ll
+ls
+ll
+ll
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/5.recalibrateRecurrencyWithCoverage/SNP/scripts/extractCoverage.sh .
+l
+ll
+vim extractCoverage.sh 
+liucj
+somatic='/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles/realSomaticMutation.recur5ForAnalysis.refinePositions.tsv'
+mpileups='/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/tumor'
+output="/home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions"
+ls
+ll
+cat $somatic | while read pos; do  cat $somatic | while read pos
+cat $somatic | while read pos; do  echo $pos; done
+cat $somatic | while read pos; do  echo $pos; done|wc -l
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t"
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t"; done
+cat $somatic | while read pos; do   arr=($pos); key="${arr[0]}\t${arr[1]}\t";name="${arr[-1]}_${arr[0]}_${arr[1]}";cmd="grep --perl-regex \"$key\"  *mpileup> $output/$name";echo $cmd;  done
+grep --perl-regex "chr8\t85651191\t" *mpileup> /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions/T_chr8_85651191
+grep --perl-regex "chr8\t85651191\t" *mpileup 
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; done
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; echo $cmd;done
+cat $somatic | while read pos; do  arr=($pos); key="${arr[0]}\t${arr[1]}\t"; name="${arr[-1]}_${arr[0]}_${arr[1]}"; cmd="grep --perl-regex \"$key\"  ${mpileups}/*mpileup"; echo $cmd;done|tail
+l
+ll
+bash extractCoverage.sh 
+lsd
+ll
+bash noncodingMutation.sh 
+bash noncodingMutation.sh |tail 1
+bash noncodingMutation.sh |tail -1
+grep --perl-regex "chr8\t85651191\t" /extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/tumor/TCGA-E2-A1B6-01A-31D-A12Q-09_IlluminaGA-DNASeq_exome_gdc_realn.extracted.bam.mpileup > /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.recheckPositions/chr8_85651191_A_T
+ls
+ll
+nohup bash noncodingMutation.sh &
+ps xf
+top
+ps xf
+top
+ps xf
+l
+ll
+ps xf
+k
+ll
+lsd
+ls
+ll
+l
+Rscript 05.targetGenesForMutation.R 
+ls
+ll
+ls
+ll
+bash noncodingMutation.sh 
+Rscript 04.somaticMutationAnalysis.R 
+l
+ll
+rm nohup.out 
+l
+ll
+nohup bash extractCoverage.sh &
+l
+les extractCoverage.sh 
+les nohup.out 
+ps xf
+l
+ps xf
+ls
+l
+ll
+ls
+ll
+ps xf
+l
+ps xf
+l
+ps xf
+exit
+ls
+ll
+l
+Rscript 07.loadRecheckPositions.R 
+exit
+ls
+ll
+cat extractCoverage.sh 
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles
+ls
+ll
+Rscript 07.loadRecheckPositions.R
+l
+exit
+ls
+l
+ll
+cd ../
+ls
+ll
+liucj
+ls
+ll
+lsd
+ll
+lsd
+l
+ll
+ls
+ll
+lsd
+l
+ll
+ls
+ls
+perl -e "split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[0-9]/, '24S76M')"
+perl -e "print shift split(/[0-9]/, '24S76M')"
+perl -e "shift split(/[0-9]/, '24S76M')"
+perl -e "print shift split(/[0-9]/, '24S76M')"
+perl -e "split(/[MIDNSHP]/, '24S76M')"
+perl -e "print split(/[0-9]/, '24S76M')"
+perl -e "print split(/[MIDNSHP]/, '24S76M')"
+ls
+ls
+cd ../../
+ls
+ll
+ls
+l
+vim findMotif.py
+rm findMotif.py 
+vim find_motif_affect_by_nutation.sh
+bash noncodingMutation.sh 
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+-f /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+ll /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+ll /home/cliu18/liucj/reference/TFs/hTFtarget_datasetfilteredpeak.bed.sortByChrom
+python /home/cliu18/liucj/reference/TFs/findMotif.py /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation.list
+l
+bash noncodingMutation.sh &
+ps xf
+ls
+ll
+cd ../
+ls
+mkdir summary_2017_01_13
+l
+cd summary_2017_01_13/
+l
+cd us
+cd sy
+cdls
+ll
+cd summary_2017_01_13/
+l
+mkdir summary
+l
+mv summary_2017_01_13/su
+mv summary_2017_01_13 summary
+l
+cd summary/
+ls
+ll
+cd summary/
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles
+ls
+ll
+cd summary/
+l
+cd summary/2017_01_13/
+ls
+l
+cd summary/
+ls
+ll
+cd summary/
+ls
+cd summary/
+ls
+nohup Rscript 03a.recur3.r &
+l
+ll
+les no
+ll
+les nohup.out 
+ps xf
+ll
+les nohup.out 
+ls
+R
+l
+rm no
+rm nohup.out 
+l
+nohup Rscript 03a.recur3.r &
+ps xf
+l
+les no
+les nohup.out 
+ll
+les nohup.out 
+cat nohup.out 
+lls
+l
+cat nohup.out 
+rm nohup.out 
+nohup Rscript 03a.recur3.r &
+ps xf
+ll
+cat no
+cat nohup.out 
+cat no
+cat nohup.out 
+rm nohup.out 
+nohup Rscript 03a.recur3.r &
+cat nohup.out 
+ps xf
+cat nohup.out 
+l
+grep "candidate_merged_mutation.rds" *
+l
+ll
+cp extractCoverage.sh extractCoverage_01.sh 
+l
+bash extractCoverage_01.sh 
+bash extractCoverage_01.sh |les
+l
+nohup bash extractCoverage_01.sh 
+ps xf
+les nohup.out 
+l
+ps xf
+rm nohup.out 
+l
+ps xf
+top
+nohup bash extractCoverage_01.sh &
+tail nohup.out 
+ps xf
+top
+ps xf
+ps xfl
+l
+cat nohup.out 
+nohup bash extractCoverage_01.sh &
+psxf
+ps xf
+top
+ql
+l
+tail nohup.out 
+l
+ll
+top
+ls
+ll
+grep candidate_merged_mutation.rds *
+l
+ll
+cd /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/LINSIGHT
+ls
+cd ../
+ls
+les nohup.out 
+rm nohup.out 
+l
+nohup Rscript 07.loadRecheckPositions.R &
+ls
+ll
+grep candidate_merged_mutation *
+grep 03.recur3_candidate_mutation_coverage.png *
+cd 
+ls
+ll
+rm nohup.out 
+l
+nohup Rscript 07.loadRecheckPositions.R &
+l
+ll
+les nohup.out 
+ll
+les nohup.out 
+l
+ls
+cd ../
+ls
+grep -i tex *
+grep -i latex *
+grep TeX *R
+cd

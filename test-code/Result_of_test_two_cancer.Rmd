@@ -1,0 +1,99 @@
+---
+title: "Statistics of BRCA/KIRC test data result"
+author: "C.J. Liu"
+date: "11/16/2016"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  word_document:
+    toc: yes
+---
+
+# Statistics of BRCA/KIRC 20 test data result
+
+## Load data
+```{r load data}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+library(knitr)
+#project/3.calling/BRCA_WXS_20/recurrency/SNP
+#project/3.calling/KIRC_WXS_20/recurrency/SNP
+#read recurrency.sortByChrom to brca and kirc
+brca <- as_data_frame(read.table('brca.recurrency.sortByChrom', header = F, sep = "\t"))
+kirc <- as_data_frame(read.table('kirc.recurrency.sortByChrom', header = F, sep = "\t"))
+brca <- mutate(brca, type = 'brca')
+kirc <- mutate(kirc, type = 'kirc')
+tcga <- bind_rows(brca, kirc, .id = NULL)
+header <-c("chrom","pos","ref","alt","ensid","desc","feature","recurrent", "type")
+colnames(tcga) <- header
+
+tcga.filterEns <- filter(tcga, ensid != ".")
+
+tcga.filterEns.recurrent2 <- filter(tcga.filterEns, recurrent > 1)
+chromOrder = c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22","chrX")
+# reorder the chrom levels
+tcga.filterEns.recurrent2$chrom <- factor(tcga.filterEns.recurrent2$chrom, levels = chromOrder)
+```
+
+## Basic statistics
+```{r basics}
+# all result
+ggplot(tcga.filterEns, aes(x = factor(recurrent))) + geom_bar(aes(fill = type)) + theme_minimal()
+
+# following analyis based on the recurrent > 2
+
+# filter 1 recurrent
+ggplot(tcga.filterEns.recurrent2, aes(x = factor(recurrent))) + geom_bar(aes(fill = type)) + theme_minimal()
+
+# feature distribution
+ggplot(tcga.filterEns.recurrent2, aes(type, recurrent)) + geom_boxplot(aes(color = feature), position = position_dodge(0.8))  + theme_minimal() + geom_rug() #+ geom_jitter(aes(color = feature),position = position_dodge(0.8))
+
+# recurrent distribution
+ggplot(tcga.filterEns.recurrent2, aes(x = recurrent)) + geom_histogram(aes(color = feature, fill = feature), bins = 19) + theme_minimal()
+
+# chrom distribution
+ggplot(tcga.filterEns.recurrent2, aes(x = chrom)) + geom_bar(aes(fill = type)) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# chrom feature distribution
+ggplot(tcga.filterEns.recurrent2, aes(x = chrom)) + geom_bar(aes(fill = feature)) + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# mutation
+# ggplot(tcga.filterEns.recurrent2, aes(ref, alt)) + geom_jitter(aes(color = ref), size = 0.5) + theme_minimal()
+
+ggplot(tcga.filterEns.recurrent2, aes(ref,alt)) + geom_bin2d() + theme_minimal() + scale_fill_gradient(low = "#00AFBB", high = "#FC3E07")
+
+# ggplot(tcga.filterEns.recurrent2, aes(x = feature)) + geom_bar(aes(color = alt, fill = alt)) + theme_minimal()
+
+# mutations in ens region
+# ggplot(tcga.filterEns.recurrent2, aes(x = ensid)) + geom_bar()
+tcga.filterEns.recurrent2.ensid.top10 <- as.data.frame(head(sort(table(tcga.filterEns.recurrent2$ensid), decreasing = T),10))
+tcga.filterEns.recurrent2.ensid.top10$ensid <- row.names(tcga.filterEns.recurrent2.ensid.top10)
+colnames(tcga.filterEns.recurrent2.ensid.top10)[1] = "No"
+
+tcga.filterEns.recurrent2.ensid.top10 <- tcga.filterEns.recurrent2 %>% distinct(ensid, .keep_all = TRUE) %>% filter(ensid %in% rownames(tcga.filterEns.recurrent2.ensid.top10)) %>% right_join(tcga.filterEns.recurrent2.ensid.top10, by = "ensid")
+
+# Top 10 mutated region
+kable(as.data.frame(tcga.filterEns.recurrent2.ensid.top10), caption = "Top 10 region with mutation")
+```
+
+## Connect to biomaRt
+```{r inquery biomart}
+# library("biomaRt")
+# ENSEMBL = useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl")
+# 
+# ENSEMBL.ATTRIBUTES = listAttributes(ENSEMBL)
+# ENSEMBL.FILTERS = listFilters(ENSEMBL)
+```
+
+
+
+
+
+

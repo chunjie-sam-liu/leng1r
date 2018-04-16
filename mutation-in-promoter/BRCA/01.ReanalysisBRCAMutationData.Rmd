@@ -1,0 +1,265 @@
+---
+title: "ReanalysisBRCAMutationData"
+author: "C.J. Liu"
+date: "1/30/2017"
+output:
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r library}
+suppressMessages(require(tidyverse))
+suppressMessages(require(stringr))
+```
+
+# Reanlysis the BRCA data
+
+The previous running pipeline has many problems. Such as:
+
+1. The clue of analysis is not clear.
+2. We lost some information which cause false positive site.
+3. All downstream analysis is messy not tidy.
+
+Now I will retry two pipeline: 
+
+1. Try mutect2 merged into GATK call somatic mutation
+2. raw snp vcf result to filter the candidate position
+
+Notice:
+
+- **Every step every operation must be tidy and clear.**
+- **Every step result should stored to RData follow the Rmd name**
+
+## Manifest information
+
+The raw manifest file download from DGC data-portal `BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv` was converted into `BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv.map2submitterID` by my uuidmapping barcode python script.
+
+```{r manifest}
+downloadPath <- '/extraspace/TCGA/WXS_RAW/BRCA/downloadDataList'
+
+manifestFile <- file.path(downloadPath, 'BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv.map2submitterID')
+
+manifestData <- read_tsv(file = manifestFile)
+
+# Select field we need
+manifestData<- 
+  manifestData %>% 
+  dplyr::select(
+  case = cases_0_submitter_id,
+  barcode = cases_0_samples_0_submitter_id, 
+  type = cases_0_samples_0_sample_type, 
+  uuid = file_id, 
+  bam = file_name,
+  aliquot = cases_0_samples_0_portions_0_analytes_0_aliquots_0_submitter_id)
+
+# filter un paired 
+manifestData <- 
+  manifestData %>% 
+  count(case) %>% 
+  filter(n >= 2) %>% 
+  semi_join(manifestData, ., by = 'case')
+
+# get files size
+rawManifestFile <- file.path(downloadPath, 'BRCA_gdc_manifest.2016-11-16T20-32-04.345034.tsv')
+
+manifestData <- 
+  read_tsv(rawManifestFile) %>%
+  dplyr::select(uuid = id,  size) %>%
+  left_join(manifestData, ., by = 'uuid')
+
+# extracted bam file size
+extractedFileSize <- file.path(downloadPath, 'total.extractedbam.file.size')
+
+manifestData <- 
+  read_delim(extractedFileSize, delim = " ") %>%
+  mutate(bam = str_replace(bam, '\\.extracted', '')) %>%
+  inner_join(manifestData, ., by = 'bam')
+
+write.table(manifestData, file = file.path(downloadPath, "manifestData.info"), sep = "\t", row.names = F, col.names = T, quote = F)
+```
+
+## Check difference of two pipeline
+
+1. Use one case **TCGA-3C-AAAU** for test somatic mutation difference `just minus` and `gatk mutect2`
+
+### Minus test
+```{r Minus}
+testCase <- 
+  manifestData %>%
+  filter(case == 'TCGA-3C-AAAU') %>%
+  dplyr::select(uuid, bam, type, aliquot)
+
+# The minus analysis
+# Load VariantAnnotation
+suppressMessages(require(VariantAnnotation))
+
+minusPath <- '/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus'
+
+# minusNormal <-
+#  readVcf(file.path(minusPath, '2f1234605b512497e713e21f7978ff2e_gdc_realn.bam.SNP.vcf'),
+#          genome = "GRCh38")
+
+#minusTumor <- 
+#  readVcf(file = file.path(minusPath, '552d2edb157ccf877109a7fa1b5e21b7_gdc_realn.bam.SNP.vcf'),
+#          genome = "GRCh38")
+
+# Waring! I can't use readVcf
+# Error: scanVcf: object '.scan_vcf_character' not found
+load('/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/minus/test.RData')
+
+##################
+## Normal filter##
+##################
+
+# Convert S4Vector into data.frame
+minusNormal.AD <- as.data.frame(geno(minusNormal)$AD)
+colnames(minusNormal.AD) <- 'AD'
+
+# Get mapping quality
+minusNormal.MQ <- 
+  as.data.frame(info(minusNormal)['MQ']) %>%
+  mutate(mutation = rownames(.)) %>%
+  tbl_df()
+
+# Mapping quality > 20
+# Depth > 5 && altDepth >3
+minusNormal.filter <-
+  minusNormal.AD %>% 
+  mutate(mutation = rownames(.), AD = as.character(AD)) %>%
+  tbl_df() %>%
+  mutate(AD = str_replace_all(AD, "[c\\(|\\)]", "")) %>%
+  filter(str_count(AD,",|:") == 1) %>% # remove AD = 3
+  separate(AD, c("refDepth", "altDepth"), sep = "[\\,\\:]", convert = T) %>%
+  mutate(Depth = refDepth + altDepth) %>%
+  dplyr::select(mutation, Depth, refDepth, altDepth) %>%
+  inner_join(minusNormal.MQ, by = "mutation") %>%
+  filter(MQ >= 20, Depth >= 5, altDepth >= 3) 
+
+################
+# Tumor filter##
+################
+minusTumor.AD <- as.data.frame(geno(minusTumor)$AD)
+colnames(minusTumor.AD) <- "AD"
+
+# Get mapping quality
+minusTumor.MQ <- 
+  as.data.frame(info(minusTumor)['MQ']) %>%
+  mutate(mutation = rownames(.)) %>%
+  tbl_df()
+
+# Mapping quality > 20
+# Depth > 10 && altDepth >3
+minusTumor.filter <-
+  minusTumor.AD %>% 
+  mutate(mutation = rownames(.), AD = as.character(AD)) %>%
+  tbl_df() %>%
+  mutate(AD = str_replace_all(AD, "[c\\(|\\)]", "")) %>%
+  filter(str_count(AD,",|:") == 1) %>% # remove AD = 3
+  separate(AD, c("refDepth", "altDepth"), sep = "[\\,\\:]", convert = T) %>%
+  mutate(Depth = refDepth + altDepth) %>%
+  dplyr::select(mutation, Depth, refDepth, altDepth) %>%
+  inner_join(minusTumor.MQ, by = "mutation") %>%
+  filter(MQ >= 20, Depth >= 10, altDepth >= 3) 
+
+##############
+# Get somatic#
+##############
+minusSomatic <- minusTumor.filter %>%
+  anti_join(minusNormal.filter, by = "mutation")
+
+# somatic to vcf for remove dbSNP and regulatory annotation
+# write avinput format
+minusSomatic %>% 
+  separate(mutation, c("chrom", "pos", "ref", "alt"), convert = T) %>%
+  mutate(end = pos) %>%
+  dplyr::select(chrom, pos, end, ref, alt) %>%
+  write.table(
+    file = file.path(minusPath, 'minusSomaticVCF.avinput'), 
+    row.names = F,col.names = F, quote = F, sep = "\t")
+
+########################################
+#remove dbSNP and Regulatory annotation#
+########################################
+# noncodingMutation.sh for the process
+
+minusSomaticFilter <- 
+  read_tsv(file = file.path(minusPath,'minusSomaticVCF.avinput.dbsnp.sortByChrom.region')) %>%
+  unite(mutation, chrom, pos, sep=":") %>%
+  unite(mutation, mutation, ref) %>%
+  unite(mutation, mutation, alt, sep = "/") %>%
+  left_join(minusSomatic, by = "mutation")
+  
+minusSomaticFilterSNP <- 
+  minusSomaticFilter %>%
+  filter( id != "." )
+
+minusSomaticFilterrmSNP <- 
+  minusSomaticFilter %>%
+  filter(id == ".", ensr != ".")
+```
+For `r n_distinct(manifestData$case)` cases.
+In the script outline follows the instruction:
+
+1. R script for obtain somatic mutation for every sample, Write somatic to vcf files and write case sample mutation statistics table to **sampleMutation.txt**
+  + Normal: MQ > 20, DP >= 5, altDP >= 3
+  + Tumor: MQ > 20, DP >= 10, altDP >= 3
+  + somatic: combined Tumor - combined Normal for one case
+2. Bash script for multiple processing to annotate dbsnp files.
+  + `annotate_variation`
+3. python script for annotating somatic mutation with Regulatory region.
+4. Find recurrent > 3 mutation point.
+  + basic statistics
+5. Find nearest target protein coding genes (`biomaRt`).
+
+### Mutect2 test
+```{r mutect2}
+mutectPath <- "/extraspace/TCGA/WXS_RAW/BRCA/regulatoryBam/forTest/mutect2"
+
+ # java -jar GenomeAnalysisTK.jar \
+ #     -T MuTect2 \
+ #     -R reference.fasta \
+ #     -I:tumor tumor.bam \
+ #     -I:normal normal.bam \
+ #     [--dbsnp dbSNP.vcf] \
+ #     [--cosmic COSMIC.vcf] \
+ #     [-L targets.interval_list] \
+ #     -o output.vcf
+```
+
+Very very slow for Mutect2 calling method. Mutect2 method aborted.
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

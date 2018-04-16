@@ -1,0 +1,84 @@
+ls
+ll
+cd ../
+ls
+ll
+l
+cd ../
+ls
+ll
+lliucj
+l
+liucj
+ls
+ll
+rm style.css 
+ls
+ll
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/03.somaticForAnalysis.saveFiles/01.SomaticMutationStat.png .
+l
+ll
+l
+ls
+l
+wget "https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/bioinformatics/29/18/10.1093/bioinformatics/btt375/2/btt375f3p.jpeg?Expires=1487116499&Signature=AYNX2I6bmebumId0aL~kARHfiv7nllXKYHluD~E7fxlbhURoRBGfHguNfLXAwSVIgNEgcaT3BXCWrA3FsBQUlhM4mMMnLKf8p1U26nO19WEgjF-1~M-r49Vse~q7S70unIWHS5BkNM2Klf4qsQvGHrWxuySt1xbFmUgMArfS0G7U~Cmc20otzmbCoCQaRTJ9bJ-PeYyoVy9KD~YaX6fbJNrJJHPbKXdUmlQW2jlUZK~dhhShAhJ47cWApYYzm7moF60nFrvNHDDMP5ZV1~TkdnlJsztTS8A1HfKPT0uZibCZMj4CrDDUIYtmxPe9GFGcNxChQnxcKGGK3XeWXEkPUA__&Key-Pair-Id=APKAIUCZBIA4LVPAVW3Q"
+l
+ll
+mv btt375f3p.jpeg 01.somatic_calling_software_overlap.jpeg
+l
+ll
+ls
+l
+mkdir pics
+l
+mkdit tables
+ls
+mkdir tables
+l
+ll
+mv 01.* pics
+l
+cd tables/
+l
+cd ../
+ls
+ll
+cd tables/
+l
+cd pics/
+l
+cd tables/
+l
+ll
+l
+cd pics/
+l
+mv pics figs
+l
+cd figs/
+l
+cd tables/
+ls
+cd figs/
+l
+ll
+cd tables/
+l
+cd figs/
+l
+cd tables/
+l
+cd figs
+l
+liucj
+ls
+ll
+cd tables/
+l
+cd figs
+l
+exit
+ls
+cd tables/
+l
+exit

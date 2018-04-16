@@ -1,0 +1,87 @@
+---
+title: "Call somatic mutation in regulatory region from TCGA-BRCA WXS data"
+author: "C.J. Liu"
+date: "12/28/2016"
+output:
+  word_document:
+    toc: yes
+  html_document:
+    depth: 3
+    highlight: tango
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    word_document:
+      toc: yes
+---
+
+# Backgrounds
+hi
+
+## Mutations in promoter research
+hi
+
+## WXS capture rate
+hi
+
+# Challenges
+hi
+
+## Regulatory region
+hi
+
+## WXS data statistics
+![](pics/1.casePairsDistribution.png)
+![](pics/2.sampleTypeDistribution.png)
+![](pics/3.dataStorageComsuption.png)
+hi
+
+## Somatic calling
+![](pics/4.somaticCallingPipeline.png)
+hi
+
+# Result
+## WXS data
+hi
+![](pics/5.extractedFileRatioViolin.png)
+![](pics/6.meanCoverageInRegulatoryRegion.png)
+![](pics/7.medianCoverageInRegulatoryRegion.png)
+![](pics/8.fileSizeRatioOfRegulatoryToWholeData.Normal.png)
+![](pics/9.fileSizeRatioOfRegulatoryToWholeData.Tumor.png)
+![](pics/10.mutationNumberAndFileSize.png)
+
+## Candidate mutation
+hi
+![](pics/11.somaticMutationStat.total.png)
+![](pics/12.somaticMutationStat.recur5.png)
+![](pics/13.somaticMutationStat.recur5.ratio10.png)
+
+## Mutation target protein coding genes
+hi
+
+## Target genes expression
+![](pics/14.PRSS58.png)
+![](pics/15.PDE4DIP.png)
+![](pics/16.PDE4DIP.2normal.png)
+hi
+
+## PDE4DIP
+### RegulomeDB
+hi
+
+### Motif near PDE4DIP
+hi
+
+
+
+
+
+
+
+
+
+
+

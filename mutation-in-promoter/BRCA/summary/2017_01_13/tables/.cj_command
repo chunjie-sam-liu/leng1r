@@ -1,0 +1,82 @@
+ls
+ll
+l
+ll
+les manifest_hard.tsv
+l
+ll
+cd ../
+ls
+ll
+les manifest_hard.tsv
+ll
+rm manifest_hard.rds manifest_hard.tsv
+ll
+cd ../
+ls
+ll
+cd ../
+ls
+ll
+les table1_manifest_hard.tsv 
+sort -k 7 -rn table1_manifest_hard.tsv 
+sort -k 7 -rn table1_manifest_hard.tsv |les
+l
+ll
+les table1_manifest_hard.tsv
+l
+ls
+ll
+les table1_manifest_hard.tsv 
+ls
+ll
+les table2_mutation_annotation_filter.tsv
+ls
+ll
+ls
+ll
+ls
+ll
+cd ./
+l
+ll
+l
+ll
+les table3_mtuation_coverage.tsv
+ll
+les table3_mtuation_coverage.tsv
+ll
+cd ../
+exit
+ls
+cd ../
+ls
+ll
+tab2xls.py table1_manifest_hard.tsv 
+tab2xls.py table2_mutation_annotation_filter.tsv
+tab2xls.py table3_mtuation_coverage.tsv
+tab2xls.py table4_target_genes.tsv
+l
+liucj
+ls
+ll
+les table1_manifest_hard.tsv
+exit
+ls
+ll
+les table2_mutation_annotation_filter.tsv
+les table3_mtuation_coverage.
+les table3_mtuation_coverage.tsv
+les table4_target_genes.tsv
+l
+ll
+cp /home/cliu18/liucj/projects/1.Mutation_calling_in_non-condig_region_through_EXOME/3.calling/BRCA_reanalysis/03.somatic/09.binding_region/mutation_affect_binding.tsv .
+l
+ll
+mv mutation_affect_binding.tsv table5_mutation_affect_TF_binding.tsv
+l
+ll
+tab2xls.py table5_mutation_affect_TF_binding.tsv
+ls
+ll
+cd ../
