@@ -1,9 +1,0 @@
----
-title: "Autohpagy flux high vs. low"
-author: "C.J. Liu"
-date: "9/19/2017"
-output: html_document
----
-
-
-
